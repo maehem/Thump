@@ -1,3 +1,10 @@
+# DOOM WAD Files
+*.wad
+
+# NetBeans related files
+private/
+
+
 # Compiled class file
 *.class
 
