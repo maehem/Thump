@@ -3,7 +3,9 @@
  */
 package thump.render;
 
+import java.util.logging.Level;
 import thump.game.Game;
+import static thump.global.Defines.logger;
 import static thump.global.Tables.ANG180;
 import static thump.global.Tables.ANG90;
 import static thump.global.Tables.ANGLETOFINESHIFT;
@@ -40,12 +42,15 @@ public class Bsp {
         for (int i=0; i<solidsegs.length; i++ ) {
             solidsegs[i] = new ClipRange();
         }
+        for (int i=0; i<drawsegs.length; i++) {
+            drawsegs[i] = new DrawSeg();
+        }
     }
     
     //
     // R_ClearDrawSegs
     //
-    void R_ClearDrawSegs () {
+    public void R_ClearDrawSegs () {
         ds_p = 0;
     }
 
@@ -65,6 +70,8 @@ public class Bsp {
         //  (adjacent pixels are touching).
         start = 0;
         //start = 0;
+        
+        logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first: {0}, last: {1})\n", new Object[]{first, last});
         
         while (solidsegs[start].last < first-1) {
             start++;
@@ -159,6 +166,8 @@ public class Bsp {
     void R_ClipPassWallSegment( int first, int last ) {
         int	start;
 
+        logger.log(Level.CONFIG, "bsp.R_ClipPassWallSegment( {0}, {1} )\n", new Object[]{first, last});
+        
         // Find the first range that touches the range
         //  (adjacent pixels are touching).
         start = 0;
@@ -173,6 +182,7 @@ public class Bsp {
                 return;
             }
 
+            logger.log(Level.CONFIG, "R_StoreWallRange( {0}, {1} )\n", new Object[]{first, solidsegs[start].first-1});
             // There is a fragment above *start.
             Segs.getInstance().R_StoreWallRange (first, solidsegs[start].first - 1);
         }
@@ -202,10 +212,12 @@ public class Bsp {
     // R_ClearClipSegs
     //
     void R_ClearClipSegs () {
-        solidsegs[0].first = -0x7fffffff;
+        //solidsegs[0].first = -0x7fffffff; 
+        solidsegs[0].first = Integer.MIN_VALUE;
         solidsegs[0].last = -1;
         solidsegs[1].first = Game.getInstance().renderer.draw.viewwidth;
-        solidsegs[1].last = 0x7fffffff;
+        //solidsegs[1].last = 0x7fffffff;
+        solidsegs[1].last = Integer.MAX_VALUE;
         //newend = solidsegs+2;
         newend = 2;
     }
@@ -219,21 +231,22 @@ public class Bsp {
     void R_AddLine (Seg line) {
         int			x1;
         int			x2;
-        int		angle1;
-        int		angle2;
-        int		span;
-        int		tspan;
+        long		angle1;
+        long		angle2;
+        long		span;
+        long		tspan;
 
         curline = line;
-
+        Renderer r = Game.getInstance().renderer;
         // OPTIMIZE: quickly reject orthogonal back sides.
-        angle1 = Game.getInstance().renderer.R_PointToAngle (line.v1.x, line.v1.y);
-        angle2 = Game.getInstance().renderer.R_PointToAngle (line.v2.x, line.v2.y);
+        angle1 = r.R_PointToAngle (line.v1.x, line.v1.y);
+        angle2 = r.R_PointToAngle (line.v2.x, line.v2.y);
 
         // Clip to view edges.
         // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
-        span = angle1 - angle2;
-
+        span = (angle1 - angle2)&0xFFFFL;
+        
+        logger.log(Level.CONFIG, "Bsp.R_Addline() seg: {0}\n", line.toString());
         // Back side? I.e. backface culling?
         if (span >= ANG180) {
             return;
@@ -241,28 +254,32 @@ public class Bsp {
 
         // Global angle needed by segcalc.
         Segs.getInstance().rw_angle1 = angle1;
-        angle1 -= Game.getInstance().renderer.viewangle;
-        angle2 -= Game.getInstance().renderer.viewangle;
+        angle1 -= r.viewangle;
+        angle2 -= r.viewangle;
 
-        int clipangle = Game.getInstance().renderer.clipangle;
+        long clipangle = r.clipangle;
+        logger.log(Level.CONFIG, "Bsp.R_AddLine():  ViewAngle:  {0}     Clipangle:  {1}\n", new Object[]{ Long.toHexString(r.viewangle), Long.toHexString(clipangle) });
+        
         tspan = angle1 + clipangle;
         if (tspan > 2*clipangle) {
             tspan -= 2*clipangle;
 
             // Totally off the left edge?
             if (tspan >= span) {
+                logger.log(Level.CONFIG, "     Angle 1: Off the left edge?  tspan={0}    span={1}   returning....\n", new Object[]{Long.toHexString(tspan), Long.toHexString(span)});
                 return;
             }
 
             angle1 = clipangle;
         }
     
-        tspan = clipangle - angle2;
+        tspan = (clipangle - angle2)&0xFFFFL;
         if (tspan > 2*clipangle) {
             tspan -= 2*clipangle;
 
             // Totally off the left edge?
             if (tspan >= span) {
+                logger.log(Level.CONFIG, "     Angle2: Off the left edge?  tspan={0}    span={1}   returning....\n", new Object[]{tspan, span});
                 return;
             }
             
@@ -271,14 +288,16 @@ public class Bsp {
 
         // The seg is in the view range,
         // but not necessarily visible.
-        angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
-        angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
-        x1 = Game.getInstance().renderer.viewangletox[angle1];
-        x2 = Game.getInstance().renderer.viewangletox[angle2];
+        angle1 = (((angle1+ANG90)&0xFFFFFFFL)>>ANGLETOFINESHIFT);
+        angle2 = (((angle2+ANG90)&0xFFFFFFFL)>>ANGLETOFINESHIFT);
+        logger.log( Level.CONFIG, "Bsp.R_AddLine():  Angle1: {0}   Angle2: {1}\n", new Object[]{Long.toHexString(angle1), Long.toHexString(angle2) });
+        x1 = (int)(Game.getInstance().renderer.viewangletox[(int)angle1]);
+        x2 = (int)(Game.getInstance().renderer.viewangletox[(int)angle2]);
 
         // Does not cross a pixel?
         if (x1 == x2) {
-            return;
+            logger.log(Level.CONFIG, "Bsp.R_AddLine():  x1 == x2 ,  {0} == {1}   returning...\n", new Object[]{ x1, x2 });
+//MJK            return;
         }				
 
         backsector = line.backsector;
@@ -296,11 +315,14 @@ public class Bsp {
             return;
         }
 
+        logger.log(Level.CONFIG, "FrontSector: {0}\n", frontsector.toString());
+        logger.log(Level.CONFIG, " Backsector: {0}\n", backsector.toString());
+        
         // Window.
         if (backsector.ceilingheight != frontsector.ceilingheight
             || backsector.floorheight != frontsector.floorheight) {
             R_ClipPassWallSegment (x1, x2-1);
-            //return;
+            return;
         }	
 
         // Not needed since it returns either way.
@@ -309,17 +331,17 @@ public class Bsp {
 //        // Identical floor and ceiling on both sides,
 //        // identical light levels on both sides,
 //        // and no middle texture.
-//        if (backsector.ceilingpic == frontsector.ceilingpic
-//            && backsector.floorpic == frontsector.floorpic
-//            && backsector.lightlevel == frontsector.lightlevel
-//            && curline.sidedef.midtexture == null)
-//        {
-//            return;
-//        }
+        if (backsector.ceilingpic.equals(frontsector.ceilingpic)
+            && backsector.floorpic.equals(frontsector.floorpic)
+            && backsector.lightlevel == frontsector.lightlevel
+            && curline.sidedef.midtexture == null)
+        {
+            return;
+        }
 
 
 //      clippass:
-//        R_ClipPassWallSegment (x1, x2-1);	
+        R_ClipPassWallSegment (x1, x2-1);	
 //        return;
 //
 //      clipsolid:
@@ -359,30 +381,33 @@ public class Bsp {
         int x2;
         int y2;
 
-        int angle1;
-        int angle2;
-        int span;
-        int tspan;
+        long angle1;
+        long angle2;
+        long span;
+        long tspan;
 
         int start;
 
         int sx1;
         int sx2;
 
+        logger.log(Level.CONFIG, "Bsp.R_CheckBBox() {0}\n", new Object[]{bspcoord.toString()});
+        
+        Renderer r = Game.getInstance().renderer;
         // Find the corners of the box
         // that define the edges from current viewpoint.
         //if (Game.getInstance().renderer.viewx <= bspcoord[BOXLEFT]) {
-        if (Game.getInstance().renderer.viewx <= bspcoord.left) {
+        if (r.viewx <= bspcoord.left) {
             boxx = 0;
-        } else if (Game.getInstance().renderer.viewx < bspcoord.right) {
+        } else if (r.viewx < bspcoord.right) {
             boxx = 1;
         } else {
             boxx = 2;
         }
 
-        if (Game.getInstance().renderer.viewy >= bspcoord.top) {
+        if (r.viewy >= bspcoord.top) {
             boxy = 0;
-        } else if (Game.getInstance().renderer.viewy > bspcoord.bottom) {
+        } else if (r.viewy > bspcoord.bottom) {
             boxy = 1;
         } else {
             boxy = 2;
@@ -400,19 +425,29 @@ public class Bsp {
         y2 = bsparray[checkcoord[boxpos][3]];
 
         // check clip list for an open space
-        angle1 = Game.getInstance().renderer.R_PointToAngle (x1, y1) - Game.getInstance().renderer.viewangle;
-        angle2 = Game.getInstance().renderer.R_PointToAngle (x2, y2) - Game.getInstance().renderer.viewangle;
+        long rp1 = r.R_PointToAngle(x1, y1);//&0xFFFFL;
+        long rp2 = r.R_PointToAngle(x2, y2);//&0xFFFFL;
+        long vAng = r.viewangle;
+        
+        angle1 = (rp1 - r.viewangle)&0xFFFFFFFFL;
+        angle2 = (rp2 - r.viewangle)&0xFFFFFFFFL;
+        
+        logger.log(Level.CONFIG, "angle1 = {0} -  {1} = {2}\n", new Object[]{Long.toHexString(rp1), Long.toHexString(vAng), Long.toHexString(angle1) } );
+        logger.log(Level.CONFIG, "angle2 = {0} -  {1} = {2}\n", new Object[]{Long.toHexString(rp2), Long.toHexString(vAng), Long.toHexString(angle2) } );
 
-        span = angle1 - angle2;
+        long saveAngle1 = angle1; // Debug
+        span = Math.abs(angle1 - angle2);
+        logger.log(Level.CONFIG, "span = {0}\n", new Object[]{ Long.toHexString(span) } );
 
         // Sitting on a line?
         if (span >= ANG180) {
             return true;
         }
 
-        int clipangle = Game.getInstance().renderer.clipangle;
+        long clipangle = r.clipangle;
+        logger.log(Level.CONFIG, "clipangle = {0}\n", new Object[]{ Long.toHexString(clipangle) } );
         
-        tspan = angle1 + clipangle;
+        tspan = (angle1 + clipangle);
         if (tspan > 2*clipangle) {
             tspan -= 2*clipangle;
 
@@ -436,14 +471,26 @@ public class Bsp {
             angle2 = -clipangle;
         }
 
-
+        int itsHere = 0;
         // Find the first clippost
         //  that touches the source post
         //  (adjacent pixels are touching).
-        angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
-        angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
-        sx1 = Game.getInstance().renderer.viewangletox[angle1];
-        sx2 = Game.getInstance().renderer.viewangletox[angle2];
+        angle1 = ((angle1+ANG90)&0xFFFFFFFF)>>ANGLETOFINESHIFT;
+        angle2 = ((angle2+ANG90)&0xFFFFFFFF)>>ANGLETOFINESHIFT;
+        try {
+            sx1 = (int)(r.viewangletox[(int)angle1]);
+        } catch ( ArrayIndexOutOfBoundsException ex ) {
+            sx1 = (int)(r.viewangletox[r.viewangletox.length-1]);
+            logger.log(Level.WARNING, "oops!  angle1 = {0} [{1}], max angle is: {2}\n", 
+                    new Object[]{angle1, Long.toHexString(angle1), r.viewangletox.length} );
+        }
+        try {
+            sx2 = (int)(r.viewangletox[(int)angle2]);
+        } catch ( ArrayIndexOutOfBoundsException ex ) {
+            sx2 = (int)(r.viewangletox[r.viewangletox.length-1]);
+            logger.log(Level.WARNING, "oops!  angle2 = {0} [{1}], max angle is: {2}\n", 
+                    new Object[]{ angle2, Long.toHexString(angle2), r.viewangletox.length} );
+        }
 
         // Does not cross a pixel.
         if (sx1 == sx2) {
@@ -479,6 +526,9 @@ public class Bsp {
         frontsector = sub.sector;
         count = sub.numlines;
         int lineNum = sub.firstline;
+        
+        logger.log(Level.CONFIG, "Bsp.R_Subsector:  0x{0}  count: {1}\n", new Object[]{Integer.toHexString(num), sub.numlines } );
+
         //line = Game.getInstance().playerSetup.segs[lineNum];
 
         if (frontsector.floorheight < renderer.viewz) {
@@ -512,17 +562,18 @@ public class Bsp {
 
 
 
-
-    //
-    // RenderBSPNode
-    // Renders all subsectors below a given node,
-    //  traversing subtree recursively.
-    // Just call with BSP root.
+    /**
+     *  Renders all subsectors below a given node, traversing subtree recursively.
+     *  Just call with BSP root.
+     * 
+     * @param bspnum 
+     */
     void R_RenderBSPNode(int bspnum) {
-
+        logger.log(Level.CONFIG, "BSP Render BSP Node: {0}\n", Integer.toHexString(bspnum));
         // Found a subsector?
         if ((bspnum & NF_SUBSECTOR) > 0) {
-            if (bspnum == -1) {
+            logger.log(Level.CONFIG, "\t\tis a Subsector\n");
+            if (bspnum == -1 || bspnum == 0xFFFF) {  //  0xFFFF
                 R_Subsector(0);
             } else {
                 R_Subsector(bspnum & (~NF_SUBSECTOR));
@@ -531,8 +582,8 @@ public class Bsp {
         }
 
         Node bsp = Game.getInstance().playerSetup.nodes[bspnum];
-
         Renderer r = Game.getInstance().renderer;
+        
         // Decide which side the view point is on.
         int side = r.R_PointOnSide(r.viewx, r.viewy, bsp)?1:0;
 

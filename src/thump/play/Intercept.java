@@ -12,6 +12,14 @@ package thump.play;
 public class Intercept {
     public static final int MAXINTERCEPTS = 128;
 
+    public Intercept(int frac, boolean isaline, Object lineThing) {
+        this.frac = frac;
+        this.isaline = isaline;
+        this.lineThing = lineThing;
+    }
+    
+    
+
     public int     frac;		// along trace line
     public boolean isaline;    // Object type stored in lineThing
     //    union {

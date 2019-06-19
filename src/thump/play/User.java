@@ -59,9 +59,9 @@ public class User {
     //
     void P_Thrust ( 
         Player	player,
-        int	_angle,
+        long	_angle,
         int	move ) {
-        int angle = _angle;
+        long angle = _angle;
         angle >>= ANGLETOFINESHIFT;
 
         player.mo.momx += FixedPoint.mul(move,finecosine(angle)); 
@@ -179,12 +179,12 @@ public class User {
     // Fall on your face when dying.
     // Decrease POV height to floor height.
     //
-    public static final int ANG5  = 	(ANG90/18);
+    public static final long ANG5  = 	(ANG90/18);
 
     void P_DeathThink (Player player)
     {
-        int		angle;
-        int		delta;
+        long		angle;
+        long		delta;
 
         PSprite.P_MovePsprites (player);
 

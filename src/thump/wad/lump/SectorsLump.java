@@ -38,13 +38,18 @@ public class SectorsLump extends Lump {
             short ceil = bb.getShort();
             bb.get(fT);
             bb.get(cT);
+            int fti;
+            for (fti = 0; fti < fT.length && fT[fti] != 0; fti++) { }
+            int cti;
+            for (cti = 0; cti < cT.length && cT[cti] != 0; cti++) { }
+            
             short light = bb.getShort();
             short type = bb.getShort();
             short tag = bb.getShort();
             sectorList.add(new Sector(
                     floor,ceil, 
-                    new String(fT, "ASCII"),
-                    new String(cT, "ASCII"),
+                    new String(fT, 0, fti, "ASCII"),
+                    new String(cT, 0, cti, "ASCII"),
                     light, type, tag 
             ));
         }

@@ -5,9 +5,11 @@ package thump.render;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
 import thump.game.Game;
 import static thump.global.Defines.PowerType.pw_invisibility;
 import static thump.global.Defines.SCREENWIDTH;
+import static thump.global.Defines.logger;
 import thump.global.FixedPoint;
 import static thump.global.FixedPoint.FRACBITS;
 import static thump.global.FixedPoint.FRACUNIT;
@@ -44,7 +46,7 @@ public class Things {
     private int newvissprite;
     private Vissprite vissprites[] = new Vissprite[MAXVISSPRITES];
     public int vissprite_p; // Index of vissprite
-    public Vissprite vsprsortedhead;
+    public Vissprite vsprsortedhead = new Vissprite();
 
     // Constant arrays used for psprite clipping
     //  and initializing clipping.
@@ -398,7 +400,7 @@ public class Things {
             draw.dc_yl = mceilingclip[draw.dc_x] + 1;
         }
 
-        if (draw.dc_yl <= draw.dc_yh) {
+//        if (draw.dc_yl <= draw.dc_yh) {
             //draw.dc_source = (byte *)column + 3;
             draw.dc_source = column;
             draw.dc_texturemid = basetexturemid; // - (p.rowStart << FRACBITS);
@@ -407,7 +409,7 @@ public class Things {
             // Drawn by either R_DrawColumn
             //  or (SHADOW) R_DrawFuzzColumn.
             Game.getInstance().renderer.colfunc.doColFunc(game);
-        }
+//        }
         
         draw.dc_texturemid = basetexturemid;
 }
@@ -490,14 +492,14 @@ public class Things {
         Spriteframe	sprframe;
         int			lump;
 
-        int		rot;
+        long		rot;
         boolean		flip;
 
         int			index;
 
         Vissprite	vis;
 
-        int		ang;
+        long		ang;
         int		iscale;
         
         Renderer renderer = game.renderer;
@@ -543,10 +545,15 @@ public class Things {
 
         if (sprframe.rotate>0) {
             // choose a different rotation based on player view
-            ang = renderer.R_PointToAngle (thing.x, thing.y);
+            ang = renderer.R_PointToAngle (thing.x, thing.y)&0xffffL;
             rot = (ang-thing.angle+(ANG45/2)*9)>>29;
-            lump = sprframe.lump[rot];
-            flip = sprframe.flip[rot]>0;
+//            rot = (int)(ang-(thing.angle&0xffffffff));
+//            long xxx = ANG45/2;
+//            rot += xxx*9;
+//            rot >>= 29;
+            logger.log(Level.CONFIG, "ang: {0}   rot:{1} \n", new Object[]{Long.toHexString(ang), Long.toHexString(rot)});
+            lump = sprframe.lump[(int)rot];
+            flip = sprframe.flip[(int)rot]>0;
         } else {
             // use single rotation for all views
             lump = sprframe.lump[0];
@@ -631,6 +638,7 @@ public class Things {
         MapObject thing;
         int lightnum;
 
+        logger.log(Level.CONFIG, "Things.R_AddSprites for sector:\n{0}\n", sec.toString());
         // BSP is traversed by subsector.
         // A sector might have been split into several
         //  subsectors during BSP building.
@@ -812,8 +820,12 @@ public class Things {
         }
 
         for (int dsc = 0; dsc < vissprite_p; dsc++) {
-            vissprites[dsc].next = vissprites[dsc + 1];
-            vissprites[dsc].prev = vissprites[dsc - 1];
+            if ( dsc < vissprite_p ) {
+                vissprites[dsc].next = vissprites[dsc + 1];
+            }
+            if ( dsc != 0 ) { 
+                vissprites[dsc].prev = vissprites[dsc - 1];
+            }
         }
 
         vissprites[0].prev =  unsorted;
@@ -966,6 +978,8 @@ public class Things {
         Vissprite spr;
         DrawSeg ds;
 
+        logger.log(Level.CONFIG, "Things.R_DrawMasked()\n");
+        
         R_SortVisSprites();
 
         if (vissprite_p >= vissprites.length) {

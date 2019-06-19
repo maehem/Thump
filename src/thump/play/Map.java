@@ -634,9 +634,9 @@ public class Map {
     public void P_HitSlideLine(Line ld) {
         boolean side;
 
-        int lineangle;
-        int moveangle;
-        int deltaangle;
+        long lineangle;
+        long moveangle;
+        long deltaangle;
 
         int movelen;
         int newlen;
@@ -1094,12 +1094,12 @@ public class Map {
     //
     public int P_AimLineAttack ( 
             MapObject	t1,
-            int         _angle,
+            long         _angle,
             int         distance ) {
         int	x2;
         int	y2;
 
-        int angle = _angle;
+        long angle = _angle;
         angle >>= ANGLETOFINESHIFT;
         shootthing = t1;
 
@@ -1134,7 +1134,7 @@ public class Map {
     //
     public void P_LineAttack
     ( MapObject	t1,
-      int	aangle,
+      long	aangle,
       int	distance,
       int	slope,
       int		damage )
@@ -1142,7 +1142,7 @@ public class Map {
         int	x2;
         int	y2;
 
-        int angle = aangle;
+        long angle = aangle;
         angle >>= ANGLETOFINESHIFT;
         shootthing = t1;
         la_damage = damage;
@@ -1199,7 +1199,7 @@ public class Map {
     // Looks for special lines in front of the player to activate.
     //
     public void P_UseLines (Player player) {
-        int	angle;
+        long	angle;
         int	x1;
         int	y1;
         int	x2;

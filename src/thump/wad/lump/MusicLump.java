@@ -18,7 +18,6 @@
  */
 package thump.wad.lump;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,7 +26,6 @@ import java.util.logging.Logger;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
 import static javax.sound.midi.Sequence.PPQ;
 import javax.sound.midi.SysexMessage;
@@ -115,6 +113,7 @@ public class MusicLump extends Lump {
             track.add(ew.event);
         }
 
+        /* I think this is debug
         try {
             //****  write the MIDI sequence to a MIDI file  ****
             File f = new File("/Users/mark/Desktop/MIDI/" + name.substring(0, 5) + ".mid");
@@ -123,6 +122,7 @@ public class MusicLump extends Lump {
         catch (Exception e) {
             System.out.println("Exception caught " + e.toString());
         } //catch
+        */
 
     }
 

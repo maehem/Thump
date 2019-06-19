@@ -50,7 +50,13 @@ public class VertexesLump extends Lump {
         Iterator<Vertex> it = vertexList.iterator();
         int index=0;
         while (it.hasNext()) {
-            sb.append("    ").append(index).append("::").append(it.next().toString()).append("\n");
+            Vertex v = it.next();
+            sb.append("    ").append(index).append("::")
+                    .append(" x: ")
+                    .append(Integer.toHexString(v.x))
+                    .append(" y: ")
+                    .append(Integer.toHexString(v.y))
+                    .append("\n");
             index++;
         }
         

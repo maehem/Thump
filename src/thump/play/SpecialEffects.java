@@ -153,7 +153,7 @@ public class SpecialEffects {  //  p_spec
             anims[lastanim].istexture = animdef.istexture;
             anims[lastanim].numpics = anims[lastanim].picnum - anims[lastanim].basepic + 1;
             if (anims[lastanim].numpics < 2) {
-                SystemInterface.I_Error("P_InitPicAnims: bad cycle from {0} to {1}", new Object[]{animdef.startname, animdef.endname});
+                SystemInterface.I_Error("P_InitPicAnims: bad cycle from {0} to {1}\n", new Object[]{animdef.startname, animdef.endname});
             }
             anims[lastanim].speed = animdef.speed;
             lastanim++;
@@ -1044,18 +1044,18 @@ public class SpecialEffects {  //  p_spec
                 if (0==buttonlist[i].btimer) {
                     switch (buttonlist[i].where) {
                         case TOP:
-                            ps.sides[buttonlist[i].line.sidenum[0]].topTextureNum
-                                    = buttonlist[i].btexture;
+                            ps.sides[buttonlist[i].line.sidenum[0]]
+                                    .setTopTextureNum(buttonlist[i].btexture);
                             break;
 
                         case MIDDLE:
-                            ps.sides[buttonlist[i].line.sidenum[0]].midTextureNum
-                                    = buttonlist[i].btexture;
+                            ps.sides[buttonlist[i].line.sidenum[0]]
+                                    .setMidTextureNum(buttonlist[i].btexture);
                             break;
 
                         case BOTTOM:
-                            ps.sides[buttonlist[i].line.sidenum[0]].bottomTextureNum
-                                    = buttonlist[i].btexture;
+                            ps.sides[buttonlist[i].line.sidenum[0]]
+                                    .setBottomTextureNum(buttonlist[i].btexture);
                             break;
                     }
                     Game.getInstance().sound.S_StartSound(buttonlist[i].soundorg, sfx_swtchn);

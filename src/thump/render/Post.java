@@ -20,7 +20,7 @@ public class Post {
     public final byte[] pixels;
 
     public Post(ByteBuffer bb) {
-        int sp = bb.position(); //Debug started at.
+        //int sp = bb.position(); //Debug started at.
         rowStart = bb.get()&0xFF;
         pixels = new byte[bb.get()&0x000000ff];
         try {
@@ -29,6 +29,15 @@ public class Post {
             bb.get(); // skip byte
         } catch ( BufferUnderflowException e) {
             int i = 2; // Something to stop at.
+        }
+    }
+
+    Post(short height) {
+        pixels = new byte[height];
+        rowStart = 0;
+        
+        for ( int i=0; i<height; i++) {
+            pixels[i] = (byte) 0xFF;
         }
     }
 

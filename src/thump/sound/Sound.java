@@ -699,7 +699,7 @@ public class Sound {
         int	approx_dist;
         int	adx;
         int	ady;
-        int	angle;
+        long	angle;
 
         // calculate the distance to sound origin
         //  and clip it if necessary

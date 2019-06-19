@@ -30,12 +30,13 @@ public class SegsLump extends Lump {
         bb.position(0);
         
         for (int i = 0; i < size / 12; i++) {
-            segList.add(new Seg(map,
+            segList.add(new Seg(map, 
                     bb.getShort(), bb.getShort(),
-                    bb.getShort(), bb.getShort(),
+                    bb.getShort()&0xFFFF, bb.getShort(),
                     bb.getShort(), bb.getShort()
             ));
         }
+        int i=0;  // for breakpoint debug
     }
     
     @Override

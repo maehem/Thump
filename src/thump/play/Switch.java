@@ -198,9 +198,9 @@ public class Switch {
         PlayerSetup ps = Game.getInstance().playerSetup;
         Sound gs = Game.getInstance().sound;
         
-        texTop = ps.sides[line.sidenum[0]].topTextureNum;
-        texMid = ps.sides[line.sidenum[0]].midTextureNum;
-        texBot = ps.sides[line.sidenum[0]].bottomTextureNum;
+        texTop = ps.sides[line.sidenum[0]].getTopTextureNum();
+        texMid = ps.sides[line.sidenum[0]].getMidTextureNum();
+        texBot = ps.sides[line.sidenum[0]].getBottomTextureNum();
 
         sound = sfx_swtchn;
 
@@ -212,7 +212,7 @@ public class Switch {
         for (i = 0;i < numswitches*2;i++) {
             if (switchlist[i] == texTop) {
                 gs.S_StartSound(buttonlist[0].soundorg,sound);
-                ps.sides[line.sidenum[0]].topTextureNum = switchlist[i^1];
+                ps.sides[line.sidenum[0]].setTopTextureNum(switchlist[i^1]);
 
                 if (useAgain>0) {
                     P_StartButton(line,TOP,switchlist[i],BUTTONTIME);
@@ -222,7 +222,7 @@ public class Switch {
             } else {
                 if (switchlist[i] == texMid) {
                     gs.S_StartSound(buttonlist[0].soundorg,sound);
-                    ps.sides[line.sidenum[0]].midTextureNum = switchlist[i^1];
+                    ps.sides[line.sidenum[0]].setMidTextureNum(switchlist[i^1]);
 
                     if (useAgain>0) {
                         P_StartButton(line, MIDDLE,switchlist[i],BUTTONTIME);
@@ -232,7 +232,7 @@ public class Switch {
                 } else {
                     if (switchlist[i] == texBot) {
                         gs.S_StartSound(buttonlist[0].soundorg,sound);
-                        ps.sides[line.sidenum[0]].bottomTextureNum = switchlist[i^1];
+                        ps.sides[line.sidenum[0]].setBottomTextureNum(switchlist[i^1]);
 
                         if (useAgain>0) {
                             P_StartButton(line, BOTTOM,switchlist[i],BUTTONTIME);

@@ -1221,7 +1221,7 @@ public class AutoMap {
             Fpoint p,
             //int*	x,
             //int*	y,
-            int	a ) {
+            long	a ) {
         int tmpx;
 
         tmpx =
@@ -1240,7 +1240,7 @@ public class AutoMap {
     ( Mline[]	lineguy,
       int		lineguylines,  //oh my
       int	scale,
-      int	angle,
+      long	angle,
       int		color,
       int	x,
       int	y )

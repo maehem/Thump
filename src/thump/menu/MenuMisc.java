@@ -52,7 +52,7 @@ public class MenuMisc {
         properties.put( "key_straferight",/*&key_straferight,*/KeyEvent.VK_PERIOD);
 
         properties.put( "key_fire",/*&key_fire,*/KeyEvent.VK_CONTROL);
-        properties.put( "key_use",/*&key_use,*/' ');
+        properties.put( "key_use",/*&key_use,*/KeyEvent.VK_SPACE);
         properties.put( "key_strafe",/*&key_strafe,*/KeyEvent.VK_ALT);
         properties.put( "key_speed",/*&key_speed,*/KeyEvent.VK_SHIFT);
 

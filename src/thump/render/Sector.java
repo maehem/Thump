@@ -75,7 +75,8 @@ public class Sector {
     
     @Override
     public String toString() {
-        return  "node: floorH:" + floorheight + "  ceilH:" + ceilingheight +
+        return  "node: floorH:" + Integer.toHexString(floorheight) + 
+                "    ceilH:" + Integer.toHexString(ceilingheight) +
                 "    flTxt:" + floorpic + "    ceilTxt:" + ceilingpic +
                 "    light:" + lightlevel + "    type:" + special +
                 "    tag:" + tag

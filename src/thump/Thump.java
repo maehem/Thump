@@ -26,7 +26,7 @@ public class Thump {
         try {           
             List<String> aargs = new ArrayList<>();
             aargs.addAll(Arrays.asList(args));
-            new DoomMain(aargs);
+            DoomMain doomMain = new DoomMain(aargs);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Thump.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -699,8 +699,8 @@ public class Status {
      */
     void ST_updateFaceWidget() {
         int		i;
-        int	badguyangle;
-        int	diffang;
+        long	badguyangle;
+        long	diffang;
         int	lastattackdown = -1;
         int	priority = 0;
         boolean	doevilgrin;
@@ -1422,6 +1422,7 @@ public class Status {
     }
 
    public void ST_Init () {
+       
         veryfirsttime = 0;
         ST_loadData();
         //screens[4] = (byte *) Z_Malloc(ST_WIDTH*ST_HEIGHT, PU_STATIC, 0);

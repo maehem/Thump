@@ -105,12 +105,12 @@ public class BlockMapLump extends Lump {
         sb.append("    blockList Length: ").append(blockLists.length).append("\n");
         for (int i = 0; i < blockLists.length; i++) {
             Short[] list = blockLists[i];
-            sb.append("    ").append(i).append(": ");
+            sb.append("    ").append(i).append(": [");
             for (Short list1 : list) {
                 if ( list1 != -1) {
-                     sb.append(String.format("%04d ", list1 & 0xFFFF));
+                     sb.append(String.format("%04X ", list1 & 0xFFFF));
                 } else {
-                     sb.append(".");
+                     sb.append("]");
                 }
             }
             sb.append("\n");

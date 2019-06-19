@@ -149,6 +149,18 @@ public class Line {  // line_s
         return tag;
     }
 
+    public int getSideCount() {
+        int sCount = 0;
+        if ( sidenum[0] > 0 ) {
+            sCount ++;           
+        }
+        if ( sidenum[1] > 0 ) {
+            sCount ++;           
+        }
+        
+        return sCount;
+    }
+    
     @Override
     public String toString() {
         return  "lineDef: s:" + getStartV()+ "  e:" + getEndV()+

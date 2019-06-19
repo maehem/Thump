@@ -56,6 +56,5 @@ public class MapPatch {
     public Image getImage() {       
         return getPatch().getColorImage(0/*wad.getPlayPalLump().paletteList.get(0)*/); // Might only want BW image and apply colormap later?
     }
-    
-    
+
 }

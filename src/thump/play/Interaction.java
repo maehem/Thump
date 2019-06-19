@@ -830,7 +830,7 @@ public class Interaction {
             int 	_damage )
     {
         int     damage = _damage;
-        int	ang;
+        long	ang;
         int		saved;
         Player	player;
         int	thrust;

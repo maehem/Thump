@@ -158,7 +158,8 @@ public class Draw {
         frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
                         
         do {
-            dest.area[x+y*SCREENWIDTH] = dc_colormap[vals[(frac>>FRACBITS)&127]];
+//            dest.area[x+y*SCREENWIDTH] = dc_colormap[vals[(frac>>FRACBITS)&127]];
+            dest.area[x+y] = dc_colormap[vals[(frac>>FRACBITS)&127]];
             y++;
             frac += fracstep;
         } while ((count--)>0); 

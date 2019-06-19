@@ -24,9 +24,9 @@ public class Side {
     public String  bottomtexture;
     public String  midtexture;
     public final int   sectorNum;
-    public int topTextureNum = -1;
-    public int midTextureNum = -1;
-    public int bottomTextureNum = -1;
+    private int topTextureNum = -1;
+    private int midTextureNum = -1;
+    private int bottomTextureNum = -1;
     
     public Sector sector = null;
 
@@ -60,23 +60,24 @@ public class Side {
                 ;
     }
     
-    public int getTopTexture() {
-        if ( topTextureNum == -1) {
+    public int getTopTextureNum() {
+        if ( topTextureNum == -1 && toptexture != null ) {
             topTextureNum = Game.getInstance().wad.getTextureNum(toptexture);
         }
         return topTextureNum;
     }
 
-    public int getMidTexture() {
-        if ( midTextureNum == -1 ) {
+    public int getMidTextureNum() {
+        if ( midTextureNum == -1 && midtexture != null) {
+            
             midTextureNum = Game.getInstance().wad.getTextureNum(midtexture);
         }
         
         return midTextureNum;
     }
 
-    public int getBottomTexture() {
-        if ( bottomTextureNum == -1 ) {
+    public int getBottomTextureNum() {
+        if ( bottomTextureNum == -1 && bottomtexture != null ) {
             bottomTextureNum =  Game.getInstance().wad.getTextureNum(bottomtexture);
         }
         return bottomTextureNum;
@@ -87,5 +88,20 @@ public class Side {
             sector = map.getSectorsLump().sectorList.get(sectorNum);
         }
         return sector;
+    }
+
+    public void setTopTextureNum(int num) {
+        topTextureNum = num;
+        toptexture = Game.getInstance().wad.getTextures().get(num).name;
+    }
+
+    public void setMidTextureNum(int num) {
+        midTextureNum = num;
+        midtexture = Game.getInstance().wad.getTextures().get(num).name;
+    }
+
+    public void setBottomTextureNum(int num) {
+        bottomTextureNum = num;
+        bottomtexture = Game.getInstance().wad.getTextures().get(num).name;
     }
 }

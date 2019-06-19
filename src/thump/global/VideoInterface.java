@@ -34,10 +34,11 @@ public class VideoInterface implements KeyListener, ComponentListener {
     private static VideoInterface instance = null;
     private boolean firsttime=true;
     private int displaynum;
-    private JFrame window;
+    private JFrame window;       // Shows screen 0.
+    private JFrame debugWindow; // Shows the other four screen buffers.
     
     private ViewCanvas viewCanvas;
-    private ViewCanvas [] dbgCanvas = new ViewCanvas[5];
+    private final ViewCanvas [] dbgCanvas = new ViewCanvas[5];
     
     private final JTextPane consolePane = new JTextPane();
     //private final JScrollPane consoleScrollPane = new JScrollPane(consolePane);
@@ -95,6 +96,11 @@ public class VideoInterface implements KeyListener, ComponentListener {
         window = new JFrame(Game.getMessage("TITLE"));
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // SHould be something different
         
+        debugWindow = new JFrame( "Other Buffers" );
+        // TODO: Need a hot-key to toggle displaying
+        debugWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        
         //window.setLayout(new BorderLayout(0, 0));
         viewCanvas = new ViewCanvas();
         viewCanvas.setPreferredSize(new Dimension(Defines.SCREENWIDTH*multiply, Defines.SCREENHEIGHT*multiply));
@@ -111,10 +117,13 @@ public class VideoInterface implements KeyListener, ComponentListener {
             dbgPanel.add(dbgCanvas[sn]);
         }
         
-        window.getContentPane().add(dbgPanel, BorderLayout.EAST);
+        debugWindow.getContentPane().add(dbgPanel, BorderLayout.CENTER);
         
         window.pack();
         window.setLocationRelativeTo(null); // Centered on screen
+        
+        debugWindow.pack();
+        debugWindow.setLocationRelativeTo(window);
 
         viewCanvas.initStrategy();
         viewCanvas.requestFocus();
@@ -125,6 +134,8 @@ public class VideoInterface implements KeyListener, ComponentListener {
         }
 
         window.setVisible(true);
+        debugWindow.setVisible(true);
+        
         viewCanvas.addKeyListener(this);
         //consoleScrollPane.addKeyListener(this);
         consolePane.addKeyListener(this);
@@ -146,6 +157,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Applies current palette colors.
      */
     public void I_UpdateNoBlit () {
+        logger.log(Level.CONFIG, "I_UpdateNoBlit()\n");
         //BufferedImage s = Game.getInstance().video.screenImage[0];
         for (int sn = 0; sn<5; sn++) {
             //viewCanvas.repaint();
@@ -156,7 +168,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
                 //int x = 0;
                 int val = area[i];
                 int cc;
-                if (/*val == -1*/ val < 0 || val>254 ) {
+                if (/*val == -1*/ val < 0 || val>255 ) {
                     cc = 0;
                 } else {
                     Color c = palette[val];
@@ -174,7 +186,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Draws the draw buffer to the screen.
      */
     public void I_FinishUpdate (){
-        
+        logger.log(Level.CONFIG, "I_FinishUpdate()\n");
         BufferedImage s = Game.getInstance().video.screenImage[0];
         Graphics g = viewCanvas.getStrategy().getDrawGraphics();
         g.drawImage(s, 0, 0 , 
@@ -186,8 +198,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
         for (int sn = 0; sn < 5; sn++) {
             s = Game.getInstance().video.screenImage[sn];
             g = dbgCanvas[sn].getStrategy().getDrawGraphics();
-            g.drawImage(s, 0, 0,
-                    (int) (s.getWidth() * scaleX), (int) (s.getHeight() * scaleY), dbgCanvas[sn]);
+            g.drawImage(s, 0, 0, s.getWidth(), s.getHeight(), dbgCanvas[sn]);
             dbgCanvas[sn].getStrategy().show();
             g.dispose();
         }
@@ -341,7 +352,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        logger.log(Level.CONFIG, "key pressed. {0}\n", ke.getKeyCode());
+        logger.log(Level.FINE, "key pressed. {0}\n", ke.getKeyCode());
              
         Game.getInstance().doomMain.D_PostEvent(new Event(EventType.ev_keydown, ke.getKeyCode()));
 //            event.type = ev_keydown;

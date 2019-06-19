@@ -37,7 +37,7 @@ public class Teleport {
         int tag;
         MapObject m;
         MapObject fog;
-        int an;
+        long an;
         Thinker thinker;
         Sector sector;
         int oldx;

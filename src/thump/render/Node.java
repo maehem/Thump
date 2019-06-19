@@ -44,7 +44,7 @@ public class Node extends DivLine {
     
     @Override
     public String toString() {
-        return  "node: x:" + x + "  y:" + y +
+        return  "node: x:" + Integer.toHexString(x) + "  y:" + Integer.toHexString(y) +
                 "    xc:" + dx + "    yc:" + dy +
                 "    bbr:" + bbox[0].toString() + "    bbL:" + bbox[1].toString() +
                 "    cr:" + children[0] + "    cl:" + children[1]

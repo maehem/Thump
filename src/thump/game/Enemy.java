@@ -476,7 +476,7 @@ public class Enemy {
         int stop;
         Player player;
         //Sector sector;
-        int an;
+        long an;
         int dist;
 
         //sector = actor.subsector.sector;

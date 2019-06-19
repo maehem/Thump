@@ -418,16 +418,16 @@ public class Floor implements Thinker {
                     for (i = 0; i < sec.linecount; i++) {
                         if (SpecialEffects.twoSided(secnum, i)>0) {
                             side = SpecialEffects.getSide(secnum, i, 0);
-                            int texHeight = Game.getInstance().wad.getTextures().get(side.bottomTextureNum).height;
+                            int texHeight = Game.getInstance().wad.getTextures().get(side.getBottomTextureNum()).height;
 
-                            if (side.bottomTextureNum >= 0) {
+                            if (side.getBottomTextureNum() >= 0) {
                                 if (texHeight < minsize) {
                                     minsize = texHeight;
                                 }
                             }
                             side = SpecialEffects.getSide(secnum, i, 1);
-                            texHeight = Game.getInstance().wad.getTextures().get(side.bottomTextureNum).height;
-                            if (side.bottomTextureNum >= 0) {
+                            texHeight = Game.getInstance().wad.getTextures().get(side.getBottomTextureNum()).height;
+                            if (side.getBottomTextureNum() >= 0) {
                                 if (texHeight < minsize) {
                                     minsize = texHeight;
                                 }

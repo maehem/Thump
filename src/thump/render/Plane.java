@@ -5,9 +5,11 @@ package thump.render;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
 import thump.game.Game;
 import static thump.global.Defines.SCREENHEIGHT;
 import static thump.global.Defines.SCREENWIDTH;
+import static thump.global.Defines.logger;
 import thump.global.FixedPoint;
 import thump.global.SystemInterface;
 import static thump.global.Tables.ANG90;
@@ -145,7 +147,7 @@ public class Plane {
         }
 
         length = FixedPoint.mul (distance,distscale[x1]);
-        angle = (renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT;
+        angle = (int)((renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT);
         draw.ds_xfrac = renderer.viewx + FixedPoint.mul(finecosine(angle), length);
         draw.ds_yfrac = -renderer.viewy - FixedPoint.mul(finesine(angle), length);
 
@@ -194,7 +196,7 @@ public class Plane {
         Arrays.fill(cachedheight, 0);
 
         // left to right mapping
-        angle = (Game.getInstance().renderer.viewangle-ANG90)>>ANGLETOFINESHIFT;
+        angle = (int)((Game.getInstance().renderer.viewangle-ANG90)>>ANGLETOFINESHIFT);
 
         // scale will be unit scale at SCREENWIDTH/2 distance
         basexscale = FixedPoint.div (finecosine(angle),Game.getInstance().renderer.centerxfrac);
@@ -259,6 +261,7 @@ public class Plane {
         check.lightlevel = lightlevel;
         check.minx = SCREENWIDTH;
         check.maxx = -1;
+        Arrays.fill(check.top, (byte)0xff);
         
         visplanes.add(check);
 
@@ -323,15 +326,22 @@ public class Plane {
         vp.maxx = stop;
 
         //memset (pl.top,0xff,sizeof(pl.top));
+        Arrays.fill(vp.top, (byte)0xff);
 
         //return pl;
         return vp;
     }
 
 
-    //
-    // R_MakeSpans
-    //
+    /**
+     * Make the spans
+     * 
+     * @param x
+     * @param _t1
+     * @param _b1
+     * @param _t2
+     * @param _b2 
+     */
     void R_MakeSpans(int x, int _t1, int _b1, int _t2, int _b2) {
         int t1 = _t1;
         int b1 = _b1;
@@ -384,6 +394,8 @@ public class Plane {
 //                     lastopening - openings);
 //    #endif
 
+        logger.log(Level.CONFIG, "Plane.R_DrawPlanes()\n");
+        
         //Renderer renderer = Game.getInstance().renderer;
         Things  things = Game.getInstance().things;
         Draw draw = renderer.draw;
@@ -411,7 +423,7 @@ public class Plane {
                     draw.dc_yh = pl.bottom[x];
 
                     if (draw.dc_yl <= draw.dc_yh) {
-                        angle = (renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT;
+                        angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
                         draw.dc_x = x;
                         //draw.dc_source = renderer.data.R_GetColumn(renderer.skytexture, angle);
                         // porbably more like draw.dc_source = renderer.skytexture.getColumn(angle);   ?
@@ -443,6 +455,11 @@ public class Plane {
 
             planezlight = renderer.zlight[light];
 
+            // Debug
+            if ( pl.minx ==0 ) {
+                int i=0; // breakpoint here.
+                pl.minx = 1;
+            }
             pl.top[pl.maxx+1] = (byte) 0xff;
             pl.top[pl.minx-1] = (byte) 0xff;
 

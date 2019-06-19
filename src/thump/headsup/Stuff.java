@@ -16,6 +16,7 @@ import static thump.global.Defines.KEY_LALT;
 import static thump.global.Defines.KEY_RALT;
 import static thump.global.Defines.KEY_RSHIFT;
 import static thump.global.Defines.MAXPLAYERS;
+import static thump.global.Defines.logger;
 import static thump.headsup.HUlib.HU_MAXLINELENGTH;
 import static thump.headsup.HUlib.HUlib_initSText;
 import static thump.headsup.HUlib.HUlib_initTextLine;
@@ -517,6 +518,8 @@ public class Stuff {  // TODO rename to HeadUp
 
     public void HU_Drawer() {
 
+        logger.log(Level.CONFIG, "HU_Drawer()\n");
+        
         HUlib.HUlib_drawSText(w_message);
         HUlib.HUlib_drawIText(w_chat);
         if (game.autoMap.automapactive) {
@@ -526,6 +529,8 @@ public class Stuff {  // TODO rename to HeadUp
     }
 
     public void HU_Erase() {
+
+        logger.log(Level.CONFIG, "HU_Erase()\n");
 
         HUlib.HUlib_eraseSText(w_message);
         HUlib.HUlib_eraseIText(w_chat);

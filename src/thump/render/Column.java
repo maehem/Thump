@@ -28,6 +28,11 @@ public class Column {
         }
     }
 
+    Column(short height) {
+        this.height = height;
+        posts.add(new Post(height));
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

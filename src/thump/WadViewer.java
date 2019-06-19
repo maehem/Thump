@@ -7,13 +7,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
-import java.io.IOException;
 import java.util.ListIterator;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
@@ -44,6 +42,7 @@ import thump.wad.lump.PlaypalLump;
 import thump.wad.lump.SoundEffectLump;
 import thump.wad.lump.SpritesLump;
 import thump.wad.lump.TextureLump;
+import thump.wad.lump.ThingsLump;
 
 /**
  *
@@ -52,9 +51,10 @@ import thump.wad.lump.TextureLump;
 @SuppressWarnings("serial")
 public class WadViewer extends javax.swing.JFrame implements TreeSelectionListener {
 
-    private final String wadFile = System.getProperty("user.home") + File.separator + "Doom" + File.separator + "doom2.wad";
+    private final String wadFile = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Doom" + File.separator + "doom2.wad";
     private final Wad wad;
     private final ImagePanel imagePreviewPanel;
+    private Sequencer sequencer = null;
 
     /**
      * Creates new form WadViewer
@@ -233,6 +233,10 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
     @Override
     public void valueChanged(TreeSelectionEvent tse) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) wadTree.getLastSelectedPathComponent();
+        if (sequencer != null && sequencer.isOpen()) {
+            sequencer.stop();
+        }
+        //Logger.getLogger(WadViewer.class.getName()).log(Level.SEVERE, null, ex);
         if (node instanceof LumpNode) {
             Lump lump = ((LumpNode) node).getLump();
             if (lump instanceof PictureLump) {
@@ -247,7 +251,15 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
                 imagePreviewPanel.setImage(l.getAsImage(720,400));
             } else if ( lump instanceof LineDefsLump ) {
                 LineDefsLump l = (LineDefsLump)lump;
-                imagePreviewPanel.setImage(l.getImage(4));
+                //imagePreviewPanel.setImage(l.getImage(2560));
+            } else if ( lump instanceof MapLump ) {
+                logger.log(Level.CONFIG, "Map Lump: {0} selected.\n", lump.name);
+                MapLump l = (MapLump)lump;
+                imagePreviewPanel.setImage(l.getImage());
+            } else if ( lump instanceof ThingsLump ) {
+                logger.log(Level.CONFIG, "{0}\n", lump.toString());
+            } else {
+                logger.log(Level.CONFIG, "{0}\n{1}\n", new Object[]{lump.name, lump.toString()});
             }
 
         } else if (node instanceof PictureNode) {
@@ -261,7 +273,6 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
             imagePreviewPanel.setImage(n.getTexture().getImage());
         } else if (node instanceof MusicNode) {
             MusicLump lump = ((MusicNode) node).getLump();
-            Sequencer sequencer = null;
             Synthesizer synthesizer = null;
             try {
                 sequencer = MidiSystem.getSequencer();
@@ -352,26 +363,38 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
         private Image image = null;
 
         public ImagePanel() {
-            try {
-                image = ImageIO.read(new File(System.getProperty("user.home") + File.separator + "test.jpg"));
-                this.setPreferredSize(new Dimension(1600, 1024));
-            } catch (IOException ex) {
-                Logger.getLogger(WadViewer.class.getName()).log(Level.SEVERE, null, ex);
-            }
+//            try {
+//                image = ImageIO.read(new File(System.getProperty("user.home") + File.separator + "test.jpg"));
+                //this.setPreferredSize(new Dimension(1024, 1024));
+//            } catch (IOException ex) {
+//                Logger.getLogger(WadViewer.class.getName()).log(Level.SEVERE, null, ex);
+//            }
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (image != null) {
-                g.drawImage(
-                        image.getScaledInstance(image.getWidth(this) * 2, image.getHeight(this) * 2, Image.SCALE_DEFAULT),
-                        0, 0, null);
+//                g.drawImage(
+//                        //image.getScaledInstance(image.getWidth(this), image.getHeight(this), Image.SCALE_DEFAULT),
+//                        image.getScaledInstance(image.getWidth(ImagePanel.this), image.getHeight(ImagePanel.this), Image.SCALE_DEFAULT),
+//                        0, 0, null);
+                g.drawImage(image, 0,0, this);
+                
             }
         }
 
         public void setImage(Image image) {
             this.image = image;
+            //ImagePanel.this.setPreferredSize(new Dimension(image.getWidth(this), image.getHeight(this)));
+            //ImagePanel.this.setPreferredSize(jScrollPane1.getSize());
+            //this.pack();
+            ImagePanel.this.validate();
+            imagePanel.setPreferredSize(new Dimension(image.getWidth(this), image.getHeight(this)));
+            imagePanel.validate();
+            jScrollPane1.revalidate();
+            this.validate();
+            jScrollPane1.repaint();
             repaint();
         }
 
@@ -507,10 +530,11 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
         wadTree = new javax.swing.JTree();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(1024, 768));
+        setPreferredSize(new java.awt.Dimension(1600, 1000));
 
         toolBar.setRollover(true);
 
+        imagePanel.setLayout(new java.awt.BorderLayout());
         jScrollPane1.setViewportView(imagePanel);
 
         wadTreeScrollPanel.setViewportView(wadTree);
@@ -523,7 +547,8 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
             .addGroup(layout.createSequentialGroup()
                 .addComponent(wadTreeScrollPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 532, Short.MAX_VALUE)
+                .addGap(14, 14, 14))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

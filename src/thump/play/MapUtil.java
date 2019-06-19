@@ -445,7 +445,8 @@ public class MapUtil {
             return true;
         }
 
-        offset = y * ps.bmapwidth + x;
+        //offset = y * ps.bmapwidth + x;
+        offset = y + x;
 
         offset = ps.bmapOffsetList[offset];  // Needs rework based on original source.
         // This wants to be blockmaplump.offsetList[offset];
@@ -499,10 +500,11 @@ public class MapUtil {
     //
     // INTERCEPT ROUTINES
     //
+    // TODO: Make this an arrayList?sx
     public Intercept	intercepts[] = new Intercept[MAXINTERCEPTS];
     public int	intercept_p;
 
-    public DivLine 	trace;
+    public DivLine 	trace = new DivLine();
     public boolean 	earlyout;
     public int		ptflags;
 
@@ -554,9 +556,10 @@ public class MapUtil {
             return false;	// stop checking
         }
 
-        intercepts[intercept_p].frac = frac;
-        intercepts[intercept_p].isaline = true;
-        intercepts[intercept_p].lineThing = ld;
+        intercepts[intercept_p] = new Intercept(frac, true, ld);
+//        intercepts[intercept_p].frac = frac;
+//        intercepts[intercept_p].isaline = true;
+//        intercepts[intercept_p].lineThing = ld;
         intercept_p++;
 
         return true;	// continue
@@ -616,9 +619,10 @@ public class MapUtil {
         if (frac < 0) {
             return true;		// behind source
         }
-        intercepts[intercept_p].frac = frac;
-        intercepts[intercept_p].isaline = false;
-        intercepts[intercept_p].lineThing = thing;
+        intercepts[intercept_p] = new Intercept(frac, false, thing);
+//        intercepts[intercept_p].frac = frac;
+//        intercepts[intercept_p].isaline = false;
+//        intercepts[intercept_p].lineThing = thing;
         intercept_p++;
 
         return true;		// keep going
@@ -731,6 +735,7 @@ public class MapUtil {
         game.renderer.validcount++;
         //intercept_p = intercepts;
         intercept_p = 0;
+        intercepts = new Intercept[MAXINTERCEPTS];
 
         if (((x1 - bmaporgx) & (MAPBLOCKSIZE - 1)) == 0) {
             x1 += FRACUNIT;	// don't side exactly on a line

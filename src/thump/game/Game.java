@@ -317,6 +317,15 @@ public class Game {
         G_BuildTiccmd(localcmds[i]);
     }
 
+    private int getKey(String key) {
+        Object p = mainMenu.properties.get(key);
+        try {
+            return Integer.valueOf((String)p);
+        } catch ( ClassCastException ex ) {
+            return (Integer)p;
+        }
+    }
+    
     //
     // G_BuildTiccmd
     // Builds a ticcmd from all of the available inputs
@@ -337,13 +346,13 @@ public class Game {
         //base = SystemInterface.getInstance().I_BaseTiccmd ();		// empty, or external driver
         //memcpy (cmd,base,sizeof(*cmd));
         
+        Defines.logger.finer("Build Tick Command.\n");
 
         cmd.consistancy = (short) consistancy[consoleplayer][net.maketic%BACKUPTICS]; 
 
-
 //        strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] 
-//            || joybuttons[joybstrafe]; 
-        strafe = gamekeydown[key_strafe] || mousearray[1+mousebstrafe] 
+//            || joybuttons[joybstrafe];
+        strafe = gamekeydown[getKey("key_strafe")] || mousearray[1+mousebstrafe] 
             || joyarray[1+joybstrafe]; 
         speed = gamekeydown[key_speed] || joyarray[1+joybspeed]?1:0;
 
@@ -370,12 +379,14 @@ public class Game {
         
         // let movement keys cancel each other out
         if (strafe) { 
-            if (gamekeydown[key_right]) {
+            if (gamekeydown[getKey("key_right")]) {
                 // fprintf(stderr, "strafe right\n");
+                Defines.logger.config("Strafe Right\n");
                 side += sidemove[speed]; 
             }
-            if (gamekeydown[key_left]) {
+            if (gamekeydown[getKey("key_left")]) {
                 //	fprintf(stderr, "strafe left\n");
+                Defines.logger.config("Strafe Left\n");
                 side -= sidemove[speed]; 
             }
             if (joyxmove > 0) {
@@ -386,10 +397,12 @@ public class Game {
             } 
 
         } else { 
-            if (gamekeydown[key_right]) {
+            if (gamekeydown[getKey("key_right")]) {
+                Defines.logger.config("Turn Right\n");
                 cmd.angleturn -= angleturn[tspeed];
             } 
-            if (gamekeydown[key_left]) {
+            if (gamekeydown[getKey("key_left")]) {
+                Defines.logger.config("Turn Left\n");
                 cmd.angleturn += angleturn[tspeed];
             } 
             if (joyxmove > 0) {
@@ -400,12 +413,14 @@ public class Game {
             } 
         } 
 
-        if (gamekeydown[key_up]) {
+        if (gamekeydown[getKey("key_up")]) {
             // fprintf(stderr, "up\n");
+            Defines.logger.config("Move Forward\n");
             forward += forwardmove[speed]; 
         }
-        if (gamekeydown[key_down]) {
+        if (gamekeydown[getKey("key_down")]) {
             // fprintf(stderr, "down\n");
+            Defines.logger.config("Move Backward\n");
             forward -= forwardmove[speed]; 
         }
         if (joyymove < 0) {
@@ -414,22 +429,26 @@ public class Game {
         if (joyymove > 0) {
             forward -= forwardmove[speed];
         } 
-        if (gamekeydown[key_straferight]) {
+        if (gamekeydown[getKey("key_straferight")]) {
+            Defines.logger.config("Strafe Right\n");
             side += sidemove[speed];
         } 
-        if (gamekeydown[key_strafeleft]) {
+        if (gamekeydown[getKey("key_strafeleft")]) {
+            Defines.logger.config("Strafe Left\n");
             side -= sidemove[speed];
         }
 
         // buttons
         cmd.chatchar = (byte) Game.getInstance().headUp.HU_dequeueChatChar(); 
 
-        if (gamekeydown[key_fire] || mousearray[1+mousebfire] 
+        if (gamekeydown[getKey("key_fire")] || mousearray[1+mousebfire] 
             || joyarray[1+joybfire]) {
+            Defines.logger.config("Attack\n");
             cmd.buttons |= BT_ATTACK;
         } 
 
-        if (gamekeydown[key_use] || joyarray[1+joybuse] ) { 
+        if (gamekeydown[getKey("key_use")] || joyarray[1+joybuse] ) { 
+            Defines.logger.config("Use\n");
             cmd.buttons |= BT_USE;
             // clear double clicks if hit use button 
             dclicks = 0;                   
@@ -438,6 +457,7 @@ public class Game {
         // chainsaw overrides 
         for (i=0 ; i<WeaponType.values().length-2 ; i++) {
             if (gamekeydown['1'+i]) {
+                Defines.logger.log(Level.CONFIG, "Weapon Change {0}\n", gamekeydown['1'+i]);
                 cmd.buttons |= BT_CHANGE;
                 cmd.buttons |= i<<BT_WEAPONSHIFT;
                 break;
@@ -658,6 +678,7 @@ public class Game {
             return true;	// finale ate the event 
         } 
 
+        Defines.logger.log(Level.CONFIG, "Game Event: {0} {1}\n", new Object[]{ev.type, ev.data1} );
         switch (ev.type) { 
           case ev_keydown: 
             if (ev.data1 == KEY_PAUSE) { 
@@ -695,7 +716,7 @@ public class Game {
           default: 
             break; 
         } 
-        Defines.logger.log(Level.CONFIG, "Nobody ate the event!{0}", ev.type);
+        Defines.logger.log(Level.CONFIG, "Nobody ate the event!{0}\n", ev.type);
         return false; 
     } 
 
@@ -967,7 +988,7 @@ public class Game {
         int		x;
         int		y; 
         SubSector	ss; 
-        int		an; 
+        long		an; 
         MapObject	mo; 
         int		i;
 

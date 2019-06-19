@@ -46,12 +46,11 @@ public class Wipe {
       int		height )
     {
 //        int		x;
-        int		yy;
 
         //dest =  Z_Malloc(width*height*2, PU_STATIC, 0);
         int[] dest = new int[width*height*2];
 
-        for( yy=0;yy<height;yy++) {
+        for( int yy=0;yy<height;yy++) {
             for(int x=0;x<width;x++) {
                 dest[x*height+yy] = scrn.area[yy*width+x];
             }

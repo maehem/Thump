@@ -48,7 +48,7 @@ public final class DoomMain {
     private MenuManager menu = MenuManager.getInstance();
     
     private String homeDir = System.getProperty("user.home" );
-    private String doomWadDir = homeDir + File.separator + "Doom";
+    private String doomWadDir = homeDir + File.separator + "Documents"  + File.separator + "Doom";
     public boolean advancedemo = false;
     public String basedefault = "";
     
@@ -93,7 +93,7 @@ public final class DoomMain {
         
         logger.log(Level.CONFIG, "{0}\n", title);
         
-        int p=0;
+        int p;
         
         String file;
 
@@ -534,7 +534,7 @@ public final class DoomMain {
         long			tics;
         long			wipestart;
         int			y;
-        boolean			done = false;
+        boolean			done;
         boolean			wipe;
         boolean			redrawsbar;
 
@@ -548,7 +548,7 @@ public final class DoomMain {
         redrawsbar = false;
 
         // change the view size if needed
-        if (Game.getInstance().renderer.setsizeneeded) {  // setsizein r_main
+        if (game.renderer.setsizeneeded) {  // setsizein r_main
             game.renderer.R_ExecuteSetViewSize ();
             oldgamestate = GameState.GS_NONE;                      // force background redraw
             borderdrawcount = 3;
@@ -605,16 +605,17 @@ public final class DoomMain {
         }
 
         // draw buffered stuff to screen
-        VideoInterface.getInstance().I_UpdateNoBlit();
+        //logger.config("Render Update - No Blit\n");
+        game.videoInterface.I_UpdateNoBlit();
         //VideoInterface.getInstance().I_FinishUpdate();
 
         // draw the view directly
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.gametic>0) {
-            //logger.config("Render Player View\n");
+            logger.finer("Render Player View\n");
             game.renderer.R_RenderPlayerView (game.players[game.displayplayer]);
             
             if (game.gamestate == GS_LEVEL && game.gametic>0) {
-                Game.getInstance().headUp.HU_Drawer ();
+                game.headUp.HU_Drawer ();
             }
         }
 
@@ -626,7 +627,7 @@ public final class DoomMain {
 
         // see if the border needs to be initially drawn
         if (game.gamestate == GS_LEVEL && oldgamestate != GS_LEVEL) {
-            //logger.config("Fill Back Screen\n");
+            logger.config("Fill Back Screen\n");
             viewactivestate = false;        // view was not active
             game.renderer.draw.R_FillBackScreen ();    // draw the pattern into the back screen
         }
@@ -692,6 +693,12 @@ public final class DoomMain {
             menu.M_Drawer();   // menu is drawn even on top of wipes
             game.videoInterface.I_FinishUpdate();   // page flip or blit buffer
         } while (!done);
+        
+        // Wipe blows away any redraw for the status bar.
+        // Works fine in legacy C edition but not here in our port.
+        // So we set the flag after the redraw is done.
+        game.statusBar.ST_Drawer (game.renderer.draw.viewheight == 200, redrawsbar );
+
     }
 
 
@@ -1118,12 +1125,12 @@ public final class DoomMain {
             return;
         }
 
-        logger.log(Level.CONFIG, "Game mode indeterminate.");
+        logger.log(Level.CONFIG, "Game mode indeterminate.\n");
         game.gameMode = GameMode.INDETERMINED;
 
         // We don't abort. Let's see what the PWAD contains.
         //exit(1);
-        SystemInterface.I_Error ("Game mode indeterminate\n");
+        SystemInterface.I_Error ("Game mode indeterminate");
     }
 
 }

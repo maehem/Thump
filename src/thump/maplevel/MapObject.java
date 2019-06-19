@@ -100,7 +100,7 @@ public class MapObject extends Degenmobj implements Thinker {
     public MapObject	sprev = null;
 
     //More drawing info: to determine current sprite.
-    public int		angle;	// orientation
+    public long		angle;	// orientation
     public State.SpriteNum	sprite;	// used to find patch_t and flip value
     public long			frame;	// might be ORed with FF_FULLBRIGHT
 

@@ -28,12 +28,15 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import thump.game.Game;
+import thump.maplevel.MapPatch;
 
 /**
  *
  * @author mark
  */
 public class Patch {
+
     public final String name;
     public final short width;
     public final short height;
@@ -45,27 +48,28 @@ public class Patch {
     private final ArrayList<Color[]> paletteList;
     //public int[] data;
 
-    public Patch( String name, ByteBuffer bb, ArrayList<Color[]> paletteList ) {
+    public Patch(String name, ByteBuffer bb, ArrayList<Color[]> paletteList) {
         this.name = name;
         this.paletteList = paletteList;
-        
+
+        bb.position(0);
         width = bb.getShort();
         height = bb.getShort();
         leftOffset = bb.getShort();
         topOffset = bb.getShort();
-        
+
         pointers = new int[width];
-        for ( int i=0; i< width; i++ ) {
+        for (int i = 0; i < width; i++) {
             pointers[i] = bb.getInt();
         }
-        
+
         //int imageStart = bb.position();
         pixelData = new Column[width];
-        for ( int i=0; i< width; i++ ) {
+        for (int i = 0; i < width; i++) {
             bb.position(pointers[i]); // Seek to offset.
             pixelData[i] = new Column(bb, height);
         }
-        
+
 //        // Save a raster version of this patch
 //        data = new int[width*height];
 //        for ( int x=0; x<width; x++) {
@@ -76,21 +80,62 @@ public class Patch {
 //        }
     }
 
+    private Patch(String name, short width, short height) {
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.leftOffset = 0;
+        this.topOffset = 0;
+        pointers = new int[0];
+        pixelData = new Column[width];
+        paletteList = Game.getInstance().wad.paletteList;
+
+        for (int i = 0; i < width; i++) {
+            pixelData[i] = new Column(height);
+        }
+    }
+
+    public static Patch merge(String name, short width, short height, MapPatch[] patchList) {
+        Patch mp = new Patch(name, width, height);
+
+        for (MapPatch p : patchList) {
+            Patch pp = p.getPatch();
+            for (int x = 0; x < pp.width; x++) {
+                try {
+                    Column mc = mp.pixelData[x + pp.leftOffset];
+                    int[] rawVals = pp.pixelData[x].getRawVals();
+                    for (int y = 0; y < pp.height; y++) {
+                        try {
+                            mc.posts.get(0).pixels[y + pp.topOffset] = (byte) (rawVals[y] & 0xff);
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            break;
+                        }
+                    }
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    break;
+                }
+
+            }
+        }
+
+        return mp;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Picture:\n");
-        
+
         sb.append("  n:").append(name).append("  w:").append(width).append("  h:").
                 append(height).append("  lOff:").append(leftOffset).append("  tOff:").
                 append(topOffset).append("  cols:").append(pointers.length);
         //sb.append("\n");
-        
+
 //        for (Column col : pixelData) {
 //            sb.append(col.toString());//.append("\n");
 //        }
         return sb.toString(); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 //    public Image getImage() {
 //        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 //        int x=0;
@@ -107,55 +152,55 @@ public class Patch {
 //    
     public Image getImage() {
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-        int x=0;
+        int x = 0;
         for (Column col : pixelData) {
             int[] vals = col.getRawVals();
-            for ( int y=0; y< vals.length; y++ ) {
-                img.setRGB(x, y, 
-                                (byte)vals[y]<<16|
-                                (byte)vals[y]<<8 |
-                                (byte)vals[y]&0xFF     );
+            for (int y = 0; y < vals.length; y++) {
+                img.setRGB(x, y,
+                        (byte) vals[y] << 16
+                        | (byte) vals[y] << 8
+                        | (byte) vals[y] & 0xFF);
             }
             x++;
         }
-        
+
         return img;
     }
-    
+
     public Image getColorImage(int paletteNum) {
         BufferedImage img;
         try {
             img = imageCache.get(paletteNum);
-        } catch (IndexOutOfBoundsException ex ) {
+        } catch (IndexOutOfBoundsException ex) {
             img = null;
         }
-        
-        if ( img != null ) {
+
+        if (img != null) {
             return img;
         } else {
             img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            int x=0;
+            int x = 0;
             Color[] palette = paletteList.get(paletteNum);
             Graphics g = img.getGraphics();
             for (Column col : pixelData) {
                 int[] vals = col.getRawVals();
-                for ( int y=0; y< vals.length; y++ ) {
+                for (int y = 0; y < vals.length; y++) {
                     //Color[] palette = wad.getPlayPalLump().paletteList.get(0);
                     int val = vals[y];
                     int trans = 0xff;
-                    if ( val == -1 ){
+                    if (val == -1) {
                         val = 0;
                         trans = 0x00;
                     }
                     Color c = palette[val];
-                    int cc = trans<<24 | (c.getRed()&0xFF)<<16 | (c.getGreen()&0xFF)<<8 | c.getBlue()&0xFF;
+                    int cc = trans << 24 | (c.getRed() & 0xFF) << 16 | (c.getGreen() & 0xFF) << 8 | c.getBlue() & 0xFF;
                     img.setRGB(x, y, cc);
                 }
                 x++;
             }
             imageCache.add(paletteNum, img); // Cache it
         }
-        
+
         return img;
     }
 }

@@ -115,7 +115,9 @@ public class MenuManager {
     private final SaveMenu    saveMenu    = new SaveMenu(mainMenu, 80,54);
     
 
-    public  final MenuMisc menuMisc = new MenuMisc();
+    //public  final MenuMisc menuMisc = new MenuMisc();
+    public final MenuMisc menuMisc = game.mainMenu;
+    
     private Sound sound = Game.getInstance().sound;
     
     

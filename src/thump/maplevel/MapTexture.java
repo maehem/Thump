@@ -31,21 +31,24 @@ public class MapTexture {
     
     public final MapPatch[] patch;
     
-    public Patch fullPatch = null;   // The fully mapped Patch
+    private Patch fullPatch = null;   // The fully mapped Patch
     
     BufferedImage img = null;
+    BufferedImage rawMap = null;
 
     public MapTexture(Wad wad, ByteBuffer bb) {
         byte[] bytes = new byte[8];
         bb.get(bytes);
-        this.name = new String(bytes);
+        int i;
+        for (i = 0; i < bytes.length && bytes[i] != 0; i++) { }
+        this.name = new String(bytes, 0 , i);
         this.masked = bb.getInt() != 0;  //
         this.width = bb.getShort();
         this.height = bb.getShort();
         bb.getInt(); // Ignore these four bytes.
         this.patchcount = bb.getShort();
         this.patch = new MapPatch[patchcount];
-        for( int i=0; i< patchcount; i++ ) {
+        for( i=0; i< patchcount; i++ ) {
             patch[i] = new MapPatch(wad, bb.getShort(), bb.getShort(), bb.getShort(), bb.getShort(), bb.getShort());
         }
     }
@@ -71,27 +74,50 @@ public class MapTexture {
     }
     
     public Patch getPatch() {
-        if ( fullPatch ==  null ) {
-            ByteBuffer bb = ByteBuffer.allocate(width*height);
-            byte bp[][] = new byte[width][height];
-            for ( MapPatch p: patch ) {
-                Patch fp = p.getPatch();
-                for ( int x=0; x<fp.width; x++) {
-                    Column c = fp.pixelData[x];
-                    for ( int y=0; y<c.height; y++) {
-                        bb.put((x+p.originx) * (y+p.originy) , (byte) c.getRawVals()[y]);
-                    }
-                }
-            }
-            
-            fullPatch = new Patch(name, bb, null);
-            
+//        if ( fullPatch ==  null ) {
+//            ByteBuffer bb = ByteBuffer.allocate(width*height+8);
+//            bb.order(ByteOrder.LITTLE_ENDIAN);
+//            bb.put( new byte[]{ (byte) (width&0xFF),  (byte)((width>>8)&0xff)  } );
+//            bb.put( new byte[]{ (byte) (height&0xFF), (byte)((height>>8)&0xff) } );
+//            bb.put((byte)0);
+//            bb.put((byte)0);
+//            bb.put((byte)0);
+//            bb.put((byte)0);
+//            //byte bp[][] = new byte[width][height];
+//            for ( MapPatch p: patch ) {
+//                Patch fp = p.getPatch();
+//                for ( int x=0; x<fp.width; x++) {
+//                    Column c = fp.pixelData[x];
+//                    for ( int y=0; y<c.height; y++) {
+//                        bb.put((x+p.originx) * (y+p.originy) + 8 , (byte) c.getRawVals()[y]);
+//                    }
+//                }
+//            }
+//            
+//            
+//            // Seems to be lacking the offset table before the data!
+//            
+//            
+//            //fullPatch = new Patch(name, bb, null);
+//            fullpatch = Patch.merge(name, width, height, patch);
+//            
+//        }
+        if (fullPatch == null) {
+            fullPatch = Patch.merge(name, width, height, patch);
         }
-        
         return fullPatch;
     }
     
     public Column getColumn(int colnum ) {
-        return getPatch().pixelData[colnum];
+        if ( colnum == 139 ) {
+            int i=0;  // debug breakpoint
+        }
+        try {
+            return getPatch().pixelData[colnum];         
+        } catch (Exception e) {
+            int size = getPatch().pixelData.length;
+            
+            return getPatch().pixelData[size-1];         
+        }
     }
 }

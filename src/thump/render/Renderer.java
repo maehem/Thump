@@ -6,7 +6,6 @@ package thump.render;
 import java.util.logging.Logger;
 import thump.game.Game;
 import thump.game.Player;
-import thump.game.Stats;
 import static thump.global.Defines.SCREENHEIGHT;
 import static thump.global.Defines.SCREENWIDTH;
 import thump.global.FixedPoint;
@@ -109,7 +108,7 @@ public class Renderer {
     public  int			viewy;
     public  int			viewz;
 
-    public int		viewangle;
+    public long                 viewangle;
 
     public int			viewcos;
     public int			viewsin;
@@ -125,18 +124,18 @@ public class Renderer {
     //
     // precalculated math tables
     //
-    int clipangle;
+    long clipangle;
 
     // The viewangletox[viewangle + FINEANGLES/4] lookup
     // maps the visible view angles to screen X coordinates,
     // flattening the arc to a flat projection plane.
     // There will be many angles mapped to the same X. 
-    int[] viewangletox = new int[FINEANGLES/2];
+    long[] viewangletox = new long[FINEANGLES/2];
 
     // The xtoviewangleangle[] table maps a screen pixel
     // to the lowest viewangle that maps back to x ranges
     // from clipangle to -clipangle.
-    int[]   xtoviewangle = new int[SCREENWIDTH+1];
+    long[]   xtoviewangle = new long[SCREENWIDTH+1];
     
     //void (*colfunc) (void);
     public ColumnFunction colfunc;
@@ -148,6 +147,7 @@ public class Renderer {
     public ColumnFunction transcolfunc;
     //void (*spanfunc) (void);
     public ColumnFunction spanfunc;
+    private Logger logger;
 
 
     // UNUSED.
@@ -175,7 +175,7 @@ public class Renderer {
 
     public void R_Init () {
         MenuManager menu = MenuManager.getInstance();
-        Logger logger = thump.global.Defines.logger;
+        logger = thump.global.Defines.logger;
         
         logger.config("R_InitData\n");
         data.R_InitData ();
@@ -340,83 +340,87 @@ public class Renderer {
     }
 
 
-    //
-    // R_PointToAngle
-    // To get a global angle from cartesian coordinates,
-    //  the coordinates are flipped until they are in
-    //  the first octant of the coordinate system, then
-    //  the y (<=x) is scaled and divided by x to get a
-    //  tangent (slope) value which is looked up in the
-    //  tantoangle(] table.
-
-    //
-
-
-
-
-    public int R_PointToAngle(int px, int py) {
+    /**
+     * R_PointToAngle
+     * To get a global angle from cartesian coordinates, the coordinates are 
+     * flipped until they are in the first octant of the coordinate system, 
+     * then the y (<=x) is scaled and divided by x to get a tangent (slope) 
+     * value which is looked up in the tantoangle(] table.
+     * 
+     * @param px
+     * @param py
+     * @return angle
+     */
+    public long R_PointToAngle(int px, int py) {
         int x = px;
         int y = py;
-        
+
         x -= viewx;
         y -= viewy;
 
-        if ( (x==0) && (y==0) ) {
+        if ((x == 0) && (y == 0)) {
             return 0;
         }
 
-        if (x>= 0) {
+        if (x >= 0) {
+            
             // x >=0
-            if (y>= 0) {
+            if (y >= 0) {
+                //logger.warning("R_PointToAngle: x>= 0  y>=0\n");
                 // y>= 0
-
-                if (x>y) {
+                if (x > y) {
                     // octant 0
-                    return tantoangle( SlopeDiv(y,x) );
-                }
-                else
-                {
+                    logger.config("R_PointToAngle: octant 0\n");
+                    return tantoangle(SlopeDiv(y, x));
+                } else {
                     // octant 1
-                    return ANG90-1-tantoangle( SlopeDiv(x,y) );
+                    logger.config("R_PointToAngle: octant 1\n");
+                    return (short) (ANG90 - 1 - tantoangle(SlopeDiv(x, y)));
                 }
             } else {
+                //logger.warning("R_PointToAngle: x>= 0  y<0\n");
                 // y<0
                 y = -y;
 
-                if (x>y) {
+                if (x > y) {
                     // octant 8
-                    return -tantoangle(SlopeDiv(y,x));
+                    logger.config("R_PointToAngle: octant 7\n");
+                    return -tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 7
-                    return ANG270+tantoangle( SlopeDiv(x,y) );
+                    logger.config("R_PointToAngle: octant 6\n");
+                    return ANG270 + tantoangle(SlopeDiv(x, y));
                 }
             }
         } else {
             // x<0
             x = -x;
 
-            if (y>= 0) {
+            if (y >= 0) {
+            //logger.warning("R_PointToAngle: x< 0  y>=0\n");
                 // y>= 0
-                if (x>y) {
+                if (x > y) {
                     // octant 3
-                    return ANG180-1-tantoangle( SlopeDiv(y,x));
+                    logger.config("R_PointToAngle: octant 3\n");
+                    return ANG180 - 1 - tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 2
-                    return ANG90+ tantoangle( SlopeDiv(x,y));
+                    logger.config("R_PointToAngle: octant 2\n");
+                    return ANG90 + tantoangle(SlopeDiv(x, y));
                 }
             } else {
                 // y<0
+                //logger.warning("R_PointToAngle: x< 0  y<0\n");
                 y = -y;
 
-                if (x>y)
-                {
+                if (x > y) {
                     // octant 4
-                    return ANG180+tantoangle( SlopeDiv(y,x));
-                }
-                else
-                {
-                     // octant 5
-                    return ANG270-1-tantoangle( SlopeDiv(x,y));
+                    logger.config("R_PointToAngle: octant 4\n");
+                    return ANG180 + tantoangle(SlopeDiv(y, x));
+                } else {
+                    // octant 5
+                    logger.config("R_PointToAngle: octant 5\n");
+                    return ANG270 - 1 - tantoangle(SlopeDiv(x, y));
                 }
             }
         }
@@ -424,7 +428,7 @@ public class Renderer {
     }
 
 
-    public int R_PointToAngle2(int x1, int y1, int x2, int y2) {
+    public long R_PointToAngle2(int x1, int y1, int x2, int y2) {
         viewx = x1;
         viewy = y1;
 
@@ -433,7 +437,7 @@ public class Renderer {
 
 
     int R_PointToDist( int x,int y ) {
-        int	angle;
+        long	angle;
         int	dx;
         int	dy;
         int	temp;
@@ -489,10 +493,10 @@ public class Renderer {
     //  at the given angle.
     // rw_distance must be calculated first.
     //
-    int R_ScaleFromGlobalAngle (int visangle){
+    int R_ScaleFromGlobalAngle (long visangle){
         int scale;
-        int anglea;
-        int angleb;
+        long anglea;
+        long angleb;
         int sinea;
         int sineb;
         int num;
@@ -584,7 +588,7 @@ public class Renderer {
         int			t;
         int		focallength;
 
-        Stats stats = Stats.getInstance();
+        //Stats stats = Stats.getInstance();
         
         // Use tangent table to generate viewangletox:
         //  viewangletox will give the next greatest x
@@ -596,12 +600,13 @@ public class Renderer {
                                 finetangent(FINEANGLES/4+FIELDOFVIEW/2) );
 
         for (i=0 ; i<FINEANGLES/2 ; i++) {
-            if (finetangent(i) > FRACUNIT*2) {
+            int finetangent = finetangent(i);
+            if (finetangent > FRACUNIT*2) {
                 t = -1;
-            } else if (finetangent(i) < -FRACUNIT*2) {
+            } else if (finetangent < -FRACUNIT*2) {
                 t = game.renderer.draw.viewwidth+1;
             } else {
-                t = FixedPoint.mul (finetangent(i), focallength);
+                t = FixedPoint.mul (finetangent, focallength);
                 t = (centerxfrac - t+FRACUNIT-1)>>FRACBITS;
 
                 if (t < -1) {

@@ -4,6 +4,11 @@
  */
 package thump.wad.lump;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
@@ -12,6 +17,8 @@ import java.nio.channels.FileChannel;
  * @author mark
  */
 public class MapLump extends Lump {
+    public int scale = 120000;
+    public int margin = 20;
 
     private ThingsLump      things      = null;
     private LineDefsLump    lineDefs    = null;
@@ -200,6 +207,31 @@ public class MapLump extends Lump {
         getNodes().init();
         //P_LoadSegs (lumpnum+ML_SEGS);
         getSegs().init();
+    }
+
+    /**
+     * Draw the map and details into an image.
+     * @return 
+     */
+    public Image getImage() {
+        // Get a base image with lines and vertex drawn.
+        Image img = this.lineDefs.getImage(1200);
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null)+(2*this.margin), img.getHeight(null)+(2*this.margin), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.setColor(Color.BLACK);
+        bGr.fillRect(0, 0, bimage.getWidth(), bimage.getHeight());
+        bGr.setStroke(new BasicStroke(5));
+        bGr.drawRect(2, 2, bimage.getWidth()-2, bimage.getHeight()-2);
+        bGr.setColor(Color.BLUE);
+        bGr.drawImage(img, this.margin, this.margin, null);
+        
+        // Draw
+        bGr.dispose();
+
+        return bimage;        
     }
 
     

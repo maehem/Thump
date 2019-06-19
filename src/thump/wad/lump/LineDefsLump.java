@@ -16,6 +16,10 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
+import static thump.global.Defines.logger;
+import static thump.global.FixedPoint.FRACBITS;
+import thump.maplevel.MapThing;
 import thump.render.Line;
 import thump.render.Vertex;
 
@@ -82,79 +86,155 @@ public class LineDefsLump extends Lump {
 
     private void computeExtents() {
         Vertex[] vList = parent.getVertexes().getVertexList();
-
-        Iterator<Line> lineList = getLineDefList();
-        while( lineList.hasNext() ) {
-            Line line = lineList.next();
-            Vertex s = vList[line.getStartV()];
-            Vertex e = vList[line.getEndV()];
-            if ( s.x < 0 && s.x < xMin ) {
-                xMin = s.x;
-            } else if ( s.x > 0 && s.x > xMax ) {
-                xMax = s.x;
+        xMin = vList[0].x;
+        yMin = vList[0].y;
+        
+        for ( Vertex v: vList ) {
+            
+            if ( v.x < xMin ) {
+                xMin = v.x;
+            } else if ( v.x > xMax ) {
+                xMax = v.x;
             }
-            if ( s.y < 0 && s.y < yMin ) {
-                yMin = s.y;
-            } else if ( s.y > 0 && s.y > yMax ) {
-                yMax = s.y;
+            if ( v.y < yMin ) {
+                yMin = v.y;
+            } else if ( v.y > yMax ) {
+                yMax = v.y;
             }
-            if ( e.x < 0 && e.x < xMin ) {
-                xMin = e.x;
-            } else if ( e.x > 0 && e.x > xMax ) {
-                xMax = e.x;
-            }
-            if ( e.y < 0 && e.y < yMin ) {
-                yMin = e.y;
-            } else if ( e.y > 0 && e.y > yMax ) {
-                yMax = e.y;
-            }
+            
         }
     }
     
-    public Image getImage(int zoom) {
+    public Image getImage(int imgWidth ) {
         if ( !extentsKnown ) {
             computeExtents();  // Just need to do this once
         }
         
-        int xOff = -xMin + 20;
-        int yOff = -yMin + 20;
+        int xOff = -xMin>>FRACBITS;
+        int yOff = -yMin>>FRACBITS;
         
-        BufferedImage img = new BufferedImage((xMax-xMin)+40, (yMax-yMin)+40, BufferedImage.TYPE_INT_ARGB);
+        int width = (xMax-xMin)>>FRACBITS;
+        int height = (yMax-yMin)>>FRACBITS;
+        
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        logger.log(Level.CONFIG, "Image: {0} x {1}  xMin: {2}  yMin: {3}  xMax: {4}  yMax: {5} OffsetX: {6}  OffsetY: {7}\n", 
+                new Object[]{width, height, 
+                    xMin>>FRACBITS, yMin>>FRACBITS, 
+                    xMax>>FRACBITS, yMax>>FRACBITS, 
+                    xOff, yOff});
+        
+        // Draw from minX and minY points.
         Graphics2D g = (Graphics2D) img.getGraphics();
+        g.translate(xOff, yOff);
         
+        // Fill the background with black.
         g.setColor(Color.black);
         g.fillRect(0, 0, img.getWidth()-1, img.getHeight()-1);
                 
         Vertex[] vList = parent.getVertexes().getVertexList();
         
-        g.setStroke(new BasicStroke(3.0f));
-        g.setColor(Color.yellow);
         Iterator<Line> lineList = getLineDefList();
         while( lineList.hasNext() ) {
             Line line = lineList.next();
+
             Vertex s = vList[line.getStartV()];
             Vertex e = vList[line.getEndV()];
             
-            g.drawLine(
-                    (s.x + xOff), 
-                    (s.y + yOff),
-                    (e.x + xOff), 
-                    (e.y + yOff)
-            );
+            // Round it down.
+            int sX = s.x>>FRACBITS;
+            int sY = s.y>>FRACBITS;
+            
+            int eX = e.x>>FRACBITS;
+            int eY = e.y>>FRACBITS;
+
+            if ( line.getSideCount() == 2 ) {
+                g.setColor(Color.GRAY);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+            g.setStroke(new BasicStroke(4.0f/line.getSideCount()));
+
+            g.drawLine( sX, sY, eX, eY );
+            
+            // Draw side-0 indicator at linedef half-point.
+            if ( line.sidenum[0] > 0 ) {
+                g.setColor(new Color(255,100,100));
+                g.setStroke(new BasicStroke(1.0f));
+
+                // Draw tick perpendicular at half point. 
+                int mX = (sX + eX)/2;
+                int mY = (sY + eY)/2;
+                //double pAngle = -angle(s.x, s.y, e.x, e.y);
+                double pAngle = -angle(sX, sY, eX, eY);
+                
+                int pX = (int)(mX + Math.sin(pAngle) * 10);
+                int pY = (int)(mY + Math.cos(pAngle) * 10);
+                
+                g.drawLine( mX, mY, pX, pY );
+            }
+            
+            // Draw side-1 indicator at linedef half-point.
+            if ( line.sidenum[1] > 0 ) {
+                g.setColor(new Color(100,100,255));
+                g.setStroke(new BasicStroke(1.0f));
+
+                // Draw tick perpendicular at half point. 
+                int mX = (sX + eX)/2;
+                int mY = (sY + eY)/2;
+                //double pAngle = -angle(s.x, s.y, e.x, e.y);
+                double pAngle = -angle(sX, sY, eX, eY);
+                
+                int pX = (int)(mX + Math.sin(pAngle) * -10);
+                int pY = (int)(mY + Math.cos(pAngle) * -10);
+                
+                g.drawLine( mX, mY, pX, pY );
+            }
+            
         }
         
-        g.setColor(Color.blue);
-        g.drawRect(0, 0, img.getWidth()-1, img.getHeight()-1);
+        // Draw vertex start points as red boxes.
+        int boxSize = 6;
+        g.setColor(Color.red);
         
-        return img.getScaledInstance(800, -1, Image.SCALE_SMOOTH);
+        for ( Vertex v : vList ) {
+            g.fillRect( 
+                    (v.x>>FRACBITS) /* + xOff */ - (boxSize/2),// + margin, 
+                    (v.y>>FRACBITS) /* + yOff */ - (boxSize/2),// + margin , 
+                    boxSize, boxSize);
+        }
+                
+        // Draw Things
+        MapThing[] things = parent.getThings().toArray();
+        for (MapThing t : things) {
+            if ( t.type == 1 ) {
+                g.setColor(Color.GREEN);  // Player 1
+            } else {
+                g.setColor(Color.ORANGE);
+            }
+            g.fillRect( t.x, t.y, 12, 12);
+        }
+        
+        
+        // Draw a cross hair at Map 0,0
+        g.setColor(Color.CYAN);
+        g.setStroke(new BasicStroke(3.0f));
+        g.drawLine(  0, -10,  0, 10 );
+        g.drawLine(-10,   0, 10,  0 );
+        
+        return img.getScaledInstance(imgWidth, -1, Image.SCALE_AREA_AVERAGING);
     }
 
-
+    private static double angle(double x1, double y1, double x2, double y2) {
+        double xdiff = x1 - x2;
+        double ydiff = y1 - y2;
+        
+        return  Math.atan2(ydiff, xdiff);
+    }
+    
+    
     void initVertexes() {
-        lineDefList.forEach((line) -> {
+        lineDefList.forEach((Line line) -> {
             line.initLine(parent);
-            //line.v1 = vertexList.get(line.startV);
-            //line.v2 = vertexList.get(line.endV);
         });
         
  

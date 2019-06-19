@@ -687,7 +687,7 @@ public class PSprite {
     // P_BulletSlope
     //
     public void P_BulletSlope (MapObject mo){
-        int	an;
+        long	an;
         
         // see which target is to be aimed at
         an = mo.angle;
@@ -710,7 +710,7 @@ public class PSprite {
     // P_GunShot
     //
     public void P_GunShot( MapObject	mo, boolean accurate ) {
-        int	angle;
+        long	angle;
         int		damage;
     	
         damage = 5*(Random.getInstance().P_Random ()%3+1);

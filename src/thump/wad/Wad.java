@@ -124,7 +124,8 @@ public class Wad {
                 return i;
             }
         }
-        return -1;        
+        //return -1;
+        return 0;        
     }
     
     public FlatsLump getFlats() {
