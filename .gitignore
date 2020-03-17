@@ -29,3 +29,5 @@ private/
 hs_err_pid*
 /build/
 /dist/
+src/.DS_Store
+.DS_Store
