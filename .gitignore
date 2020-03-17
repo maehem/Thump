@@ -31,3 +31,4 @@ hs_err_pid*
 /dist/
 src/.DS_Store
 .DS_Store
+/thump/target/
