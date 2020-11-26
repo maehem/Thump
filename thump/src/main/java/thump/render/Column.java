@@ -117,7 +117,7 @@ public class Column {
         // Zero length, column does not exceed a pixel.
         if (count < 0) {
             return;
-        } 
+}
         int y = 0; //ylookup[dc_yl];
         //int x = columnofs[dc_x];  
 

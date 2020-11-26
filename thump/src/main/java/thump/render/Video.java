@@ -267,7 +267,8 @@ public class Video {
         int destX = x;
         Column columns[] = patch.pixelData;
         for (Column column : columns) {
-            column.draw(screens[scrn], destX, y);
+            //column.draw(screens[scrn], destX, y);
+            drawColumn(column, screens[scrn], x, dy);
             destX++;
         }
 
@@ -350,7 +351,9 @@ public class Video {
             //column = (column_t *)((byte *)patch + LONG(patch.columnofs[w-1-col])); 
             column = patch.pixelData[col];
 
-            column.draw(dest, x, dy);
+            //column.draw(dest, x, dy);
+            drawColumn(column, dest, x, dy);
+            
             // step through the posts in a column 
 //	while (column.topdelta != 0xff ) 
 //	{ 
@@ -583,4 +586,39 @@ public class Video {
         memcpy(screens[d], 0, screens[s], 0, SCREENHEIGHT * SCREENWIDTH);
     }
 
+    public void drawColumn( Column col, Screen screen, int x, int dy ) {
+        //int		frac;
+        //int		fracstep;
+        int count = col.height-1; 
+
+        // Zero length, column does not exceed a pixel.
+        if (count < 0) {
+            return;
+        } 
+        int y = 0; //ylookup[dc_yl];
+        //int x = columnofs[dc_x];  
+
+
+        int [] vals = col.getRawVals();
+        //fracstep = 1; //dc_iscale; 
+        //frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
+                        
+        do {
+            if (y>=SCREENHEIGHT) {
+                return;
+            }
+            try {
+                if (vals[y]>=0) { // Transparency is -1 so don't draw for negative value.
+                    screen.area[dy*SCREENWIDTH+x] = vals[y];
+                }
+            y++;
+            dy++;
+            //frac += fracstep;
+            } catch (ArrayIndexOutOfBoundsException ex ) {
+                // chicken!
+                int i=0;
+            }
+            count--;
+        } while (count>0); 
+    }
 }

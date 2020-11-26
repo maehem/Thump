@@ -48,7 +48,8 @@ public class PNamesLump extends Lump {
     public String toString() {
         StringBuilder sb = new StringBuilder("PNAMES:\n    ");
         for ( int i=0; i< patchNames.length; i++ ) {
-            sb.append(patchNames[i]);
+            sb.append(i).append(":")
+            .append(patchNames[i]);
             sb.append("  ");
             
             if ( (i+1)%8 == 0 ) {

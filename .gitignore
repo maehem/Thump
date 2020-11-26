@@ -32,3 +32,10 @@ hs_err_pid*
 src/.DS_Store
 .DS_Store
 /thump/target/
+/base/target/
+/wad/target/
+/wad-viewer/target/
+/render/target/
+/game/target/
+*.cdg
+UMLDiagrams/umlproject

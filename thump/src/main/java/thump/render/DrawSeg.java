@@ -10,6 +10,8 @@ package thump.render;
  * @author mark
  */
 public class DrawSeg {
+    public static final int MAXDRAWSEGS = 256;
+
     public Seg     curline;
     public int     x1;
     public int     x2;

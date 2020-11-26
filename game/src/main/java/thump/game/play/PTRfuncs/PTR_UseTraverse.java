@@ -1,0 +1,22 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package thump.game.play.PTRfuncs;
+
+import thump.game.Game;
+import thump.game.play.Intercept;
+
+/**
+ *
+ * @author mark
+ */
+public class PTR_UseTraverse implements PTRfunc {
+
+    @Override
+    public boolean doFunc(Intercept in) {
+        return Game.getInstance().map.PTR_UseTraverse(in);
+    }
+    
+}
