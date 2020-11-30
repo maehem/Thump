@@ -328,8 +328,10 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
         DefaultMutableTreeNode n = new DefaultMutableTreeNode("Sprites");
         SpritesLump sl = (SpritesLump) l;
         ListIterator<PatchData> sprites = sl.getSprites();
+        int i=0;
         while (sprites.hasNext()) {
-            n.add(new PictureNode(sprites.next()));
+            n.add(new PictureNode(i, sprites.next()));
+            i++;
         }
 
         return n;
@@ -358,10 +360,13 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
 //            n = new DefaultMutableTreeNode("patches");
 //        }
         PatchesLump pl = (PatchesLump) l;
-        ListIterator<PatchData> patches = pl.getPatches().listIterator();
-        while (patches.hasNext()) {
-            n.add(new PictureNode(patches.next()));
+        //ListIterator<PatchData> patches = pl.getPatches().listIterator();
+        for ( int i=0; i<pl.getPatches().size(); i++) {
+            n.add(new PictureNode(i, pl.getPatch(i)));
         }
+//        while (patches.hasNext()) {
+//            n.add(new PictureNode(patches.next()));
+//        }
 
         return n;
     }
@@ -488,14 +493,16 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
     private class PictureNode extends DefaultMutableTreeNode {
 
         private final PatchData picture;
+        private final int n;
 
-        public PictureNode(PatchData p) {
+        public PictureNode(int n, PatchData p) {
+            this.n = n;
             this.picture = p;
         }
 
         @Override
         public String toString() {
-            return picture.name;
+            return n + ": " + picture.name;
         }
 
         public PatchData getPicture() {

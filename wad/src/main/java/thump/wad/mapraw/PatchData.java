@@ -11,6 +11,7 @@ columnofs   uint32_t[]	4 * width   8       Array of column offsets relative to t
 package thump.wad.mapraw;
 
 import java.nio.ByteBuffer;
+import static thump.base.Defines.logger;
 
 /**
  *
@@ -49,11 +50,12 @@ public class PatchData {
     /**
      * Create a transparent PatchData.
      * 
+     * @param name
      * @param width
      * @param height 
      */
-    public PatchData( int width, int height ) {
-        this.name = "TRANS";
+    public PatchData( String name, int width, int height ) {
+        this.name = name;
         this.width = width;
         this.height = height;
         this.leftOffset = 0;

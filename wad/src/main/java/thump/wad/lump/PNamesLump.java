@@ -40,7 +40,7 @@ public class PNamesLump extends Lump {
         for (int i = 0; i < patchNames.length; i++) {
             byte b[] = new byte[8];
             bb.get(b);
-            patchNames[i] = new String(b);
+            patchNames[i] = new String(b, "ASCII").trim(); // Get rid of trailing 0's in short names.
         }
     }
 

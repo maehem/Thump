@@ -22,6 +22,7 @@ import thump.wad.map.Flat;
 import thump.wad.map.Line;
 import thump.wad.map.Vertex;
 import thump.wad.mapraw.Column;
+import thump.wad.mapraw.MapPatch;
 import thump.wad.mapraw.MapTexture;
 import thump.wad.mapraw.MapThing;
 import thump.wad.mapraw.PatchData;
@@ -205,6 +206,23 @@ public class DrawUtils {
         //}
         PatchData patch = mt.getPatch();
         g.drawImage(getRawPatchImage(patch), 0, 0, null);
+        
+        return img;
+    }
+
+    public static Image getTextureImage2(Wad wad, MapTexture mt) {
+        
+        BufferedImage    img = new BufferedImage(mt.width, mt.height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics g = img.getGraphics();
+        for ( MapPatch mp: mt.patches ) {
+            g.drawImage(
+                    getRawPatchImage(wad.patchesLump.getPatch(mp.getPatchNum())), 
+                    mp.getX(), mp.getY(), 
+                    null
+            );
+        }
+    
         
         return img;
     }

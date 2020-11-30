@@ -156,6 +156,7 @@ public class WadLoader {
                         || name.startsWith("P2_START") || name.startsWith("P2_END") 
                         || name.startsWith("P3_START") || name.startsWith("P3_END") 
                         ) {
+                    logger.config(name);
                     // Do nothing.
                     lump = null;
                 } else if ( patchesLump != null ) {
@@ -377,17 +378,24 @@ public class WadLoader {
                 }
             }
             
-            logger.config("Finished Loading Lumps.");
+            logger.config("Finished Loading Lumps.\n\n\n\n\n\n\n\n\n\n");
             
+            // Re-index the patch lump for correct patch order.
+            wad.patchesLump.sortPatches(wad.pNamesLump);
+        
             // Merge patches to create fullPatch for each texture.
-            if ( textureLump1 != null ) logger.config("Merge Texture1 Lump Textures.");
-            for ( MapTexture t : textureLump1.textures ) {
-                t.merge(wad);
+            if (textureLump1 != null) {
+                logger.config("Merge Texture1 Lump Textures.");
+                for (MapTexture t : textureLump1.textures) {
+                    t.merge(wad);
+                }
             }
             // Merge patches to create fullPatch for each texture.
-            if ( textureLump2 != null ) logger.config("Merge Texture2 Lump Textures.");
-            for ( MapTexture t : textureLump1.textures ) {
-                t.merge(wad);
+            if (textureLump2 != null) {
+                logger.config("Merge Texture2 Lump Textures.");
+                for (MapTexture t : textureLump2.textures) {
+                    t.merge(wad);
+                }
             }
             
             

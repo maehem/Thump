@@ -10,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import static thump.base.Defines.logger;
 import thump.wad.Wad;
 import thump.wad.mapraw.Column;
 import thump.wad.mapraw.MapPatch;
@@ -21,6 +23,7 @@ import thump.wad.mapraw.PatchData;
  * @author mark
  */
 public class PatchesLump extends Lump {
+    public final ArrayList<PatchData> lumpPatches = new ArrayList<>(); // Todo, eliminate this after sort.
     private final ArrayList<PatchData> patches = new ArrayList<>();
     //private final ArrayList<Color[]>paletteList;
 
@@ -39,9 +42,19 @@ public class PatchesLump extends Lump {
         bb.position(0);
 
         PatchData pic = new PatchData(name,  bb /*, paletteList*/);
-        patches.add(pic);
+        lumpPatches.add(pic);
     
         return pic;
+    }
+    
+    /**
+     * Generate patches in order of pNames 
+     * @param lump
+     */
+    public void sortPatches(PNamesLump lump) {
+        for ( String pName: lump.patchNames ) {
+            patches.add(getNamedPatch(pName));
+        }
     }
 
     @Override
@@ -49,7 +62,7 @@ public class PatchesLump extends Lump {
         StringBuilder sb = new StringBuilder("Patches:\n");
         
         for ( int i=0; i<patches.size(); i++) {
-            //sb.append(patches.get(i).name).append("  ");*/
+            //sb.append(lumpPatches.get(i).name).append("  ");*/
             sb.append(i).append(": ");
             sb.append(patches.get(i).toString());
             sb.append("\n");
@@ -57,7 +70,7 @@ public class PatchesLump extends Lump {
 //                sb.append("\n");
 //            }
         }
-        return sb.toString(); //To change body of generated methods, choose Tools | Templates.
+        return sb.toString();
     }
     
     public ArrayList<PatchData> getPatches() {
@@ -68,6 +81,15 @@ public class PatchesLump extends Lump {
         return patches.get(patchNum);
     }
     
+    private  PatchData getNamedPatch( String name ) {
+        for ( PatchData pd: lumpPatches ) {
+            if ( pd.name.equals(name)) { return pd; }
+        }
+        
+        logger.log(Level.WARNING, "PatchesLump.getNamedPatch():  Failed to find a patch called {0}", name);
+        return new PatchData(name, 10, 10);
+    }
+
 //    public PatchData getPatchByName( String pName ) {
 //        ListIterator<PatchData> pics = getPatches().listIterator();
 //        
@@ -84,7 +106,7 @@ public class PatchesLump extends Lump {
     //TODO:  make non-static?
     public static PatchData merge(Wad wad, short width, short height, MapPatch[] patchList) {
         //PatchData mp = new PatchData(name, width, height);
-        PatchData mp = new PatchData(width, height);
+        PatchData mp = new PatchData("MERGED", width, height);
 
         for (MapPatch p : patchList) {
             //PatchData pp = p.getPatch();

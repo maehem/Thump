@@ -13,6 +13,7 @@
 package thump.wad.mapraw;
 
 import java.nio.ByteBuffer;
+import thump.base.Defines;
 import thump.wad.Wad;
 
 /**
@@ -179,15 +180,14 @@ public class MapTexture {
     }
     
     public void merge(Wad wad) {
-        //PatchData mp = new PatchData(name, width, height);
-        fullPatch = new PatchData(width, height);
+        fullPatch = new PatchData("MERGED", width, height);
 
         for (MapPatch p : patches) {
             //PatchData pp = p.getPatch();
             PatchData pd = wad.patchesLump.getPatch(p.getPatchNum());
             for (int x = 0; x < pd.width; x++) {
                 try {
-                    Column mc = fullPatch.pixelData[p.getX() + x /*+ pd.leftOffset*/];
+                    Column mc = fullPatch.pixelData[p.getX() + x /*+ pd.leftOffset*/];// Not sure what offsets do. They don't render right.
                     int[] rawVals = pd.pixelData[x].getRawVals();
                     for (int y = 0; y < pd.height; y++) {
                         try {
@@ -199,7 +199,6 @@ public class MapTexture {
                 } catch (ArrayIndexOutOfBoundsException ex) {
                     //break;
                 }
-
             }
         }
 

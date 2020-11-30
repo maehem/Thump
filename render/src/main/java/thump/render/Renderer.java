@@ -675,7 +675,7 @@ public class Renderer {
     public void R_SetViewSize ( int blocks, boolean detail ) {
         setsizeneeded = true;
         setblocks = blocks;
-        setdetail = detail?1:0;
+        setdetail = detail?1:0;  // TODO: make setdetail boolean
     }
 
 
