@@ -47,7 +47,7 @@ public class RenderDemo extends JFrame implements KeyListener {
     private final JPanel panel = new JPanel();
     private final JPanel patchesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
     private ImageLabel label;
-    private int currentTexture = 1;
+    private int currentTexture = 0;
     
     private final JLabel itemDetailsLabel = new JLabel("Name      W:999    H:999");
     
@@ -68,9 +68,7 @@ public class RenderDemo extends JFrame implements KeyListener {
         
         Render patches for texture.
         Label patches for texture.
-        Apply palette
-        Draw boxes according to the patch mapping.
-        
+        Draw boxes according to the patch mapping.        
         
         */       
     }
@@ -94,10 +92,10 @@ public class RenderDemo extends JFrame implements KeyListener {
         MapTexture texture = wad.getTextures().get(currentTexture);
         //ImageIcon imageIcon = new ImageIcon(DrawUtils.getTextureImage(wad, texture));
         
-        label = new ImageLabel(
-                DrawUtils.getTextureImage(wad, texture)
-                  );
-        
+        label = new ImageLabel(DrawUtils.getColorImage(
+                texture.getPatch(), wad.getPlayPalLump().paletteList, 0
+        ));
+
         //label.addKeyListener(this);
         //label.setPreferredSize(new Dimension(300,300));
         panel.add(label);
@@ -116,9 +114,10 @@ public class RenderDemo extends JFrame implements KeyListener {
         patchesPanel.repaint();
         for ( MapPatch mp: mt.patches ) {
             PatchData pd = wad.patchesLump.getPatch(mp.getPatchNum());
-            patchesPanel.add(new JLabel( 
-                    new ImageIcon(DrawUtils.getRawPatchImage(pd) 
-            )));
+            JLabel pLabel = new JLabel(new ImageIcon(
+                    DrawUtils.getColorImage(pd, wad.getPlayPalLump().paletteList, 0))
+            );
+            patchesPanel.add(pLabel);
         }
         patchesPanel.doLayout();
         
@@ -153,15 +152,15 @@ public class RenderDemo extends JFrame implements KeyListener {
         MapTexture mt;
         switch(e.getKeyCode()) {
             case VK_MINUS:
-                logger.config("Zoom Out");
+                //logger.config("Zoom Out");
                 label.downScale();
                 break;
             case VK_EQUALS:   // non-shifted  PLUS
-                logger.config("Zoom In");
+                //logger.config("Zoom In");
                 label.upScale();
                 break;
             case VK_LEFT:
-                logger.config("Previous Texture");
+                //logger.config("Previous Texture");
                 currentTexture--;
                 if (currentTexture >= textures.size()) {
                     currentTexture = textures.size()-1;
@@ -176,7 +175,7 @@ public class RenderDemo extends JFrame implements KeyListener {
                 break;
 
             case VK_RIGHT:
-                logger.config("Next Texture");
+                //logger.config("Next Texture");
                 currentTexture++;
                 if (currentTexture >= textures.size()) {
                     currentTexture = textures.size()-1;
@@ -197,7 +196,9 @@ public class RenderDemo extends JFrame implements KeyListener {
 
     private void update() {
                 MapTexture mt = wad.getTextures().get(currentTexture);
-                label.setImage(DrawUtils.getTextureImage(wad, mt));
+                label.setImage(DrawUtils.getColorImage(
+                        mt.getPatch(), wad.getPlayPalLump().paletteList, 0
+                ));
                 populatePatches(mt);   
                 updateInfoPanel(mt);
     }
@@ -234,7 +235,7 @@ public class RenderDemo extends JFrame implements KeyListener {
             int x, y;
             //this is to center the image
             x = (this.getWidth() - width) < 0 ? 0 : (this.getWidth() - width);
-            y = (this.getHeight() - width) < 0 ? 0 : (this.getHeight() - width);
+            y = (this.getHeight() - height) < 0 ? 0 : (this.getHeight() - height);
 
             g.drawImage(image, x, y, width, height, null);
         }

@@ -13,7 +13,6 @@
 package thump.wad.mapraw;
 
 import java.nio.ByteBuffer;
-import thump.base.Defines;
 import thump.wad.Wad;
 
 /**

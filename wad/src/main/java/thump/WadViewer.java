@@ -291,8 +291,7 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
             imagePreviewPanel.setImage(DrawUtils.getImage(f));
         } else if (node instanceof MapTextureNode) {
             MapTextureNode n = (MapTextureNode) node;
-            //imagePreviewPanel.setImage(n.getTexture().getImage());
-            imagePreviewPanel.setImage(DrawUtils.getTextureImage(wad, n.getTexture()));
+            imagePreviewPanel.setImage(DrawUtils.getColorImage(n.getTexture().getPatch(), wad.getPlayPalLump().paletteList, 0));
         } else if (node instanceof MusicNode) {
             MusicLump lump = ((MusicNode) node).getLump();
             Synthesizer synthesizer = null;
