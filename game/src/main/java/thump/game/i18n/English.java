@@ -10,8 +10,8 @@ package thump.game.i18n;
  * @author mark
  */
 public class English {
-    public static final String D_DEVSTR =	"Development mode ON.\n";
-    public static final String D_CDROM =        "CD-ROM Version: default.cfg from c:\\doomdata\n";
+    public static final String D_DEVSTR =	"Development mode ON.";
+    public static final String D_CDROM =        "CD-ROM Version: default.cfg from c:\\doomdata";
 
 //
 //	M_Menu.C

@@ -58,7 +58,7 @@ public class WadLoader {
     public static Wad getWad(File wadFile) {
         Wad wad = new Wad();
         FileChannel fc = null;
-        logger.log(Level.CONFIG, "Get WAD File: {0}\n", wadFile.getAbsolutePath());
+        logger.log(Level.CONFIG, "Get WAD File: {0}", wadFile.getAbsolutePath());
         
         try {
             RandomAccessFile aFile     = new RandomAccessFile(wadFile, "r");
@@ -362,10 +362,10 @@ public class WadLoader {
                         
                   ) {
                     lump = new PictureLump(fc, name, filePos, lumpSize/*, wad.getPlayPalLump().paletteList*/);
-                    logger.config(lump.toString());
+                    //logger.config(lump.toString());
                 } else {
                     lump = LumpFactory.getLump(fc, name, filePos, lumpSize);
-                    logger.config(lump.toString());
+                    //logger.config(lump.toString());
                     
                     //  Shouldn't need this.  Throw exception for unknown lump.
                 }
@@ -378,7 +378,7 @@ public class WadLoader {
                 }
             }
             
-            logger.config("Finished Loading Lumps.\n\n\n\n\n\n\n\n\n\n");
+            logger.config("Finished Loading Lumps.\n\n\n\n\n");
             
             // Re-index the patch lump for correct patch order.
             wad.patchesLump.sortPatches(wad.pNamesLump);

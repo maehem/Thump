@@ -190,7 +190,7 @@ public class Renderer {
     }
 
     public void setThings( RThings things) {
-        if ( things != null ) {
+        if ( this.things != null ) {
             logger.severe("Tried to set render.things after it was already set!");
             return;
         }
@@ -201,7 +201,7 @@ public class Renderer {
     public void R_Init (Wad wad, int screenBlocks, boolean detailLevel) {
         //MenuManager menu = MenuManager.getInstance();
         
-        logger.config("R_InitData\n");
+        logger.config("R_InitData");
         data.R_InitData (wad);
         
         //UNUSED - gets points from a table.
@@ -214,16 +214,16 @@ public class Renderer {
         // viewwidth / viewheight / detailLevel are set by the defaults
 
         R_SetViewSize (screenBlocks, detailLevel);
-        logger.config("R_InitPlanes\n");
+        logger.config("R_InitPlanes");
         plane.R_InitPlanes ();   //todo  Handled in r_planes.c
         
-        logger.config("R_InitLightTables\n");
+        logger.config("R_InitLightTables");
         R_InitLightTables ();
         
-        logger.config("R_InitSkyMap\n");
+        logger.config("R_InitSkyMap");
         R_InitSkyMap (wad);   //todo handled in r_sky.c
         
-        logger.config("R_InitTranslationTables\n");
+        logger.config("R_InitTranslationTables");
         draw.R_InitTranslationTables ();  //todo handled in r_draw.c
 
         framecount = 0;
@@ -347,11 +347,11 @@ public class Renderer {
                 // y>= 0
                 if (x > y) {
                     // octant 0
-                    logger.config("R_PointToAngle: octant 0\n");
+                    logger.config("R_PointToAngle: octant 0");
                     return tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 1
-                    logger.config("R_PointToAngle: octant 1\n");
+                    logger.config("R_PointToAngle: octant 1");
                     return (short) (ANG90 - 1 - tantoangle(SlopeDiv(x, y)));
                 }
             } else {
@@ -361,11 +361,11 @@ public class Renderer {
 
                 if (x > y) {
                     // octant 8
-                    logger.config("R_PointToAngle: octant 7\n");
+                    logger.config("R_PointToAngle: octant 7");
                     return -tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 7
-                    logger.config("R_PointToAngle: octant 6\n");
+                    logger.config("R_PointToAngle: octant 6");
                     return ANG270 + tantoangle(SlopeDiv(x, y));
                 }
             }
@@ -378,11 +378,11 @@ public class Renderer {
                 // y>= 0
                 if (x > y) {
                     // octant 3
-                    logger.config("R_PointToAngle: octant 3\n");
+                    logger.config("R_PointToAngle: octant 3");
                     return ANG180 - 1 - tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 2
-                    logger.config("R_PointToAngle: octant 2\n");
+                    logger.config("R_PointToAngle: octant 2");
                     return ANG90 + tantoangle(SlopeDiv(x, y));
                 }
             } else {
@@ -392,11 +392,11 @@ public class Renderer {
 
                 if (x > y) {
                     // octant 4
-                    logger.config("R_PointToAngle: octant 4\n");
+                    logger.config("R_PointToAngle: octant 4");
                     return ANG180 + tantoangle(SlopeDiv(y, x));
                 } else {
                     // octant 5
-                    logger.config("R_PointToAngle: octant 5\n");
+                    logger.config("R_PointToAngle: octant 5");
                     return ANG270 - 1 - tantoangle(SlopeDiv(x, y));
                 }
             }

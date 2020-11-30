@@ -609,7 +609,7 @@ public class Net {
             D_ArbitrateNetStart ();
         }
 
-        Defines.logger.log(Level.CONFIG, "startskill {0}  deathmatch: {1}  startmap: {2}  startepisode: {3}\n",
+        Defines.logger.log(Level.CONFIG, "startskill {0}  deathmatch: {1}  startmap: {2}  startepisode: {3}",
                 new Object[]{game.doomMain.startskill, game.deathmatch, game.doomMain.startmap, game.doomMain.startepisode} );
 
         // read values out of doomcom
@@ -626,7 +626,7 @@ public class Net {
             nodeingame[i] = true;
         }
 
-        Defines.logger.log(Level.CONFIG, "player {0} of {1} ({2} nodes)\n",
+        Defines.logger.log(Level.CONFIG, "player {0} of {1} ({2} nodes)",
                 new Object[] {game.consoleplayer+1, doomcom.numplayers, doomcom.numnodes}
         );
 

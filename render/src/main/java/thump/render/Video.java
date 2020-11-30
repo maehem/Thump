@@ -566,7 +566,7 @@ public class Video {
     // V_Init
     // 
     public void init() {
-        logger.log(Level.CONFIG, "Allocate screens.\n");
+        logger.log(Level.CONFIG, "Allocate screens.");
 
         // <nostalgia>stick these in low dos memory on PCs</nostalgia>
         //byte[] base = SystemInterface.I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);

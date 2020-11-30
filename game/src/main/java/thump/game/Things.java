@@ -95,7 +95,7 @@ public class Things extends RThings {
 //                        "multip rot=0 lump\n", new Object[]{spritename, 'A'+frame} );
                 logger.log(Level.SEVERE,
                         "R_InitSprites: Sprite {0} frame {1} has "+
-                        "multip rot=0 lump\n", new Object[]{spritename, 'A'+frame} );
+                        "multip rot=0 lump", new Object[]{spritename, 'A'+frame} );
             }
 
             if (sprtemp[frame].rotate == 1) {
@@ -104,7 +104,7 @@ public class Things extends RThings {
 //                        "and a rot=0 lump\n", new Object[]{spritename, 'A'+frame});
                 logger.log(Level.SEVERE,
                         "R_InitSprites: Sprite {0} frame {1} has rotations "+
-                        "and a rot=0 lump\n", new Object[]{spritename, 'A'+frame});
+                        "and a rot=0 lump", new Object[]{spritename, 'A'+frame});
             }
 
             sprtemp[frame].rotate = 0;
@@ -260,7 +260,7 @@ public class Things extends RThings {
 //                            "R_InitSprites: No patches found for {0} frame {1}\n", 
 //                            new Object[]{namelist[i], frame+'A'} );
                     logger.log( Level.SEVERE,
-                            "R_InitSprites: No patches found for {0} frame {1}\n", 
+                            "R_InitSprites: No patches found for {0} frame {1}", 
                             new Object[]{namelist[i], frame+'A'} );
                     break;
 
@@ -276,7 +276,7 @@ public class Things extends RThings {
 //                                "R_InitSprites: Sprite {0} frame {1} is missing rotations\n",
 //                                 new Object[]{namelist[i], frame+'A'});
                             logger.log( Level.SEVERE,
-                                "R_InitSprites: Sprite {0} frame {1} is missing rotations\n",
+                                "R_InitSprites: Sprite {0} frame {1} is missing rotations",
                                  new Object[]{namelist[i], frame+'A'});
                         }
                     }
@@ -710,7 +710,7 @@ public class Things extends RThings {
         Vissprite spr;
         DrawSeg ds;
 
-        logger.log(Level.CONFIG, "Things.R_DrawMasked()\n");
+        logger.log(Level.CONFIG, "Things.R_DrawMasked()");
         
         R_SortVisSprites();
 

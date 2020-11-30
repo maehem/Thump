@@ -961,7 +961,7 @@ public class Status {
 
         if (palette != st_palette) {
             st_palette = palette;
-            logger.log(Level.CONFIG, "Do_Palette_Stuff: Set Palette {0}\n", palette);
+            logger.log(Level.CONFIG, "Do_Palette_Stuff: Set Palette {0}", palette);
             //pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+palette*768;
             VideoInterface.getInstance().I_SetPalette (game.wad.paletteList.get(palette)); //TODO pass this via Video and not VideoInterface.
         }

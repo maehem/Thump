@@ -174,7 +174,7 @@ public class Switch {
             }
         }
 
-        logger.severe("P_StartButton: no button slots left!\n");
+        logger.severe("P_StartButton: no button slots left!");
     }
 
 

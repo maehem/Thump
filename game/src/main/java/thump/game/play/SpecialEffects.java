@@ -156,7 +156,7 @@ public class SpecialEffects {  //  p_spec
             anims[lastanim].istexture = animdef.istexture;
             anims[lastanim].numpics = anims[lastanim].picnum - anims[lastanim].basepic + 1;
             if (anims[lastanim].numpics < 2) {
-                logger.log(Level.SEVERE, "P_InitPicAnims: bad cycle from {0} to {1}\n", new Object[]{animdef.startname, animdef.endname});
+                logger.log(Level.SEVERE, "P_InitPicAnims: bad cycle from {0} to {1}", new Object[]{animdef.startname, animdef.endname});
             }
             anims[lastanim].speed = animdef.speed;
             lastanim++;
@@ -304,7 +304,7 @@ public class SpecialEffects {  //  p_spec
 
             // Check for overflow. Exit.
             if (h >= MAX_ADJOINING_SECTORS) {
-                logger.severe( "Sector with more than 20 adjoining sectors\n");
+                logger.severe( "Sector with more than 20 adjoining sectors");
                 break;
             }
         }
@@ -988,7 +988,7 @@ public class SpecialEffects {  //  p_spec
                 break;
 
             default:
-                logger.log(Level.SEVERE, "P_PlayerInSpecialSector: unknown special {0}\n",
+                logger.log(Level.SEVERE, "P_PlayerInSpecialSector: unknown special {0}",
                         new Object[]{sector.special}
                 );
                 break;

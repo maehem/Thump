@@ -83,7 +83,11 @@ public class PatchesLump extends Lump {
     
     private  PatchData getNamedPatch( String name ) {
         for ( PatchData pd: lumpPatches ) {
-            if ( pd.name.equals(name)) { return pd; }
+            if ( pd.name.equals(name.toUpperCase())) { return pd; }
+
+            if ( name.equals("w94_1")) {
+                int i=0; // breakpoint
+            }
         }
         
         logger.log(Level.WARNING, "PatchesLump.getNamedPatch():  Failed to find a patch called {0}", name);

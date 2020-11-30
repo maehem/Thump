@@ -289,7 +289,7 @@ public class MenuManager {
         // Yet another hack...
         if (game.gameMode == Defines.GameMode.REGISTERED
                 && choice > 2) {
-            logger.severe( "M_Episode: 4th episode requires UltimateDOOM\n");
+            logger.severe( "M_Episode: 4th episode requires UltimateDOOM");
             epi=0; // No episode for you!!!
         }
 
@@ -354,7 +354,7 @@ public class MenuManager {
         detailLevel = !detailLevel;
 
         // FIXME - does not work. Remove anyway?
-        logger.info("M_ChangeDetail: low detail mode not applicable.\n");
+        logger.info("M_ChangeDetail: low detail mode not applicable.");
 
         
         Game.getInstance().renderer.R_SetViewSize (screenblocks, detailLevel);
@@ -1429,7 +1429,7 @@ public class MenuManager {
             return false;
         }
 
-        logger.config("do menu key\n");
+        logger.config("do menu key");
         // Keys usable within menu
         switch (ch) {
           case Defines.KEY_DOWNARROW:

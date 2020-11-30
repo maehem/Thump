@@ -8,10 +8,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.text.MessageFormat;
 import java.util.ListIterator;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -76,7 +77,7 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
      */
     public WadViewer() {
         initComponents();
-        setLoggerLevel();
+        //setLoggerLevel();
 
         wad = WadLoader.getWad(new File(wadFile));
 
@@ -675,6 +676,26 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+            logger.setLevel(Level.ALL);
+            logger.addHandler(new Handler() {
+                @Override
+                public void publish(LogRecord record) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(
+                    MessageFormat.format(record.getMessage(), record.getParameters())
+                    );
+                    System.out.println(sb.toString());
+                }
+
+                @Override
+                public void flush() {}
+
+                @Override
+                public void close() throws SecurityException {}
+            });
+            logger.setUseParentHandlers(false);
+            
+            
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -700,28 +721,28 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
         });
     }
 
-    private void setLoggerLevel() {
-        logger.setLevel(Level.ALL);
-        // Handler for console (reuse it if it already exists)
-        Handler consoleHandler = null;
-        //see if there is already a console handler
-        for (Handler handler : logger.getHandlers()) {
-            if (handler instanceof ConsoleHandler) {
-                //found the console handler
-                consoleHandler = handler;
-                break;
-            }
-        }
-
-        if (consoleHandler == null) {
-            //there was no console handler found, create a new one
-            consoleHandler = new ConsoleHandler();
-            logger.addHandler(consoleHandler);
-        }
-
-        //set the console handler to fine:
-        consoleHandler.setLevel(java.util.logging.Level.FINEST);
-    }
+//    private void setLoggerLevel() {
+//        logger.setLevel(Level.ALL);
+//        // Handler for console (reuse it if it already exists)
+//        Handler consoleHandler = null;
+//        //see if there is already a console handler
+//        for (Handler handler : logger.getHandlers()) {
+//            if (handler instanceof ConsoleHandler) {
+//                //found the console handler
+//                consoleHandler = handler;
+//                break;
+//            }
+//        }
+//
+//        if (consoleHandler == null) {
+//            //there was no console handler found, create a new one
+//            consoleHandler = new ConsoleHandler();
+//            logger.addHandler(consoleHandler);
+//        }
+//
+//        //set the console handler to fine:
+//        consoleHandler.setLevel(java.util.logging.Level.FINEST);
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel imagePanel;

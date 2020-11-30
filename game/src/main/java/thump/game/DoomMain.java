@@ -86,14 +86,11 @@ public final class DoomMain {
 
         
     public DoomMain( List<String> args) throws FileNotFoundException {
+        logger.log(Level.CONFIG, "{0}", title);
         game.args = args;
         //ThumpLogger.init();  // Sets up or logging handlers and level.
         game.setDoomMain(this);
         
-        logger.log(Level.CONFIG, "Init Graphics: Creating Window.\n");
-        game.videoInterface.I_InitGraphics();
-        
-        logger.log(Level.CONFIG, "{0}\n", title);
         
         int p;
         
@@ -150,10 +147,10 @@ public final class DoomMain {
             break;
         }
 
-        logger.log(Level.CONFIG, "{0}\n", title);
+        logger.log(Level.CONFIG, "{0}", title);
 
         if (devparm) {
-            logger.log(Level.CONFIG, "{0}\n", Game.messages.getString("D_DEVSTR"));
+            logger.log(Level.CONFIG, "{0}", Game.messages.getString("D_DEVSTR"));
         }
 
         if (game.isParam("-cdrom")) {
@@ -177,7 +174,7 @@ public final class DoomMain {
             if (scale > 400) {
                 scale = 400;
             }
-            logger.log(Level.CONFIG, "turbo scale: {0}\n", scale);
+            logger.log(Level.CONFIG, "turbo scale: {0}", scale);
             
             game.forwardmove[0] = game.forwardmove[0] * scale / 100;
             game.forwardmove[1] = game.forwardmove[1] * scale / 100;
@@ -198,7 +195,7 @@ public final class DoomMain {
                 case RETAIL:
                 case REGISTERED:
                     file = "~" + DEVMAPS + "E" + args.get(p+1).charAt(0) + "M" + args.get(p+2).charAt(0) + ".wad";
-                    logger.log(Level.CONFIG, "Warping to Episode {0}, Map {1}.\n", new Object[]{args.get(p+1), args.get(p+2)});
+                    logger.log(Level.CONFIG, "Warping to Episode {0}, Map {1}.", new Object[]{args.get(p+1), args.get(p+2)});
                     break;
 
                 case COMMERCIAL:
@@ -228,7 +225,7 @@ public final class DoomMain {
             game.modifiedgame = true;            // homebrew levels
             while (++p != args.size() && args.get(p).charAt(0) != '-') {
                 wadList.add(args.get(p));
-                logger.log(Level.CONFIG, "Adding file: {0}\n", args.get(p));
+                logger.log(Level.CONFIG, "Adding file: {0}", args.get(p));
             }
         }
 
@@ -242,7 +239,7 @@ public final class DoomMain {
             wadList.add(args.get(p + 1) + ".lmp");
             //D_AddFile(file);
             //logger.log(Level.CONFIG, "Playing demo %s.lmp.\n", args.get(p+1));
-            logger.log(Level.CONFIG, "Playing demo {0}.lmp.\n", args.get(p + 1));
+            logger.log(Level.CONFIG, "Playing demo {0}.lmp.", args.get(p + 1));
         }
 
         // get skill / episode / map from parms
@@ -263,16 +260,16 @@ public final class DoomMain {
         if (p>-1 && p < args.size() - 2 && game.deathmatch > 0) {
             int time;
             time = Integer.valueOf(args.get(p + 1));
-            logger.log(Level.CONFIG, "Levels will end after {0} minute", time);
-            if (time > 1) {
-                logger.log(Level.CONFIG, "s");
-            }
-            logger.log(Level.CONFIG, ".\n");
+            logger.log(Level.CONFIG, "Levels will end after {0} minute{1}.", new Object[]{time,time>1?"s":""});
+//            if (time > 1) {
+//                logger.log(Level.CONFIG, "s");
+//            }
+//            logger.log(Level.CONFIG, ".");
         }
 
         p = args.indexOf("-avg");
         if (p>-1 && p < args.size() - 2 && game.deathmatch > 0) {
-            logger.log(Level.CONFIG, "Austin Virtual Gaming: Levels will end after 20 minutes.\n");
+            logger.log(Level.CONFIG, "Austin Virtual Gaming: Levels will end after 20 minutes.");
         }
 
         p = args.indexOf("-warp");
@@ -286,11 +283,13 @@ public final class DoomMain {
             autostart = true;
         }
 
+        game.videoInterface.I_InitGraphics();
+        
         // init subsystems
         game.renderer.video.init();
 
 
-        logger.log(Level.CONFIG, "Load misc. defaults.\n");
+        logger.log(Level.CONFIG, "Load misc. defaults.");
         menu.initDefaultProperties();// load before initing other systems
         // TODO  Video initDefaultProperties
         // TODO  Sound initDefaultProperties
@@ -381,29 +380,29 @@ public final class DoomMain {
                 break;
         }
 
-        logger.log(Level.CONFIG, "M_Init: Init Menus.\n");
+        logger.log(Level.CONFIG, "M_Init: Init Menus.");
         menu.M_Init();
 
-        logger.log(Level.CONFIG, "R_Init: Init DOOM render daemon.\n");
+        logger.log(Level.CONFIG, "R_Init: Init DOOM render daemon.");
         game.renderer.R_Init(game.wad, menu.screenblocks, menu.detailLevel);
         game.videoInterface.I_SetPalette(game.wad.paletteList.get(0));
 
-        logger.log(Level.CONFIG, "P_Init: Init Playloop state.\n");
+        logger.log(Level.CONFIG, "P_Init: Init Playloop state.");
         game.playerSetup.P_Init();
 
-        logger.log(Level.CONFIG, "I_Init: Setting up machine state.\n");
+        logger.log(Level.CONFIG, "I_Init: Setting up machine state.");
         SystemInterface.getInstance().I_Init();
 
-        logger.log(Level.CONFIG, "D_CheckNetGame: Checking network game status.\n");
+        logger.log(Level.CONFIG, "D_CheckNetGame: Checking network game status.");
         game.net.D_CheckNetGame();
 
-        logger.log(Level.CONFIG, "S_Init: Setting up sound.\n");
+        logger.log(Level.CONFIG, "S_Init: Setting up sound.");
         game.sound.S_Init(100 , 100 );  // Menu will re-load with the defaults.
 
-        logger.log(Level.CONFIG, "HU_Init: Setting up heads up display.\n");
+        logger.log(Level.CONFIG, "HU_Init: Setting up heads up display.");
         game.headUp.HU_Init();
 
-        logger.log(Level.CONFIG, "ST_Init: Init status bar.\n");
+        logger.log(Level.CONFIG, "ST_Init: Init status bar.");
         game.statusBar.ST_Init();
 
 // TODO
@@ -455,10 +454,10 @@ public final class DoomMain {
 
         if (game.gameaction != GameAction.ga_loadgame) {
             if (autostart || game.netgame) {
-                logger.log(Level.CONFIG, "Call G_InitNew.\n");
+                logger.log(Level.CONFIG, "Call G_InitNew.");
                 game.G_InitNew(startskill, startepisode, startmap);
             } else {
-                logger.log(Level.CONFIG, "Call D_StartTitle.\n");
+                logger.log(Level.CONFIG, "Call D_StartTitle.");
                 D_StartTitle();                // start up intro loop
             }
         }
@@ -472,7 +471,7 @@ public final class DoomMain {
             //char filename[20];
             //sprintf(filename, "debug%i.txt", consoleplayer);
             String filename = "debug" + game.consoleplayer + ".txt";
-            logger.log(Level.CONFIG, "debug output to: {0}\n", filename);
+            logger.log(Level.CONFIG, "debug output to: {0}", filename);
 //TODO            debugfile = fopen(filename, "w");
         }
 
@@ -541,7 +540,7 @@ public final class DoomMain {
         boolean			wipe;
         boolean			redrawsbar;
 
-        //logger.config("D_Display()\n");
+        //logger.config("D_Display()");
         
         if (game.nodrawers) {
             return;                    // for comparative timing / profiling
@@ -559,7 +558,7 @@ public final class DoomMain {
 
         // save the current screen if about to wipe
         if (game.gamestate != wipegamestate) {
-            logger.config("Set Wipe Gamestate\n");
+            logger.config("Set Wipe Gamestate");
             wipe = true;
             Wipe.getInstance().wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
         } else {
@@ -567,14 +566,14 @@ public final class DoomMain {
         }
 
         if (game.gamestate == GS_LEVEL && game.gametic>0) {
-            //logger.config("HeadUp Erase\n");
+            //logger.config("HeadUp Erase");
             game.headUp.HU_Erase();
         }
 
         // do buffered drawing
         switch (game.gamestate) {
           case GS_LEVEL:
-            //logger.config("GS_LEVEL\n");
+            //logger.config("GS_LEVEL");
             if (game.gametic==0) {
                 break;
             }
@@ -592,29 +591,29 @@ public final class DoomMain {
             break;
 
           case GS_INTERMISSION:
-            logger.config("GS_INTERMISSION\n");
+            logger.config("GS_INTERMISSION");
             game.intermission.WI_Drawer ();
             break;
 
           case GS_FINALE:
-            logger.config("GS_FINALE\n");
+            logger.config("GS_FINALE");
             game.finale.F_Drawer ();
             break;
 
           case GS_DEMOSCREEN:
-            //logger.config("GS_DEMOSCREEN\n");
+            //logger.config("GS_DEMOSCREEN");
             D_PageDrawer ();
             break;
         }
 
         // draw buffered stuff to screen
-        //logger.config("Render Update - No Blit\n");
+        //logger.config("Render Update - No Blit");
         game.videoInterface.I_UpdateNoBlit();
         //VideoInterface.getInstance().I_FinishUpdate();
 
         // draw the view directly
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.gametic>0) {
-            logger.finer("Render Player View\n");
+            logger.finer("Render Player View");
             R_RenderPlayerView (game.players[game.displayplayer]);
             
             if (game.gamestate == GS_LEVEL && game.gametic>0) {
@@ -624,13 +623,13 @@ public final class DoomMain {
 
         // clean up border stuff
         if (game.gamestate != oldgamestate && game.gamestate != GS_LEVEL) {
-            //logger.config("Set Palette\n");
+            //logger.config("Set Palette");
             game.videoInterface.I_SetPalette(game.wad.paletteList.get(0));
         }
 
         // see if the border needs to be initially drawn
         if (game.gamestate == GS_LEVEL && oldgamestate != GS_LEVEL) {
-            logger.config("Fill Back Screen\n");
+            logger.config("Fill Back Screen");
             viewactivestate = false;        // view was not active
             game.renderer.draw.R_FillBackScreen (
                     game.wad,
@@ -640,7 +639,7 @@ public final class DoomMain {
 
         // see if the border needs to be updated to the screen
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.renderer.draw.scaledviewwidth != 320) {
-            //logger.config("Update Border\n");
+            //logger.config("Update Border");
             if (menu.menuactive || menuactivestate || !viewactivestate) {
                 borderdrawcount = 3;
             }
@@ -660,7 +659,7 @@ public final class DoomMain {
 
         // draw pause pic
         if (game.paused) {
-            logger.config("Draw Pause Pic\n");
+            logger.config("Draw Pause Pic");
             if (game.autoMap.automapactive) {
                 y = 4;
             } else {
@@ -713,7 +712,7 @@ public final class DoomMain {
         long lastTime = System.currentTimeMillis();
         while (true) {
             fps = (int) (1000/(System.currentTimeMillis()-lastTime+1));
-            //logger.log(Level.CONFIG, "Tics elapsed: {0}\n", System.currentTimeMillis()-lastTime);
+            //logger.log(Level.CONFIG, "Tics elapsed: {0}", System.currentTimeMillis()-lastTime);
             lastTime = System.currentTimeMillis();
             // frame syncronous IO operations
 //            I_StartFrame();  // Does nothing for us.
@@ -721,22 +720,22 @@ public final class DoomMain {
             // process one or more lastTime
             if (singletics) {
                 VideoInterface.getInstance().I_StartTic();
-                //Defines.logger.config("doomLoop D_ProcessEvents\n");
+                //Defines.logger.config("doomLoop D_ProcessEvents");
 
                 D_ProcessEvents();
                 game.G_BuildTiccmd( game.net.netcmds[game.consoleplayer], game.net.maketic % BACKUPTICS);
                 if (advancedemo) {
-                    logger.config("D_DoAdvanceDemo\n");
+                    logger.config("D_DoAdvanceDemo");
                     D_DoAdvanceDemo();
                 }
-                //logger.config("M_Ticker\n");
+                //logger.config("M_Ticker");
                 menu.M_Ticker();
-                //logger.config("game.G_Ticker\n");
+                //logger.config("game.G_Ticker");
                 game.G_Ticker();
                 game.gametic++;
                 game.net.maketic++;
             } else {
-                logger.config("DryRunTics\n");
+                logger.config("DryRunTics");
                 game.net.TryRunTics(); // will run at least one tic
             }
 
@@ -792,7 +791,7 @@ public final class DoomMain {
                     throw new FileNotFoundException("No such response file! File: " + fileName );
 
                 }
-                //logger.log(Level.CONFIG, "Found response file %s!\n",  & myargv[i][1]);
+                //logger.log(Level.CONFIG, "Found response file %s!",  & myargv[i][1]);
                 logger.log(Level.CONFIG, "Found response file {0}", fileName);
 // TODO response file.
 //            fseek(handle, 0, SEEK_END);
@@ -834,9 +833,9 @@ public final class DoomMain {
 //            myargc = indexinfile;
 //
 //            // DISPLAY ARGS
-//            logger.log(Level.CONFIG, "%d command-line args:\n", myargc);
+//            logger.log(Level.CONFIG, "%d command-line args:", myargc);
 //            for (k = 1; k < myargc; k++) {
-//                logger.log(Level.CONFIG, "%s\n", myargv[k]);
+//                logger.log(Level.CONFIG, "%s", myargv[k]);
 //            }
 //
 //            break;
@@ -1006,7 +1005,7 @@ public final class DoomMain {
 //        if (!home)
 //          I_Error("Please set $HOME to your home directory");
         if ( !new File(homeDir).isDirectory() ) {
-            logger.severe("Home directory not found.\n");
+            logger.severe("Home directory not found.");
         }
         
         //slogger.log(Level.CONFIG, basedefault, "%s/.doomrc", home);
@@ -1071,7 +1070,7 @@ public final class DoomMain {
             // Let's handle languages in config files, okay?
             Game.country =  "FR";
             Game.language = "fr";
-            logger.log(Level.CONFIG, "Version: French Doom2\n");
+            logger.log(Level.CONFIG, "Version: French Doom2");
             //D_AddFile (doom2fwad);
             wadList.add(doom2fwad);
             return;
@@ -1082,7 +1081,7 @@ public final class DoomMain {
             game.gameMode = GameMode.COMMERCIAL;
             //D_AddFile (doom2wad);
             wadList.add(doom2wad);
-            logger.log(Level.CONFIG, "Version: Doom2\n");
+            logger.log(Level.CONFIG, "Version: Doom2");
             return;
         }
 
@@ -1091,7 +1090,7 @@ public final class DoomMain {
             game.gameMode = GameMode.COMMERCIAL;
             //D_AddFile (plutoniawad);
             wadList.add(plutoniawad);
-            logger.log(Level.CONFIG, "Version: Plutonia\n");
+            logger.log(Level.CONFIG, "Version: Plutonia");
             return;
         }
 
@@ -1100,7 +1099,7 @@ public final class DoomMain {
             game.gameMode = GameMode.COMMERCIAL;
             //D_AddFile (tntwad);
             wadList.add(tntwad);
-            logger.log(Level.CONFIG, "Version: TnT\n");
+            logger.log(Level.CONFIG, "Version: TnT");
             return;
         }
 
@@ -1109,7 +1108,7 @@ public final class DoomMain {
             game.gameMode = GameMode.RETAIL;
             //D_AddFile (doomuwad);
             wadList.add(doomuwad);
-            logger.log(Level.CONFIG, "Version: Retail\n");
+            logger.log(Level.CONFIG, "Version: Retail");
             return;
         }
 
@@ -1118,7 +1117,7 @@ public final class DoomMain {
             game.gameMode = GameMode.REGISTERED;
             //D_AddFile (doomwad);
             wadList.add(doomwad);
-            logger.log(Level.CONFIG, "Version: Registered\n");
+            logger.log(Level.CONFIG, "Version: Registered");
             return;
         }
 
@@ -1127,11 +1126,11 @@ public final class DoomMain {
             game.gameMode = GameMode.SHAREWARE;
             //D_AddFile (doom1wad);
             wadList.add(doom1wad);
-            logger.log(Level.CONFIG, "Version: Shareware\n");
+            logger.log(Level.CONFIG, "Version: Shareware");
             return;
         }
 
-        logger.log(Level.CONFIG, "Game mode indeterminate.\n");
+        logger.log(Level.CONFIG, "Game mode indeterminate.");
         game.gameMode = GameMode.INDETERMINED;
 
         // We don't abort. Let's see what the PWAD contains.

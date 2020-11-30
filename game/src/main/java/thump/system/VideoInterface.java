@@ -4,7 +4,6 @@
 package thump.system;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
@@ -65,7 +64,10 @@ public class VideoInterface implements KeyListener, ComponentListener {
     // determines the hardware configuration
     // and sets up the video mode
     public void I_InitGraphics (){
+        logger.log(Level.CONFIG, "Init Graphics: Creating Window.");
+
         if (!firsttime) {
+            logger.warning("Tried to init graphics again.  Fix me.");
             return;
         }        
         firsttime = false;
@@ -161,7 +163,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Applies current palette colors.
      */
     public void I_UpdateNoBlit () {
-        logger.log(Level.CONFIG, "I_UpdateNoBlit()\n");
+        logger.log(Level.CONFIG, "I_UpdateNoBlit()");
         //BufferedImage s = Game.getInstance().video.screenImage[0];
         for (int sn = 0; sn<5; sn++) {
             //viewCanvas.repaint();
@@ -196,7 +198,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Draws the draw buffer to the screen.
      */
     public void I_FinishUpdate (){
-        logger.log(Level.CONFIG, "I_FinishUpdate()\n");
+        logger.log(Level.CONFIG, "I_FinishUpdate()");
         BufferedImage s = Game.getInstance().renderer.video.screenImage[0];
         Graphics g = viewCanvas.getStrategy().getDrawGraphics();
         g.drawImage(s, 0, 0 , 
@@ -362,7 +364,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        logger.log(Level.FINE, "key pressed. {0}\n", ke.getKeyCode());
+        logger.log(Level.FINE, "key pressed. {0}", ke.getKeyCode());
              
         Game.getInstance().doomMain.D_PostEvent(new Event(EventType.ev_keydown, ke.getKeyCode()));
 //            event.type = ev_keydown;
@@ -389,7 +391,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
 
     @Override
     public void componentResized(ComponentEvent ce) {
-        logger.finer("Canvas resized.\n");
+        logger.finer("Canvas resized.");
         scaleX = (float)viewCanvas.getWidth()/Defines.SCREENWIDTH;
         scaleY = (float)viewCanvas.getHeight()/Defines.SCREENHEIGHT;
     }

@@ -75,7 +75,7 @@ public class DrawUtils {
         int height = (lineDefs.yMax-lineDefs.yMin)>>FRACBITS;
         
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        logger.log(Level.CONFIG, "Image: {0} x {1}  xMin: {2}  yMin: {3}  xMax: {4}  yMax: {5} OffsetX: {6}  OffsetY: {7}\n", 
+        logger.log(Level.CONFIG, "Image: {0} x {1}  xMin: {2}  yMin: {3}  xMax: {4}  yMax: {5} OffsetX: {6}  OffsetY: {7}", 
                 new Object[]{width, height, 
                     lineDefs.xMin>>FRACBITS, lineDefs.yMin>>FRACBITS, 
                     lineDefs.xMax>>FRACBITS, lineDefs.yMax>>FRACBITS, 

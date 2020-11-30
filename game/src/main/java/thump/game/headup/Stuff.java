@@ -426,7 +426,7 @@ public class Stuff {  // TODO rename to HeadUp
             hu_font[i] = ((PictureLump)game.wad.findByName(patch)).pic;
             
             if ( hu_font[i] == null ) {
-                logger.log(Level.SEVERE, "HU_Init: couldn''t find font for: {0}\n", patch);
+                logger.log(Level.SEVERE, "HU_Init: couldn''t find font for: {0}", patch);
             }
             j++;
             //	sprintf(buffer, "STCFN%.3d", j++);
@@ -518,7 +518,7 @@ public class Stuff {  // TODO rename to HeadUp
 
     public void HU_Drawer() {
 
-        logger.log(Level.CONFIG, "HU_Drawer()\n");
+        logger.log(Level.CONFIG, "HU_Drawer()");
         
         HUlib.HUlib_drawSText(w_message);
         HUlib.HUlib_drawIText(w_chat);
@@ -530,7 +530,7 @@ public class Stuff {  // TODO rename to HeadUp
 
     public void HU_Erase() {
 
-        logger.log(Level.CONFIG, "HU_Erase()\n");
+        logger.log(Level.CONFIG, "HU_Erase()");
 
         HUlib.HUlib_eraseSText(w_message);
         HUlib.HUlib_eraseIText(w_chat);

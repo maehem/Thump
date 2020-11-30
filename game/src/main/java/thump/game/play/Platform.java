@@ -340,7 +340,7 @@ public class Platform implements Thinker {
                 return;
             }
         }
-        logger.severe("P_AddActivePlat: no more plats!\n");
+        logger.severe("P_AddActivePlat: no more plats!");
     }
 
     public static void P_RemoveActivePlat(Platform plat) {
@@ -354,7 +354,7 @@ public class Platform implements Thinker {
                 return;
             }
         }
-        logger.severe("P_RemoveActivePlat: can't find plat!\n");
+        logger.severe("P_RemoveActivePlat: can't find plat!");
     }
 
 }

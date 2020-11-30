@@ -349,7 +349,7 @@ public class Game {
         //base = SystemInterface.getInstance().I_BaseTiccmd ();		// empty, or external driver
         //memcpy (cmd,base,sizeof(*cmd));
         Logger logger = thump.base.Defines.logger;
-        logger.finer("Build Tick Command.\n");
+        logger.finer("Build Tick Command.");
 
         cmd.consistancy = (short) consistancy[consoleplayer][net.maketic%BACKUPTICS]; 
 
@@ -384,12 +384,12 @@ public class Game {
         if (strafe) { 
             if (gamekeydown[getKey("key_right")]) {
                 // fprintf(stderr, "strafe right\n");
-                logger.config("Strafe Right\n");
+                logger.config("Strafe Right");
                 side += sidemove[speed]; 
             }
             if (gamekeydown[getKey("key_left")]) {
                 //	fprintf(stderr, "strafe left\n");
-                logger.config("Strafe Left\n");
+                logger.config("Strafe Left");
                 side -= sidemove[speed]; 
             }
             if (joyxmove > 0) {
@@ -401,11 +401,11 @@ public class Game {
 
         } else { 
             if (gamekeydown[getKey("key_right")]) {
-                logger.config("Turn Right\n");
+                logger.config("Turn Right");
                 cmd.angleturn -= angleturn[tspeed];
             } 
             if (gamekeydown[getKey("key_left")]) {
-                logger.config("Turn Left\n");
+                logger.config("Turn Left");
                 cmd.angleturn += angleturn[tspeed];
             } 
             if (joyxmove > 0) {
@@ -418,12 +418,12 @@ public class Game {
 
         if (gamekeydown[getKey("key_up")]) {
             // fprintf(stderr, "up\n");
-            logger.config("Move Forward\n");
+            logger.config("Move Forward");
             forward += forwardmove[speed]; 
         }
         if (gamekeydown[getKey("key_down")]) {
             // fprintf(stderr, "down\n");
-            logger.config("Move Backward\n");
+            logger.config("Move Backward");
             forward -= forwardmove[speed]; 
         }
         if (joyymove < 0) {
@@ -433,11 +433,11 @@ public class Game {
             forward -= forwardmove[speed];
         } 
         if (gamekeydown[getKey("key_straferight")]) {
-            logger.config("Strafe Right\n");
+            logger.config("Strafe Right");
             side += sidemove[speed];
         } 
         if (gamekeydown[getKey("key_strafeleft")]) {
-            logger.config("Strafe Left\n");
+            logger.config("Strafe Left");
             side -= sidemove[speed];
         }
 
@@ -446,12 +446,12 @@ public class Game {
 
         if (gamekeydown[getKey("key_fire")] || mousearray[1+mousebfire] 
             || joyarray[1+joybfire]) {
-            logger.config("Attack\n");
+            logger.config("Attack");
             cmd.buttons |= BT_ATTACK;
         } 
 
         if (gamekeydown[getKey("key_use")] || joyarray[1+joybuse] ) { 
-            logger.config("Use\n");
+            logger.config("Use");
             cmd.buttons |= BT_USE;
             // clear double clicks if hit use button 
             dclicks = 0;                   
@@ -460,7 +460,7 @@ public class Game {
         // chainsaw overrides 
         for (i=0 ; i<WeaponType.values().length-2 ; i++) {
             if (gamekeydown['1'+i]) {
-                logger.log(Level.CONFIG, "Weapon Change {0}\n", gamekeydown['1'+i]);
+                logger.log(Level.CONFIG, "Weapon Change {0}", gamekeydown['1'+i]);
                 cmd.buttons |= BT_CHANGE;
                 cmd.buttons |= i<<BT_WEAPONSHIFT;
                 break;
@@ -681,7 +681,7 @@ public class Game {
             return true;	// finale ate the event 
         } 
 
-        logger.log(Level.CONFIG, "Game Event: {0} {1}\n", new Object[]{ev.type, ev.data1} );
+        logger.log(Level.CONFIG, "Game Event: {0} {1}", new Object[]{ev.type, ev.data1} );
         switch (ev.type) { 
           case ev_keydown: 
             if (ev.data1 == KEY_PAUSE) { 
@@ -719,7 +719,7 @@ public class Game {
           default: 
             break; 
         } 
-        logger.log(Level.CONFIG, "Nobody ate the event!{0}\n", ev.type);
+        logger.log(Level.CONFIG, "Nobody ate the event!{0}", ev.type);
         return false; 
     } 
 
@@ -747,39 +747,39 @@ public class Game {
         while (gameaction != GameAction.ga_nothing) { 
             switch (gameaction) { 
               case ga_loadlevel: 
-        logger.config("G_Ticker ga_loadlevel\n");
+        logger.config("G_Ticker ga_loadlevel");
                 G_DoLoadLevel (); 
                 break; 
               case ga_newgame: 
-        logger.config("G_Ticker ga_newgame\n");
+        logger.config("G_Ticker ga_newgame");
                 G_DoNewGame (); 
                 break; 
               case ga_loadgame: 
-        logger.config("G_Ticker ga_loadgame\n");
+        logger.config("G_Ticker ga_loadgame");
 //                G_DoLoadGame (); 
                 break; 
               case ga_savegame: 
-        logger.config("G_Ticker ga_savegame\n");
+        logger.config("G_Ticker ga_savegame");
 //                G_DoSaveGame (); 
                 break; 
               case ga_playdemo: 
-        logger.config("G_Ticker ga_playdemo\n");
+        logger.config("G_Ticker ga_playdemo");
                 G_DoPlayDemo (); 
                 break; 
               case ga_completed: 
-        logger.config("G_Ticker ga_completed\n");
+        logger.config("G_Ticker ga_completed");
                 G_DoCompleted (); 
                 break; 
               case ga_victory: 
-        logger.config("G_Ticker ga_victory\n");
+        logger.config("G_Ticker ga_victory");
 //                F_StartFinale (); 
                 break; 
               case ga_worlddone: 
-        logger.config("G_Ticker ga_worlddone\n");
+        logger.config("G_Ticker ga_worlddone");
                 G_DoWorldDone (); 
                 break; 
               case ga_screenshot: 
-        logger.config("G_Ticker ge screenshot\n");
+        logger.config("G_Ticker ge screenshot");
                 MenuMisc.screenShot(); 
                 gameaction = GameAction.ga_nothing; 
                 break; 

@@ -152,7 +152,7 @@ public class Sound {
     {
         int i;
 
-      Defines.logger.log(Level.CONFIG, "S_Init: default sfx volume {0}\n", sfxVolume);
+      Defines.logger.log(Level.CONFIG, "S_Init: default sfx volume {0}", sfxVolume);
 
       soundInterface.I_InitSound();
       soundInterface.I_InitMusic();
@@ -266,7 +266,7 @@ public class Sound {
         // check for bogus sound #
         if (sfx_id.ordinal() < 1 || sfx_id.ordinal() > S_sfx.length) {
             //SystemInterface.I_Error("Bad sfx #: {0}\n", new Object[]{ sfx_id } );
-            logger.log(Level.SEVERE, "Bad sfx #: {0}\n", new Object[]{ sfx_id } );
+            logger.log(Level.SEVERE, "Bad sfx #: {0}", new Object[]{ sfx_id } );
         }
 
         sfx = S_sfx[sfx_id.ordinal()];
@@ -358,7 +358,7 @@ public class Sound {
 //        }
         
         if ( sfx.data == null ) {
-            Defines.logger.log(Level.CONFIG, "Sound: DS_{0}\n", sfx.name);
+            Defines.logger.log(Level.CONFIG, "Sound: DS_{0}", sfx.name);
             SoundEffectLump lump 
                     = (SoundEffectLump) Game.getInstance().wad.findByName("DS" + sfx.name.toUpperCase());
             sfx.data = lump.data;
@@ -601,7 +601,7 @@ public class Sound {
 
         if (volume < 0 || volume > 127) {
             //SystemInterface.I_Error("Attempt to set sfx volume at {0}\n", new Object[]{volume});
-            logger.log(Level.SEVERE, "Attempt to set sfx volume at {0}\n", new Object[]{volume});
+            logger.log(Level.SEVERE, "Attempt to set sfx volume at {0}", new Object[]{volume});
         }
 
         snd_SfxVolume = volume;
@@ -623,7 +623,7 @@ public class Sound {
         if (    (musicnum.ordinal() <= mus_None.ordinal())
              || (musicnum.ordinal() >= MusicEnum.values().length) ){
             //SystemInterface.I_Error("Bad music number {0}\n", new Object[]{musicnum});
-            logger.log(Level.SEVERE, "Bad music number {0}\n", new Object[]{musicnum});
+            logger.log(Level.SEVERE, "Bad music number {0}", new Object[]{musicnum});
         } else {
             music = Sounds.S_music[musicnum.ordinal()];
         }
@@ -905,7 +905,7 @@ public class Sound {
             line.stop();
             line.close();
         } catch (LineUnavailableException ex) {
-            Logger.getLogger(SoundEffectLump.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
     }
     

@@ -489,7 +489,7 @@ public class Intermission {
                     FB, c[i]);
         } else {
             // DEBUG
-            logger.log(Level.WARNING, "Could not place patch on level {0}\n", n + 1);
+            logger.log(Level.WARNING, "Could not place patch on level {0}", n + 1);
         }
     }
 

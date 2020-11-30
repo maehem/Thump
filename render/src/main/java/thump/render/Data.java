@@ -548,7 +548,7 @@ public class Data {
         for (i = 0; i < numspritelumps; i++) {
             if (0==(i & 63)) {
                 //printf(".");
-                logger.config(".");
+                //logger.config(".");
             }
 
             //patch = W_CacheLumpNum(firstspritelump + i, PU_CACHE);
@@ -588,16 +588,16 @@ public class Data {
     //
     void R_InitData ( Wad wad) {
 
-        logger.config("InitTextures\n");
+        logger.config("InitTextures");
         R_InitTextures (wad);
 
-        logger.config("InitFlats\n");
+        logger.config("InitFlats");
         R_InitFlats (wad);
 
-        logger.config("InitSprites\n");
+        logger.config("InitSprites");
         R_InitSpriteLumps (wad);
 
-        logger.config("InitColormaps\n");
+        logger.config("InitColormaps");
         R_InitColormaps (wad);
     }
 

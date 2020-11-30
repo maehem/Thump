@@ -1056,7 +1056,7 @@ public class AutoMap {
                || fl.b.x < 0 || fl.b.x >= f_w
                || fl.b.y < 0 || fl.b.y >= f_h)
         {
-            Defines.logger.log(Level.FINE, "fuck {0}\n", fuck);
+            Defines.logger.log(Level.FINE, "fuck {0}", fuck);
             fuck++;
             return;
         }
@@ -1384,7 +1384,7 @@ public class AutoMap {
             return;
         }
 
-        Defines.logger.config("AM_Drawer()\n");
+        Defines.logger.config("AM_Drawer()");
         AM_clearFB(BACKGROUND);
         if (grid) {
             AM_drawGrid(GRIDCOLORS);
