@@ -7,6 +7,7 @@ package thump.wad;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,6 +44,7 @@ public class Wad {
     public PatchesLump patchesLump = null;  // Set by WadLoader
     public FlatsLump   flatsLump = null;  // Set by WadLoader
     public PNamesLump pNamesLump = null; // Set by WadLoader
+    //public PictureLump statusLump = null;
     
     public ArrayList<MapLump> mapLumps = new ArrayList<>();
     
@@ -178,7 +180,12 @@ public class Wad {
         byte[][] maps = new byte[lump.mapList.size()][256];
         int i=0;
         while(list.hasNext()) {
-            maps[i] = list.next();
+            byte[] next = list.next();
+            Arrays.fill(maps[i], (byte)0);
+            for( int ii=0; ii< next.length; ii++) {
+                maps[i][ii] = next[ii];
+            }
+            i++;
         }
         
         return maps;

@@ -149,7 +149,7 @@ public class Map {
         tmbbox.right = x + tmthing.radius;
         tmbbox.left = x - tmthing.radius;
 
-        newsubsec = MapNode.R_PointInSubsector (x,y);
+        newsubsec = MapNode.R_PointInSubsector (x,y).subsector;
         ceilingline = null;
 
         // The base floor/ceiling is from the subsector
@@ -415,7 +415,7 @@ public class Map {
         tmbbox.right = x + tmthing.radius;
         tmbbox.left = x - tmthing.radius;
 
-        newsubsec = MapNode.R_PointInSubsector (x,y);
+        newsubsec = MapNode.R_PointInSubsector (x,y).subsector;
         ceilingline = null;
 
         // The base floor / ceiling is from the subsector

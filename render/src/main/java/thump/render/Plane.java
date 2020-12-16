@@ -150,12 +150,15 @@ public class Plane {
         if (renderer.fixedcolormap!=null) {
             draw.ds_colormap = renderer.fixedcolormap;
         } else {
-            int index = distance >> LIGHTZSHIFT;
+            int index = (int) ((long)(distance&0xFFFFFFFFL) >> LIGHTZSHIFT);
 
             if (index >= MAXLIGHTZ ) {
                 index = MAXLIGHTZ-1;
             }
 
+            if ( index < 0 ) {
+                int ii=0;  //debugger breakpoint
+            }
             draw.ds_colormap = planezlight[index];
         }
 
@@ -224,6 +227,7 @@ public class Plane {
 //            }
 //        }
 
+        // See if we alreqady have that visplane in our list.
         for (Visplane visplane : visplanes) {
             if (height == visplane.height
                 && picnum == visplane.picnum
@@ -257,12 +261,14 @@ public class Plane {
         check.picnum = picnum;
         check.lightlevel = lightlevel;
         check.minx = SCREENWIDTH;
-        check.maxx = -1;
-        Arrays.fill(check.top, (byte)0xff);
+        //check.maxx = -1;
+        //check.maxx = Integer.MAX_VALUE;
+        check.maxx = 0xFF;
+        
+        //memset (check.top,0xff,sizeof(check.top));
+        Arrays.fill(check.top, 0xff);
         
         visplanes.add(check);
-
-        //memset (check.top,0xff,sizeof(check.top));
 
         return check;
     }
@@ -278,6 +284,8 @@ public class Plane {
         int unionh;
         int x;
 
+        logger.log(Level.CONFIG, "R_CheckPlane(start:{0},stop:{1})", new Object[]{start, stop});
+        
         if (start < pl.minx) {
             intrl = pl.minx;
             unionl = start;
@@ -302,7 +310,13 @@ public class Plane {
 
         if (x > intrh) {
             pl.minx = unionl;
+            if ( pl.minx < 0 ) {
+                logger.log( Level.CONFIG, "    pl.minx was set to a negative value.");
+            }
             pl.maxx = unionh;
+            if ( pl.maxx < 0 ) {
+                logger.log(Level.CONFIG, "    pl.maxx was set to a negative value.");
+            }
 
             // use the same one
             return pl;
@@ -318,12 +332,27 @@ public class Plane {
         visplanes.add(vp);
         
 //        pl.minx = start;
+        pl.minx = start;
+        if ( pl.minx < 0 ) {
+            logger.log(Level.CONFIG, "    pl.minx was set to a negative value.");            
+        }
 //        pl.maxx = stop;
+        pl.maxx = stop;
+        if ( pl.maxx < 0 ) {
+            logger.log(Level.CONFIG, "    pl.maxx was set to a negative value.");
+        }
+
         vp.minx = start;
+        if ( vp.minx < 0 ) {
+            logger.log(Level.CONFIG, "    vp.minx was set to a negative value.");
+        }
         vp.maxx = stop;
+        if ( vp.maxx < 0 ) {
+            logger.log(Level.CONFIG, "    vp.maxx was set to a negative value.");
+        }
 
         //memset (pl.top,0xff,sizeof(pl.top));
-        Arrays.fill(vp.top, (byte)0xff);
+        Arrays.fill(vp.top, 0xff);
 
         //return pl;
         return vp;
@@ -345,6 +374,10 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
+        logger.log(Level.CONFIG, 
+                "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
+                new Object[]{x,_t1,_b1,_t2,_b2}
+        );
         while (t1 < t2 && t1 <= b1) {
             R_MapPlane(t1, spanstart[t1], x - 1);
             t1++;
@@ -373,7 +406,7 @@ public class Plane {
     public void R_DrawPlanes(FlatsLump flats, int pspriteiscale) {
         //Visplane pl;
         int light;
-        int x;
+        int x=0;
         int stop;
         int angle;
         
@@ -391,21 +424,21 @@ public class Plane {
 //                     lastopening - openings);
 //    #endif
 
-        logger.log(Level.CONFIG, "Plane.R_DrawPlanes()\n");
+        logger.log(Level.CONFIG, "Plane.R_DrawPlanes():  visplanes.size={0}", visplanes.size());
         
-        //Renderer renderer = Game.getInstance().renderer;
         Draw draw = renderer.draw;
         
         //for (pl = visplanes ; pl < lastvisplane ; pl++) {
         for (Visplane pl : visplanes) {
+            logger.log(Level.CONFIG, "process visplane. pl.picnum = {0}", pl.picnum);
             if (pl.minx > pl.maxx) {
-                continue;
+               logger.log(Level.CONFIG, "    visplane: minx > maxx [{0}]>[{1}]  ...Next visplane.", new Object[]{pl.minx, pl.maxx});
+               continue;
             }
-
-            
 
             // sky flat
             if (pl.picnum == renderer.skyflatnum) {
+                logger.log(Level.CONFIG, "    Draw a skyflat.");
                 //draw.dc_iscale = renderer.things.pspriteiscale>>(renderer.detailshift?1:0);
                 draw.dc_iscale = pspriteiscale>>(renderer.detailshift?1:0);
 
@@ -416,10 +449,14 @@ public class Plane {
                 draw.dc_colormap = renderer.data.colormaps[0];
                 draw.dc_texturemid = renderer.skytexturemid;
                 for (x=pl.minx ; x <= pl.maxx ; x++) {
-                    draw.dc_yl = pl.top[x];
-                    draw.dc_yh = pl.bottom[x];
+//                    draw.dc_yl = pl.top[x];
+//                    draw.dc_yh = pl.bottom[x];
+                    draw.dc_yl = pl.top[x+1]; /*&0xFF; */
+                    draw.dc_yh = pl.bottom[x+1];/* &0xFF; */
 
                     if (draw.dc_yl <= draw.dc_yh) {
+                        // TODO:  See if xtoviewangle is similar to top[] and needs padding.
+                        //angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
                         angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
                         draw.dc_x = x;
                         //draw.dc_source = renderer.data.R_GetColumn(renderer.skytexture, angle);
@@ -428,7 +465,7 @@ public class Plane {
                         renderer.colfunc.doColFunc(draw);
                     }
                 }
-                continue;
+                //continue;
             }
 
             // regular flat
@@ -452,23 +489,47 @@ public class Plane {
             }
 
             planezlight = renderer.zlight[light];
-
-            // Debug
-            if ( pl.minx ==0 ) {
-                int i=0; // breakpoint here.
-                pl.minx = 1;
-            }
-            pl.top[pl.maxx+1] = (byte) 0xff;
-            pl.top[pl.minx-1] = (byte) 0xff;
+            
+            // MJK:  minx and maxx come in at zero or max sometimes.  
+            //if ( pl.minx <= 0 ) {
+            //    pl.minx = 1;
+            //}
+            //if ( pl.maxx > pl.top.length-1 ) {
+            //    pl.maxx = pl.top.length-1;
+            //}
+            
+//            pl.top[pl.maxx+1] = (byte) 0xff;
+//            pl.top[pl.minx-1] = (byte) 0xff;
+            //pl.top[pl.maxx+2] = 0xff;
+            //pl.top[pl.minx] = 0xff;
+            pl.top[pl.maxx+2] = 0xff;
+            pl.top[pl.minx] = 0xff;
 
             stop = pl.maxx + 1;
 
-            for (x=pl.minx ; x<= stop ; x++) {
-                R_MakeSpans(x,pl.top[x-1],
-                            pl.bottom[x-1],
-                            pl.top[x],
-                            pl.bottom[x]);
+//            try {
+            //for (x=pl.minx ; x<= stop ; x++) {
+            for (x=pl.minx+1 ; x < stop ; x++) {
+//                R_MakeSpans(x,
+//                        pl.top[x-1],
+//                        pl.bottom[x-1],
+//                        pl.top[x],
+//                        pl.bottom[x]);
+//            }
+    if ( x == 250 ) {
+        int i=0; // breakpoint
+    }
+                R_MakeSpans(x,
+                        pl.top[x-1],
+                        pl.bottom[x-1],
+                        //pl.top[x+1],
+                        //pl.bottom[x+1]);
+                        pl.top[x],
+                        pl.bottom[x]);
             }
+//            } catch ( ArrayIndexOutOfBoundsException e) {
+//                int i=0;  // Breakpoint.
+//            }
 
             //Z_ChangeTag (ds_source, PU_CACHE);
         }

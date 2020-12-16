@@ -228,34 +228,43 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
     int yh;
     int mid;
     int texturecolumn=0;
-    int top;
-    int bottom;
+    int top=0;
+    int bottom=0;
 
-    //texturecolumn = 0;				// shut up compiler warning
+    logger.config("Render Seg Loop()");
     
-    //Renderer renderer = Game.getInstance().renderer;
     Draw draw = renderer.draw;
     
     for ( ; rw_x < rw_stopx ; rw_x++) {
 	// mark floor / ceiling areas
+        logger.log(Level.CONFIG, "    topfrac: {0}", Integer.toHexString(topfrac));
 	yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
+        logger.log(Level.CONFIG, "    yl set to: {0}", yl);
 
 	// no space above wall?
 	if (yl < renderer.plane.ceilingclip[rw_x]+1) {
             yl = renderer.plane.ceilingclip[rw_x]+1;
+            logger.log(Level.CONFIG, "    ...no space above wall.  yl set to: {0}", yl);
         }
 	
 	if (markceiling) {
 	    top = renderer.plane.ceilingclip[rw_x]+1;
 	    bottom = yl-1;
 
+            logger.log(Level.CONFIG, 
+                    "    mark ceiling:  top:{0}  bottom:{1}  rw_x:{2}",
+                    new Object[]{top, bottom, rw_x}
+            );
+            
 	    if (bottom >= renderer.plane.floorclip[rw_x]) {
                 bottom = renderer.plane.floorclip[rw_x]-1;
             }
 
 	    if (top <= bottom) {
-		renderer.plane.ceilingplane.top[rw_x] = (byte) top;
-		renderer.plane.ceilingplane.bottom[rw_x] = (byte) bottom;
+//		renderer.plane.ceilingplane.top[rw_x] = (byte) top;
+//		renderer.plane.ceilingplane.bottom[rw_x] = (byte) bottom;
+		renderer.plane.ceilingplane.top[rw_x] = top;
+		renderer.plane.ceilingplane.bottom[rw_x] = bottom;
 	    }
 	}
 		
@@ -268,12 +277,16 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	if (markfloor) {
 	    top = yh+1;
 	    bottom = renderer.plane.floorclip[rw_x]-1;
+            logger.log(Level.CONFIG, 
+                    "    mark floor:  top:{0}  bottom:{1}  rw_x:{2}",
+                    new Object[]{top, bottom, rw_x}
+            );
 	    if (top <= renderer.plane.ceilingclip[rw_x]) {
                 top = renderer.plane.ceilingclip[rw_x]+1;
             }
 	    if (top <= bottom) {
-		renderer.plane.floorplane.top[rw_x] = (byte) top;
-		renderer.plane.floorplane.bottom[rw_x] = (byte) bottom;
+		renderer.plane.floorplane.top[rw_x] = top;
+		renderer.plane.floorplane.bottom[rw_x] = bottom;
 	    }
 	}
 	
@@ -299,7 +312,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
 	    draw.dc_colormap = Arrays.copyOfRange(walllights[index], 0, 256);
 	    draw.dc_x = rw_x;
-	    draw.dc_iscale = 0xffffffff / rw_scale;
+	    //draw.dc_iscale = 0xffffffff / rw_scale;
+	    draw.dc_iscale = Integer.MAX_VALUE / rw_scale;
 	}
 	
 	// draw the wall tiers
@@ -310,6 +324,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	    draw.dc_texturemid = rw_midtexturemid;
 	    //draw.dc_source = renderer.data.R_GetColumn(midtexture,texturecolumn);
             draw.dc_source = wad.getTextures().get(midtexture).getColumn(texturecolumn);
+            logger.log(Level.CONFIG, "    Draw a mid texture.");
 	    renderer.colfunc.doColFunc(draw);
 	    renderer.plane.ceilingclip[rw_x] = draw.viewheight;
 	    renderer.plane.floorclip[rw_x] = -1;
@@ -331,8 +346,10 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 		    draw.dc_texturemid = rw_toptexturemid;
 		    //draw.dc_source = renderer.data.R_GetColumn(toptexture,texturecolumn);
                     draw.dc_source = wad.getTextures().get(toptexture).getColumn(texturecolumn);
+                    logger.log(Level.CONFIG, "    Draw a top texture.");
 		    renderer.colfunc.doColFunc(draw);
 		    renderer.plane.ceilingclip[rw_x] = mid;
+                    logger.log(Level.CONFIG, "    ... done.");
 		}
 		else {
                     renderer.plane.ceilingclip[rw_x] = yl-1;
@@ -360,6 +377,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 		    draw.dc_texturemid = rw_bottomtexturemid;
 		    //draw.dc_source = renderer.data.R_GetColumn(bottomtexture, texturecolumn);
                     draw.dc_source = wad.getTextures().get(bottomtexture).getColumn(texturecolumn);
+                    logger.log(Level.CONFIG, "    Draw a bottom texture.");
 		    renderer.colfunc.doColFunc(draw);
 		    renderer.plane.floorclip[rw_x] = mid;
 		}
@@ -400,7 +418,11 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         int vtop;
         int lightnum;
 
-        logger.log(Level.CONFIG, "Segs.R_StoreWallRange( {0}, {1} )\n", new Object[]{start, stop});
+        logger.log(Level.CONFIG, "Segs.R_StoreWallRange( {0}, {1} )", new Object[]{start, stop});
+        if ( stop < 0 ) {
+            int ii=0;  // debugger breakpoint
+            logger.config("    stop < 0 !!!     BAD!");
+        }
         //Renderer r = Game.getInstance().renderer;
         Bsp bsp = r.bsp;
         Plane plane = r.plane;
@@ -418,7 +440,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             return;
         }
 
-        logger.log(Level.CONFIG, "plane.lastopening: {0}\n", plane.lastopening);
+        logger.log(Level.CONFIG, "    plane.lastopening: {0}", plane.lastopening);
         
 //#ifdef RANGECHECK
 //    if (start >=viewwidth || start > stop)
@@ -433,24 +455,32 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         // calculate rw_distance for scale calculation
         rw_normalangle = (bsp.curline.angle + ANG90)&0xFFFFFFFFL;
         offsetangle = Math.abs(rw_normalangle - rw_angle1);
+        logger.log(Level.CONFIG, "    offsetangle:{0}", Long.toHexString(offsetangle));
 
         if (offsetangle > ANG90) {
             offsetangle = ANG90;
         }
-
+        logger.log(Level.CONFIG, "    set offset angle: {0}", Long.toHexString(offsetangle) );
         distangle = (ANG90 - offsetangle)&0xFFFFFFFFL;
         hyp = r.R_PointToDist(bsp.curline.v1.x, bsp.curline.v1.y);
         sineval = finesine(distangle >> ANGLETOFINESHIFT);
         rw_distance = FixedPoint.mul(hyp, sineval);
+        logger.log(Level.CONFIG, "    set rw_distance: {0}", rw_distance);
 
         bsp.drawsegs[bsp.ds_p].x1 = start;
         rw_x = start;
         bsp.drawsegs[bsp.ds_p].x2 = stop;
         bsp.drawsegs[bsp.ds_p].curline = bsp.curline;
+        logger.log(Level.CONFIG, "    set rw_stopx:{0}", (stop+1) );
         rw_stopx = stop + 1;
 
         // calculate scale at both ends and step
+        logger.log(Level.CONFIG, 
+                "    set rw_scale:  r.viewangle:{0}   r.xtoviewangle[start]:{1}",
+                new Object[]{ Long.toHexString(r.viewangle), Long.toHexString(r.xtoviewangle[start]) }
+        );
         rw_scale = r.R_ScaleFromGlobalAngle(r.viewangle + r.xtoviewangle[start]);
+        logger.log(Level.CONFIG, "    rw_scale: {0}", rw_scale);
         bsp.drawsegs[bsp.ds_p].scale1 = rw_scale;
         
         if (stop > start) {
@@ -489,7 +519,6 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         if (null==bsp.backsector) {
             // single sided line
-           //Wad wad = Game.getInstance().wad;
             midtexture = r.data.texturetranslation[wad.getTextureNum(bsp.sidedef.midtexture)];
             // a single sided line is terminal, so it must mark ends
             markfloor = true;
@@ -523,7 +552,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             } else if (bsp.backsector.floorheight > viewz) {
                 bsp.drawsegs[bsp.ds_p].silhouette = SIL_BOTTOM;
                 bsp.drawsegs[bsp.ds_p].bsilheight = Integer.MAX_VALUE;
-                // bsp.drawsegs[bsp.ds_p].sprbottomclip = negonearray;
+                //bsp.drawsegs[bsp.ds_p].sprbottomclip = negonearray; // commented out in C-source
             }
 
             if (bsp.frontsector.ceilingheight < bsp.backsector.ceilingheight) {
@@ -583,11 +612,11 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
             if (worldhigh < worldtop) {
                 // top texture
-                try {
+                //try {
                     toptexture = r.data.texturetranslation[bsp.sidedef.getTopTextureNum(wad)];
-                } catch( ArrayIndexOutOfBoundsException e ) {
-                    toptexture = -1;
-                }
+                //} catch( ArrayIndexOutOfBoundsException e ) {
+                //    toptexture = -1;
+                //}
                 
                 if ((bsp.linedef.flags & ML_DONTPEGTOP)>0) {
                     // top of texture at top
@@ -607,18 +636,17 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             }
             if (worldlow > worldbottom) {
                 // bottom texture
-                try {
+                //try {
                     bottomtexture = r.data.texturetranslation[bsp.sidedef.getBottomTextureNum(wad)];
-                } catch( ArrayIndexOutOfBoundsException e ) {
-                    bottomtexture = -1;
-                }
+                //} catch( ArrayIndexOutOfBoundsException e ) {
+                //    bottomtexture = -1;
+                //}
                 
                 if ((bsp.linedef.flags & ML_DONTPEGBOTTOM)>0) {
                     // bottom of texture at bottom
                     // top of texture at top
                     rw_bottomtexturemid = worldtop;
-                } else // top of texture at top
-                {
+                } else {  // top of texture at top
                     rw_bottomtexturemid = worldlow;
                 }
             }
@@ -631,7 +659,9 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 maskedtexture = true;
                 maskedtexturecol = plane.lastopening - rw_x;
                 bsp.drawsegs[bsp.ds_p].maskedtexturecol = maskedtexturecol;
-                logger.config("plane.lastopening += rw_stopx - rw_x; \n");
+                logger.log(Level.CONFIG,
+                        "masked midtexture:  plane.lastopening += rw_stopx - rw_x   {0} += {1}-{2} == {3}",
+                        new Object[]{plane.lastopening + rw_stopx - rw_x, rw_stopx, rw_x});
                 plane.lastopening += rw_stopx - rw_x;
             }
         }
@@ -642,11 +672,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         if (segtextured) {
             // rw_normalangle: 1073741824
             // rw_angle1     : 2037829458
-            offsetangle = (rw_normalangle - rw_angle1)&0xFFFFFFFF;
+            offsetangle = (rw_normalangle - rw_angle1)&0xFFFFFFFFL;
 
-//            if (offsetangle > ANG180) {
-//                offsetangle = 360-offsetangle;
-//            }
             if ( offsetangle > ANG180 ) {
                 offsetangle = -offsetangle;
             }
@@ -658,12 +685,12 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             sineval = finesine(offsetangle >> ANGLETOFINESHIFT);
             rw_offset = FixedPoint.mul(hyp, sineval);
 
-//            if (rw_normalangle - rw_angle1 < ANG180) {
-//                rw_offset = -rw_offset;
-//            }
-            if ( rw_normalangle - rw_angle1 > 0) {
+            if (rw_normalangle - rw_angle1 < ANG180) {
                 rw_offset = -rw_offset;
             }
+//            if ( rw_normalangle - rw_angle1 > 0) {
+//                rw_offset = -rw_offset;
+//            }
             
             rw_offset += bsp.sidedef.textureoffset + bsp.curline.offset;
             rw_centerangle = (ANG90 + r.viewangle - rw_normalangle)&0xFFFFFFFFL;
@@ -712,6 +739,10 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         worldbottom >>= 4;
 
         topstep = -FixedPoint.mul(rw_scalestep, worldtop);
+        logger.log(Level.CONFIG,
+                "    r.centeryfrac: {0}   worldtop:{1}   rw_scale:{2}",
+                new Object[]{Integer.toHexString(r.centeryfrac), Integer.toHexString(worldtop), Integer.toHexString(rw_scale) }
+        );
         topfrac = (r.centeryfrac >> 4) - FixedPoint.mul(worldtop, rw_scale);
 
         bottomstep = -FixedPoint.mul(rw_scalestep, worldbottom);
@@ -734,49 +765,60 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         // render it
         if (markceiling) {
+            logger.log(Level.CONFIG, "    ceiling check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.ceilingplane = plane.R_CheckPlane(plane.ceilingplane, rw_x, rw_stopx - 1);
         }
 
         if (markfloor) {
+            logger.log(Level.CONFIG, "    floor check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.floorplane = plane.R_CheckPlane(plane.floorplane, rw_x, rw_stopx - 1);
         }
 
-        logger.config("Render Seg Loop()\n");
         R_RenderSegLoop(r, wad);
         
-        logger.log(Level.CONFIG, "       rw_x = {0}\n   rx_stopx = {1}\n", new Object[]{rw_x, rw_stopx});
+        logger.log(Level.CONFIG, "       rw_x = {0}\n   rw_stopx = {1}", new Object[]{rw_x, rw_stopx});
 
         DrawSeg seg = bsp.drawsegs[bsp.ds_p];
         // save sprite clipping info
         if (((seg.silhouette & SIL_TOP)>0 || maskedtexture)
                 && null==seg.sprtopclip) {
             //memcpy(plane.lastopening, r.plane.ceilingclip[start], 2 * (rw_stopx - start));
-            System.arraycopy(plane.ceilingclip, start, plane.openings,plane.lastopening, 2 * (rw_stopx - start));
+            try {
+            System.arraycopy(plane.ceilingclip, start, plane.openings,plane.lastopening, /*2 **/ (rw_stopx - start));
+            } catch ( ArrayIndexOutOfBoundsException e ) {
+                throw e;
+            }
+            
             if ( plane.lastopening - start > 0 ) {
                 seg.sprtopclip = Arrays.copyOfRange(plane.openings,plane.lastopening - start,plane.openings.length);
             }
-            logger.config("plane.lastopening += rw_stopx - start;\n");
             plane.lastopening += rw_stopx - start;
+            logger.log(Level.CONFIG, "plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
         }
 
         if (((seg.silhouette & SIL_BOTTOM)>0 || maskedtexture)
                 && null==seg.sprbottomclip) {
             //memcpy(plane.lastopening, r.plane.floorclip[start], 2 * (rw_stopx - start));
+            logger.log(Level.CONFIG, "Arrays.copyOfRange( src:floorclip, startPos:{0}, dest:openings:, len:{1} )", 
+                    new Object[]{start, (rw_stopx - start)});
             System.arraycopy(
-                    r.plane.floorclip, start, 
-                    plane.openings, plane.lastopening, 
-                    /*2 * */ (rw_stopx - start)
+                    r.plane.floorclip,  start, 
+                    plane.openings,     plane.lastopening, 
+                    /* 2 * */ (rw_stopx - start)
             );
             
             if ( plane.lastopening - start > 0 ) {
-                logger.log(Level.CONFIG, "Arrays.copyOfRange( {0}, {1}, {2} )\n", 
+                logger.log(Level.CONFIG, 
+                        "seg.sprbottomclip = Arrays.copyOfRange( openings:{0}, lastopening-start:{1}, len:{2} )", 
                         new Object[]{r.plane.openings, plane.lastopening - start, plane.openings.length});
-
-                seg.sprbottomclip = Arrays.copyOfRange(plane.openings,plane.lastopening - start,plane.openings.length);
+                seg.sprbottomclip = Arrays.copyOfRange(
+                        plane.openings,plane.lastopening - start,plane.openings.length);
+            } else {
+                int ii=0;  // debug beark point
             }
             
-            logger.config("plane.lastopening += rw_stopx - start;\n");
             plane.lastopening += rw_stopx - start;
+            logger.log(Level.CONFIG, "plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
         }
 
         if (maskedtexture && 0==(seg.silhouette & SIL_TOP)) {

@@ -828,6 +828,7 @@ public class MenuManager {
     // M_DrawMainMenu
     //
     void M_DrawMainMenu() {
+        logger.finest("Draw main menu.");
         game.renderer.video.drawPatchDirect(94, 20/*2*/, 0, "M_DOOM", game.wad);
     }
 

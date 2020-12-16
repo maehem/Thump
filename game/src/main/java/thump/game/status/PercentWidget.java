@@ -36,4 +36,12 @@ public class PercentWidget {
 
         n.STlib_updateNum(refresh);
     }
+    
+    public void STlib_updatePercent(
+            Integer val,
+            boolean refresh) 
+    {
+        n.num = val;
+        STlib_updatePercent(refresh);
+    }
 }

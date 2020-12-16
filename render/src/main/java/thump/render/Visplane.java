@@ -21,13 +21,13 @@ public class Visplane {
   
     // leave pads for [minx-1]/[maxx+1]
   
-    byte pad1;
+    byte pad1;  // TODO: pads not used in Java.  Delete me.
     // Here lies the rub for all
     //  dynamic resize/change of resolution.
-    byte top[] = new byte[SCREENWIDTH];
+    int top[] = new int[SCREENWIDTH+2];  // +2 for pad.
     byte pad2;
     byte pad3;
     // See above.
-    byte bottom[] = new byte[SCREENWIDTH];
+    int bottom[] = new int[SCREENWIDTH+2];
     byte pad4;
 }

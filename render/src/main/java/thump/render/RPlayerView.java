@@ -11,15 +11,15 @@ package thump.render;
  */
 public class RPlayerView {
     
-    protected int x; // mo.x
-    protected int y; // mo.y
-    protected long angle; // mo.angle
+    public int x; // mo.x
+    public int y; // mo.y
+    public long angle; // mo.angle
     
     //public int powers[]; // powers[pw_invisibility.ordinal()]
     public int invisibility;    
     public int lightlevel; // mo.subsector.sector.lightlevel    
-    protected int extralight;    
-    protected int viewz;    
-    protected int fixedcolormap;
+    public int extralight;    
+    public int viewz;    
+    public int fixedcolormap;
     
 }

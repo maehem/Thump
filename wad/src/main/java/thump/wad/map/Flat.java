@@ -14,14 +14,19 @@ import java.nio.ByteBuffer;
 public class Flat {
 
     public final String name;
-    public final byte[] pixels;
+    public final int[] pixels;
     
     public Flat(String name, ByteBuffer bb) {
         this.name = name;
 
         bb.position(0);
-        pixels = new byte[bb.limit()];
-        bb.get(pixels);
+        byte[] buf = new byte[bb.limit()];
+        bb.get(buf);
+        
+        pixels = new int[buf.length];
+        for ( int i=0; i<buf.length; i++ ) {
+            pixels[i] = buf[i]&0x000000FF;
+        }
     }
 
     @Override
@@ -30,7 +35,7 @@ public class Flat {
         
             for ( int i=0; i< pixels.length; i++ ) {
                 String padding = "00";
-                String result = padding + Integer.toHexString(pixels[i]&0x000000FF);
+                String result = padding + Integer.toHexString(pixels[i]);
                 result = result.substring(result.length() - 2, result.length());  // take the right-most 64 digits
                 sb.append(result);
             if ( (i+1)%64 == 0) {

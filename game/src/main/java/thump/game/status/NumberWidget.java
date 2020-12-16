@@ -9,6 +9,8 @@ import static thump.game.status.Status.BG;
 import static thump.game.status.Status.FG;
 import static thump.game.status.Status.ST_Y;
 import thump.render.Video;
+import thump.wad.lump.Lump;
+import thump.wad.lump.PictureLump;
 import thump.wad.mapraw.PatchData;
 
 /**
@@ -17,7 +19,7 @@ import thump.wad.mapraw.PatchData;
  */
 public class NumberWidget {
 
-    private final PatchData sttminus;
+    private final PatchData sttminus ;
 
     public NumberWidget(int x, int y, PatchData[] p, Integer num, Boolean on, int width) {
         this.x = x;
@@ -27,8 +29,15 @@ public class NumberWidget {
         this.num = num;
         this.width = width;
         
-        sttminus = Game.getInstance().wad.getPatchByName("STTMINUS");
-}
+        
+        //sttminus = Game.getInstance().wad.getPatchByName("STTMINUS");
+        Lump lump = Game.getInstance().wad.findByName("STTMINUS");
+        if ( lump instanceof PictureLump ) {
+            sttminus = ((PictureLump)lump).pic;
+        } else {
+            sttminus = null;
+        }
+    }
     
     // upper right-hand corner
     //  of the number (right-justified)

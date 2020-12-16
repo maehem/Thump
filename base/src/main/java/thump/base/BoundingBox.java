@@ -59,7 +59,7 @@ public class BoundingBox {
 
     @Override
     public String toString() {
-        return left + " " + top + " " + right + " " + bottom;
+        return "l:" + left + " t:" + top + " r:" + right + " b:" + bottom;
     }    
     
     public int[] toArray() {

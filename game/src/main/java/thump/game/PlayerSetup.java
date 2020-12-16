@@ -7,12 +7,14 @@ package thump.game;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import thump.base.BoundingBox;
+import static thump.base.Defines.logger;
 import static thump.game.Defines.MAXPLAYERS;
 import thump.game.Defines.Skill;
 import static thump.game.ThingStateLUT.sprnames;
 import thump.game.maplevel.MapNode;
 import thump.game.maplevel.MapObject;
 import thump.game.maplevel.MapSector;
+import thump.game.maplevel.MapSeg;
 import thump.game.maplevel.MapSideDef;
 import thump.game.maplevel.MapSubSector;
 import static thump.game.play.Local.MAPBLOCKSHIFT;
@@ -47,7 +49,9 @@ public class PlayerSetup {
     public Vertex[]	vertexes;
 
     //int		segs.length;
-    public Seg[]	segs;
+    //public MapSeg[]	segs;
+    public final ArrayList<MapSeg> segs = new ArrayList<>();
+    
 
     //int		numsectors;
     //public MapSector[]	sectors;
@@ -117,7 +121,7 @@ public class PlayerSetup {
     
     public int getSecNum( Sector sector ) {
 //        for (int i=0; i< sectors.length ; i++ ) {
-//            if ( sector == sectors[i] ) {
+//            if ( ms == sectors[i] ) {
 //                return i;
 //            }
 //        }
@@ -211,9 +215,9 @@ public class PlayerSetup {
 //            li.linedef = ldef;
 //            side = SHORT(ml.side);
 //            li.sidedef = &sides[ldef.sidenum[side]];
-//            li.frontsector = sides[ldef.sidenum[side]].sector;
+//            li.frontsector = sides[ldef.sidenum[side]].ms;
 //            if (ldef. flags & ML_TWOSIDED)
-//                li.backsector = sides[ldef.sidenum[side^1]].sector;
+//                li.backsector = sides[ldef.sidenum[side^1]].ms;
 //            else
 //                li.backsector = 0;
 //        }
@@ -438,12 +442,12 @@ public class PlayerSetup {
 //            ld.sidenum[1] = SHORT(mld.sidenum[1]);
 //
 //            if (ld.sidenum[0] != -1)
-//                ld.frontsector = sides[ld.sidenum[0]].sector;
+//                ld.frontsector = sides[ld.sidenum[0]].ms;
 //            else
 //                ld.frontsector = 0;
 //
 //            if (ld.sidenum[1] != -1)
-//                ld.backsector = sides[ld.sidenum[1]].sector;
+//                ld.backsector = sides[ld.sidenum[1]].ms;
 //            else
 //                ld.backsector = 0;
 //        }
@@ -476,7 +480,7 @@ public class PlayerSetup {
 //            sd.toptexture = R_TextureNumForName(msd.toptexture);
 //            sd.bottomtexture = R_TextureNumForName(msd.bottomtexture);
 //            sd.midtexture = R_TextureNumForName(msd.midtexture);
-//            sd.sector = &sectors[SHORT(msd.sector)];
+//            sd.ms = &sectors[SHORT(msd.ms)];
 //        }
 //
 //        Z_Free (data);
@@ -524,7 +528,7 @@ public class PlayerSetup {
 
     //
     // P_GroupLines
-    // Builds sector line lists and subsector sector numbers.
+    // Builds ms line lists and subsector ms numbers.
     // Finds block bounding boxes for sectors.
     //
     void P_GroupLines(MapLump map) {
@@ -533,20 +537,27 @@ public class PlayerSetup {
         int			j;
         int			total;
         //Line		li;
-        //Sector		sector;
+        //Sector		ms;
         //SubSector	ssArray;
-        Seg		seg;
+        MapSeg		seg;
         BoundingBox	bbox = new BoundingBox();
         int		block;
 
-        // look up sector number for each subsector
+        // look up ms number for each subsector
         //ss = subsectors;
-        for (SubSector ss: map.getSubSectors().toArray()) {
-            seg = segs[ss.firstline];
-            ss.sector = seg.sidedef.getSector(map);
+//        for (SubSector ss: map.getSubSectors().toArray()) {
+//            seg = segs[ss.firstline];
+//            ss.ms = seg.sidedef.getSector(map);
+//        }
+        for (MapSubSector mss: subsectors) {
+            //seg = segs[ss.firstline];
+            seg = segs.get(mss.subsector.firstline);
+            //ss.mapSector = new MapSector(seg.sidedef.getSector(map));
+            mss.mapSector = sectors.get(seg.mapSideDef.side.sectorNum);
+            mss.subsector.sector = mss.mapSector.sector; // Synchronize the two sectors.
         }
 
-        // count number of lines in each sector
+        // count number of lines in each ms
         //li = lines;
         total = 0;
         for (Line line: lines) {
@@ -559,11 +570,13 @@ public class PlayerSetup {
             }
         }
 
-        // build line tables for each sector	
+        // build line tables for each ms
         //linebuffer = Z_Malloc (total*4, PU_LEVEL, 0);
         Line lineBuffer[] = new Line[total];
+        
         //sector = sectors;
-        for (MapSector sector: sectors) {
+        for (MapSector ms: sectors) {
+            Sector sector = ms.sector;
             //M_ClearBox (bbox);
             bbox.M_ClearBox();
             sector.lines = lineBuffer;
@@ -583,14 +596,14 @@ public class PlayerSetup {
                     bbox.M_AddToBox(li.v2.x, li.v2.y);
                 }
             }
+            
             if (i != sector.linecount) {
-                //SystemInterface.I_Error ("P_GroupLines: miscounted");
-                thump.base.Defines.logger.log(Level.SEVERE, "P_GroupLines: miscounted");
+                logger.log(Level.SEVERE, "P_GroupLines: miscounted");
             }
 
             // set the degenmobj_t to the middle of the bounding box
-            ((MapObject)sector.soundorg).x = (bbox.right+bbox.left)/2;
-            ((MapObject)sector.soundorg).y = (bbox.top+bbox.bottom)/2;
+            ms.soundorg.x = (bbox.right+bbox.left)/2;
+            ms.soundorg.y = (bbox.top+bbox.bottom)/2;
 
             // adjust bounding box to map blocks
             block = (bbox.top-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
@@ -609,7 +622,6 @@ public class PlayerSetup {
             block = block < 0 ? 0 : block;
             sector.blockbox.left=block;
         }
-
     }
 
 
@@ -693,7 +705,9 @@ public class PlayerSetup {
         //sectors = map.getSectorsLump().toArray();  //  Need a method to convert sectors to MapSectors
         Sector[] secArray = map.getSectorsLump().toArray();
         for ( Sector s : secArray ) {
-            sectors.add(new MapSector(s));
+            MapSector ms = new MapSector(s);
+            sectors.add(ms);
+            ms.soundtarget = new MapObject();
         }
         
         // TODO  Merge Side with MapSideDef
@@ -724,8 +738,17 @@ public class PlayerSetup {
         }
         
         
+        // Promote the Segs to MapSegs
         //P_LoadSegs (lumpnum+ML_SEGS);
-        segs = map.getSegs().toArray();
+        //segs = map.getSegs().toArray();
+        Seg[] segArray = map.getSegs().toArray();
+        for ( Seg s: segArray ) {
+            MapSeg ms = new MapSeg(s);
+            ms.mapSideDef = lookupMapSideDefFor(s.sidedef);
+            segs.add(ms);
+            
+// TODO init s.mapsideef from sidedef.            
+        }
 
         //rejectmatrix = W_CacheLumpNum (lumpnum+ML_REJECT,PU_LEVEL);
         rejectmatrix = map.getRejects().rejects;
@@ -775,4 +798,29 @@ public class PlayerSetup {
         game.things.R_InitSprites (sprnames, game.wad);
     }
 
+    
+    public Seg[] getSegs() {
+        Seg[] sArray = new Seg[segs.size()];
+        for ( int i=0; i<segs.size(); i++ ) {
+            sArray[i] = segs.get(i).seg;
+        }
+        
+        return sArray;
+    }
+    
+    private MapSideDef lookupMapSideDefFor(Side s) {
+        for ( MapSideDef msd : sides ) {
+            if ( msd.side.equals(s)) return msd;
+        }
+        
+        return null;
+    }
+
+    public MapSector lookupMapSectorFor(Sector sec) {
+        for ( MapSector ms: sectors ) {
+            if ( ms.sector.equals(sec)) return ms;
+        }
+        
+        return null;
+    }
 }

@@ -1,7 +1,6 @@
 
 package thump.game.play;
 
-import java.util.Arrays;
 import java.util.logging.Level;
 import static thump.base.Defines.logger;
 import thump.game.Game;
@@ -216,7 +215,7 @@ public class MObject {
                 || mo.momy > FRACUNIT/4
                 || mo.momy < -FRACUNIT/4    )
             {
-                if (mo.floorz != mo.subsector.sector.floorheight) {
+                if (mo.floorz != mo.subsector.mapSector.sector.floorheight) {
                     return;
                 }
             }
@@ -226,21 +225,23 @@ public class MObject {
             && mo.momx < STOPSPEED
             && mo.momy > -STOPSPEED
             && mo.momy < STOPSPEED
-            && (player==null
-                || (player.cmd.forwardmove== 0
-                    && player.cmd.sidemove == 0 ) ) )
-        {
+            && ( player==null || 
+                (player.cmd.forwardmove== 0 && player.cmd.sidemove == 0 ) 
+               ) 
+        ) {
             // if in a walking frame, stop moving
             if (    player!=null
-                    && ( Arrays.binarySearch(states, player.mo.stateNum)- S_PLAY_RUN1.ordinal()) < 4  ) {  /// ????
+                    && ( 
+                    //    Arrays.binarySearch(states, player.mo.stateNum) - S_PLAY_RUN1.ordinal()
+                    ThingStateLUT.indexOfState(player.mo.state) - S_PLAY_RUN1.ordinal()
+                    //ThingStateLUT.indexOfState(player.mo.stateNum) - S_PLAY_RUN1.ordinal()
+                    ) < 4  ) {  /// ????
                 P_SetMobjState (player.mo, S_PLAY);
             }
 
             mo.momx = 0;
             mo.momy = 0;
-        }
-        else
-        {
+        } else {
             mo.momx = FixedPoint.mul (mo.momx, FRICTION);
             mo.momy = FixedPoint.mul (mo.momy, FRICTION);
         }
@@ -370,13 +371,13 @@ public class MObject {
         // because of removal of the body?
         mo = P_SpawnMobj (mobj.x,
                           mobj.y,
-                          mobj.subsector.sector.floorheight , MT_TFOG); 
+                          mobj.subsector.mapSector.sector.floorheight , MT_TFOG); 
         // initiate teleport sound
         Game.getInstance().sound.S_StartSound (mo, sfx_telept);
 
         // spawn a teleport fog at the new spot
         //ss = Game.getInstance().renderer.R_PointInSubsector (x,y); 
-        ss = MapNode.R_PointInSubsector (x,y); 
+        ss = MapNode.R_PointInSubsector (x,y).subsector; 
 
         mo = P_SpawnMobj (x, y, ss.sector.floorheight , MT_TFOG); 
 
@@ -511,7 +512,8 @@ public class MObject {
         // because action routines can not be called yet
         state = states[info.spawnstate.ordinal()];
 
-        mobj.stateNum = state;
+        //mobj.stateNum = state;
+        mobj.state = state;
         mobj.tics = state.tics;
         mobj.sprite = state.sprite;
         mobj.frame = state.frame;
@@ -519,8 +521,8 @@ public class MObject {
         // set subsector and/or block links
         Game.getInstance().map.util.P_SetThingPosition(mobj);
 
-        mobj.floorz = mobj.subsector.sector.floorheight;
-        mobj.ceilingz = mobj.subsector.sector.ceilingheight;
+        mobj.floorz = mobj.subsector.mapSector.sector.floorheight;
+        mobj.ceilingz = mobj.subsector.mapSector.sector.ceilingheight;
 
         switch (z) {
             case ONFLOORZ:
@@ -607,7 +609,7 @@ public class MObject {
         y = mthing.y << FRACBITS; 
 
         // spawn a teleport fog at the new spot
-        ss = MapNode.R_PointInSubsector (x,y); 
+        ss = MapNode.R_PointInSubsector (x,y).subsector; 
         mo = P_SpawnMobj (x, y, ss.sector.floorheight , MT_IFOG); 
         Game.getInstance().sound.S_StartSound (mo, sfx_itmbk);
 

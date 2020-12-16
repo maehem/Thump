@@ -183,12 +183,13 @@ public class Lights {
     // Start strobing lights (usually from a trigger)
     //
     public static void EV_StartLightStrobing(Line line) {
-        MapSector	sec;
+        //MapSector	sec;
+        Sector	sec;
 
         int secnum = -1;
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line,secnum)) >= 0) {
             //sec = Game.getInstance().playerSetup.sectors[secnum];
-            sec = Game.getInstance().playerSetup.sectors.get(secnum);
+            sec = Game.getInstance().playerSetup.sectors.get(secnum).sector;
             if (sec.specialdata!=null) {
                 continue;
             }
@@ -209,8 +210,9 @@ public class Lights {
 
         //sector = sectors;
         //for (j = 0;j < numsectors; j++, sector++) {
-        for (Sector sector : Game.getInstance().playerSetup.sectors) {
-
+        for (MapSector ms : Game.getInstance().playerSetup.sectors) {
+            Sector sector = ms.sector;
+            
             if (sector.tag == line.tag) {
                 min = sector.lightlevel;
                 for (int i = 0; i < sector.linecount; i++) {
@@ -242,7 +244,9 @@ public class Lights {
         //sector = Game.getInstance().playerSetup.sectors;
 
         //for (i = 0; i < numsectors; i++, sector++) {
-        for ( Sector sector: Game.getInstance().playerSetup.sectors) {
+        for ( MapSector ms: Game.getInstance().playerSetup.sectors) {
+            Sector sector = ms.sector;
+            
             if (sector.tag == line.tag) {
                 // bright = 0 means to search
                 // for highest light level

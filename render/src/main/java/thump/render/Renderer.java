@@ -3,6 +3,7 @@
  */
 package thump.render;
 
+import java.util.logging.Level;
 import thump.base.BoundingBox;
 import thump.base.FixedPoint;
 import static thump.base.FixedPoint.FRACBITS;
@@ -305,6 +306,14 @@ public class Renderer {
 
         // Try to quickly decide by looking at sign bits.
         if ( ((ldy ^ ldx ^ dx ^ dy)&0x80000000) > 0 ) {
+            logger.log(Level.CONFIG,
+                    "XOR:\n    ldy:{0}\n    ldx:{1}\n     dx:{2}\n     dy:{3}",
+                    new Object[]{
+                        Integer.toBinaryString(ldy),
+                        Integer.toBinaryString(ldx),
+                        Integer.toBinaryString(dx),
+                        Integer.toBinaryString(dy)
+                    });
             // (left is negative)            
             return ((ldy ^ dx) & 0x80000000) > 0;
         }
@@ -348,11 +357,12 @@ public class Renderer {
                 if (x > y) {
                     // octant 0
                     logger.config("R_PointToAngle: octant 0");
-                    return tantoangle(SlopeDiv(y, x));
+                    return tantoangle(SlopeDiv(y, x))&0xFFFFFFFFL;
                 } else {
                     // octant 1
                     logger.config("R_PointToAngle: octant 1");
-                    return (short) (ANG90 - 1 - tantoangle(SlopeDiv(x, y)));
+                    //return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
+                    return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             } else {
                 //logger.warning("R_PointToAngle: x>= 0  y<0\n");
@@ -362,11 +372,24 @@ public class Renderer {
                 if (x > y) {
                     // octant 8
                     logger.config("R_PointToAngle: octant 7");
-                    return -tantoangle(SlopeDiv(y, x));
+                    int slpdiv = SlopeDiv(y, x);
+                    logger.log(Level.CONFIG, "    SlopDiv(x:{0},y:{1}) = {2}",
+                        new Object[]{x,y,slpdiv}
+                    );
+                    logger.log(Level.CONFIG, 
+                            "    tantoangle(slopediv()) = 0x{0}",
+                            new Object[]{Long.toHexString(tantoangle(slpdiv))}
+                    );
+                    logger.log(Level.CONFIG, 
+                            "    ~tantoangle(slopediv()) = {0}",
+                            Long.toHexString((~tantoangle(slpdiv))&0xFFFFFFFFL)
+                    );
+
+                    return (~tantoangle(SlopeDiv(y, x))+1)&0xFFFFFFFFL;
                 } else {
                     // octant 7
                     logger.config("R_PointToAngle: octant 6");
-                    return ANG270 + tantoangle(SlopeDiv(x, y));
+                    return (ANG270 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             }
         } else {
@@ -379,11 +402,11 @@ public class Renderer {
                 if (x > y) {
                     // octant 3
                     logger.config("R_PointToAngle: octant 3");
-                    return ANG180 - 1 - tantoangle(SlopeDiv(y, x));
+                    return (ANG180 - 1 + ~(tantoangle(SlopeDiv(y, x))))&0xFFFFFFFFL;
                 } else {
                     // octant 2
                     logger.config("R_PointToAngle: octant 2");
-                    return ANG90 + tantoangle(SlopeDiv(x, y));
+                    return (ANG90 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             } else {
                 // y<0
@@ -393,11 +416,11 @@ public class Renderer {
                 if (x > y) {
                     // octant 4
                     logger.config("R_PointToAngle: octant 4");
-                    return ANG180 + tantoangle(SlopeDiv(y, x));
+                    return (ANG180 + tantoangle(SlopeDiv(y, x)))&0xFFFFFFFFL;
                 } else {
                     // octant 5
                     logger.config("R_PointToAngle: octant 5");
-                    return ANG270 - 1 - tantoangle(SlopeDiv(x, y));
+                    return (ANG270 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             }
         }
@@ -471,7 +494,7 @@ public class Renderer {
     // rw_distance must be calculated first.
     //
     int R_ScaleFromGlobalAngle (long visangle){
-        int scale;
+        long scale;
         long anglea;
         long angleb;
         int sinea;
@@ -516,7 +539,7 @@ public class Renderer {
             scale = 64*FRACUNIT;
         }
 
-        return scale;
+        return (int)scale;
     }
 
 
@@ -562,7 +585,7 @@ public class Renderer {
     void R_InitTextureMapping () {
         int			i;
         int			x;
-        int			t;
+        long			t;
         int		focallength;
 
         //Stats stats = Stats.getInstance();
@@ -603,7 +626,7 @@ public class Renderer {
             while (viewangletox[i]>x) {
                 i++;
             }
-            xtoviewangle[x] = (i<<ANGLETOFINESHIFT)-ANG90;
+            xtoviewangle[x] = ((((long)i)<<ANGLETOFINESHIFT)-ANG90)&0xFFFFFFFFL;
         }
 
         // Take out the fencepost cases from viewangletox.
@@ -775,9 +798,10 @@ public class Renderer {
     //
     // R_SetupFrame
     //
-    public void R_SetupFrame (RPlayerView pv) {	
+    public void R_SetupFrame (RPlayerView pv) {
+        logger.log(Level.CONFIG, "R_SetupFrame()");
         // void R_SetupFrame( int x, int y, int angle, 
-        int		i;
+        int i;
 
         //viewplayer = player;
         viewplayer = pv; // Chached for Things to use later.
@@ -789,7 +813,11 @@ public class Renderer {
         viewy = pv.y;
         
         //viewangle = player.mo.angle + viewangleoffset;
-        viewangle = pv.angle + viewangleoffset;
+        viewangle = (pv.angle + viewangleoffset)&0xFFFFFFFFL;
+        logger.log(Level.CONFIG, 
+                "    playerview: set view angle = pv.angle + viewangleoffset == {0} = {1} + {2}", 
+                new Object[]{Long.toHexString(viewangle), Long.toHexString(pv.angle), Long.toHexString(viewangleoffset)}
+        );
         
         //extralight = player.extralight;
         extralight = pv.extralight;

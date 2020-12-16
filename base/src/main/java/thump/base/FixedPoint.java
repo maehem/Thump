@@ -22,7 +22,7 @@ public class FixedPoint {
 
     // Fixme. __USE_C_FIXED__ or something.
     public static int mul(int a, int b) {
-        return (int) ((a * (long) b) >> FRACBITS);
+        return (int) (((long)a * (long) b) >> FRACBITS);
     }
 
     //

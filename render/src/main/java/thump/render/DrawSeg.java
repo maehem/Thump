@@ -29,7 +29,7 @@ public class DrawSeg {
     public int     scalestep;
 
     // 0=none, 1=bottom, 2=top, 3=both
-    public int     silhouette = SIL_NONE; // SIL_ values.  Use enum?
+    public int     silhouette = SIL_NONE; // SIL_ values.
 
     // do not clip sprites above this
     public int      bsilheight;

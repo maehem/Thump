@@ -117,7 +117,12 @@ public class MapObject extends Degenmobj implements Thinker {
     public MobJInfo		info;	// &mobjinfo[mobj.type]
     
     public long			tics;	// state tic counter
-    public State		state = ThingStateLUT.states[0];
+    
+    // TODO:  Are these the same???
+    public State state = ThingStateLUT.states[0];
+    //public State stateNum;
+    
+    
     public int			health;
 
     // Movement direction, movement generation (zig-zagging).
@@ -152,7 +157,6 @@ public class MapObject extends Degenmobj implements Thinker {
     private Thinker prevThinker;
     private Thinker nextThinker;
     private ThinkerAction function;
-    public State stateNum;
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).

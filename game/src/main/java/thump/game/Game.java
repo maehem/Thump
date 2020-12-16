@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static thump.base.Defines.logger;
 import static thump.game.Event.BTS_PAUSE;
 import static thump.game.Event.BTS_SAVEGAME;
@@ -68,6 +67,7 @@ import thump.game.maplevel.MapObject;
 import thump.game.play.MObject;
 import thump.game.headup.Stuff;
 import thump.game.maplevel.MapNode;
+import thump.game.maplevel.MapSubSector;
 import thump.game.network.Net;
 import static thump.game.network.Net.BACKUPTICS;
 import static thump.game.play.Interaction.maxammo;
@@ -84,12 +84,10 @@ import thump.game.menu.MenuManager;
 import thump.game.menu.MenuMisc;
 import thump.game.play.PlayerView;
 import thump.game.status.Status;
-import thump.render.RThings;
 import thump.system.SystemInterface;
 import thump.system.VideoInterface;
 import thump.wad.Wad;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_SHADOW;
-import thump.wad.map.SubSector;
 import thump.wad.map.Thinker;
 import thump.wad.mapraw.MapThing;
 
@@ -105,7 +103,7 @@ public class Game {
     private Game() {
         players[0] = new Player();
         //things = new Things();
-        renderer.setThings(new RThings());
+        renderer.setThings(things.rThings);
     }
     
     public static Game getInstance() {
@@ -345,11 +343,11 @@ public class Game {
         int		forward;
         int		side;
 
+        logger.finest("Build Tick Command.");
         //TickCommand	base;
         //base = SystemInterface.getInstance().I_BaseTiccmd ();		// empty, or external driver
-        //memcpy (cmd,base,sizeof(*cmd));
-        Logger logger = thump.base.Defines.logger;
-        logger.finer("Build Tick Command.");
+        
+        cmd.reset(); //memcpy (cmd,base,sizeof(*cmd));
 
         cmd.consistancy = (short) consistancy[consoleplayer][net.maketic%BACKUPTICS]; 
 
@@ -577,7 +575,7 @@ public class Game {
             if (gamemap < 12) {
                 renderer.skytexture = wad.getMapTextureByName("SKY1");
             } else if (gamemap < 21) {
-                    renderer.skytexture = wad.getMapTextureByName("SKY2");
+                renderer.skytexture = wad.getMapTextureByName("SKY2");
             }
         }
 
@@ -657,8 +655,7 @@ public class Game {
             return false; 
         } 
 
-        if (gamestate == GS_LEVEL) 
-        { 
+        if (gamestate == GS_LEVEL) { 
 //    #if 0 
 //            if (devparm && ev.type == ev_keydown && ev.data1 == ';') 
 //            { 
@@ -994,7 +991,7 @@ public class Game {
     boolean G_CheckSpot( int playernum, MapThing mthing ) { 
         int		x;
         int		y; 
-        SubSector	ss; 
+        MapSubSector	ss; 
         long		an; 
         MapObject	mo; 
         int		i;
@@ -1029,7 +1026,7 @@ public class Game {
         an = ( ANG45 * (mthing.angle/45) ) >> ANGLETOFINESHIFT; 
 
         mo = MObject.P_SpawnMobj (x+20*finecosine(an), y+20*finesine(an) 
-                          , ss.sector.floorheight 
+                          , ss.mapSector.sector.floorheight 
                           , MT_TFOG); 
 
         if (players[consoleplayer].viewz != 1) { 

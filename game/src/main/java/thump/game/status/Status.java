@@ -988,7 +988,7 @@ public class Status {
         }
 
         //STlib_updatePercent(&w_health, refresh);
-        w_health.STlib_updatePercent(refresh);
+        w_health.STlib_updatePercent(plyr.health, refresh);
         //STlib_updatePercent(&w_armor, refresh);
         w_armor.STlib_updatePercent(refresh);
 

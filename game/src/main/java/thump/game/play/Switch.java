@@ -169,7 +169,7 @@ public class Switch {
                 buttonlist[i].where = w;
                 buttonlist[i].btexture = texture;
                 buttonlist[i].btimer = time;
-                buttonlist[i].soundorg = (MapObject) line.frontsector.soundorg;
+                buttonlist[i].soundorg = Game.getInstance().playerSetup.lookupMapSectorFor(line.frontsector).soundorg;
                 return;
             }
         }
@@ -203,9 +203,9 @@ public class Switch {
 //        texTop = ps.sides[line.sidenum[0]].getTopTextureNum();
 //        texMid = ps.sides[line.sidenum[0]].getMidTextureNum();
 //        texBot = ps.sides[line.sidenum[0]].getBottomTextureNum();
-        texTop = ps.sides.get(line.sidenum[0]).getTopTextureNum(wad);
-        texMid = ps.sides.get(line.sidenum[0]).getMidTextureNum(wad);
-        texBot = ps.sides.get(line.sidenum[0]).getBottomTextureNum(wad);
+        texTop = ps.sides.get(line.sidenum[0]).side.getTopTextureNum(wad);
+        texMid = ps.sides.get(line.sidenum[0]).side.getMidTextureNum(wad);
+        texBot = ps.sides.get(line.sidenum[0]).side.getBottomTextureNum(wad);
 
         sound = sfx_swtchn;
 
@@ -218,7 +218,7 @@ public class Switch {
             if (switchlist[i] == texTop) {
                 gs.S_StartSound(buttonlist[0].soundorg,sound);
                 //ps.sides[line.sidenum[0]].setTopTextureNum(switchlist[i^1]);
-                ps.sides.get(line.sidenum[0]).setTopTextureNum(switchlist[i^1]);
+                ps.sides.get(line.sidenum[0]).side.setTopTextureNum(switchlist[i^1]);
 
                 if (useAgain>0) {
                     P_StartButton(line,TOP,switchlist[i],BUTTONTIME);
@@ -229,7 +229,7 @@ public class Switch {
                 if (switchlist[i] == texMid) {
                     gs.S_StartSound(buttonlist[0].soundorg,sound);
                     //ps.sides[line.sidenum[0]].setMidTextureNum(switchlist[i^1]);
-                    ps.sides.get(line.sidenum[0]).setMidTextureNum(switchlist[i^1]);
+                    ps.sides.get(line.sidenum[0]).side.setMidTextureNum(switchlist[i^1]);
 
                     if (useAgain>0) {
                         P_StartButton(line, MIDDLE,switchlist[i],BUTTONTIME);
@@ -240,7 +240,7 @@ public class Switch {
                     if (switchlist[i] == texBot) {
                         gs.S_StartSound(buttonlist[0].soundorg,sound);
                         //ps.sides[line.sidenum[0]].setBottomTextureNum(switchlist[i^1]);
-                        ps.sides.get(line.sidenum[0]).setBottomTextureNum(switchlist[i^1]);
+                        ps.sides.get(line.sidenum[0]).side.setBottomTextureNum(switchlist[i^1]);
 
                         if (useAgain>0) {
                             P_StartButton(line, BOTTOM,switchlist[i],BUTTONTIME);

@@ -11,13 +11,23 @@ package thump.game;
  * @author mark
  */
 public class TickCommand {
-    public int     forwardmove=0;    // *2048 for move
-    public int     sidemove=0;       // *2048 for move
-    public short    angleturn=0;      // <<16 for angle delta
-    public short    consistancy=0;    // checks for net game
-    public byte     chatchar=0;
-    public byte     buttons=0;
-    
+
+    public int forwardmove = 0;    // *2048 for move
+    public int sidemove = 0;       // *2048 for move
+    public short angleturn = 0;      // <<16 for angle delta
+    public short consistancy = 0;    // checks for net game
+    public byte chatchar = 0;
+    public byte buttons = 0;
+
+    public void reset() {
+        forwardmove = 0;
+        sidemove = 0;
+        angleturn = 0;
+        consistancy = 0;
+        chatchar = 0;
+        buttons = 0;
+    }
+
     // Not even used!
 //    public int getChecksum(TickCommand cmd) {
 //        int		i;

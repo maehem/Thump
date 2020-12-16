@@ -36,7 +36,7 @@ public class Platform implements Thinker {
     public static final int MAXPLATS = 30;
 
     //Thinker thinker;
-    Sector  sector;
+    MapSector  mapSector;
     int     speed;
     int     low;
     int     high;
@@ -106,7 +106,7 @@ public class Platform implements Thinker {
 
         switch (plat.status) {
             case up:
-                res = Floor.T_MovePlane(plat.sector,
+                res = Floor.T_MovePlane(plat.mapSector.sector,
                         plat.speed,
                         plat.high,
                         plat.crush, 0, 1);
@@ -114,7 +114,7 @@ public class Platform implements Thinker {
                 if (plat.type == raiseAndChange
                         || plat.type == raiseToNearestAndChange) {
                     if (0 == (Game.getInstance().leveltime & 7)) {
-                        sound.S_StartSound(plat.sector.soundorg,
+                        sound.S_StartSound(plat.mapSector.soundorg,
                                 sfx_stnmov);
                     }
                 }
@@ -122,12 +122,12 @@ public class Platform implements Thinker {
                 if (res == crushed && (!plat.crush)) {
                     plat.count = plat.wait;
                     plat.status = down;
-                    sound.S_StartSound(plat.sector.soundorg,
+                    sound.S_StartSound(plat.mapSector.soundorg,
                             sfx_pstart);
                 } else if (res == pastdest) {
                     plat.count = plat.wait;
                     plat.status = waiting;
-                    sound.S_StartSound(plat.sector.soundorg,
+                    sound.S_StartSound(plat.mapSector.soundorg,
                             sfx_pstop);
 
                     switch (plat.type) {
@@ -148,24 +148,24 @@ public class Platform implements Thinker {
                 break;
 
             case down:
-                res = Floor.T_MovePlane(plat.sector, plat.speed, plat.low, false, 0, -1);
+                res = Floor.T_MovePlane(plat.mapSector.sector, plat.speed, plat.low, false, 0, -1);
 
                 if (res == pastdest) {
                     plat.count = plat.wait;
                     plat.status = waiting;
-                    sound.S_StartSound(plat.sector.soundorg, sfx_pstop);
+                    sound.S_StartSound(plat.mapSector.soundorg, sfx_pstop);
                 }
                 break;
 
             case waiting:
                 plat.count--;
                 if (0 == plat.count) {
-                    if (plat.sector.floorheight == plat.low) {
+                    if (plat.mapSector.sector.floorheight == plat.low) {
                         plat.status = up;
                     } else {
                         plat.status = down;
                     }
-                    sound.S_StartSound(plat.sector.soundorg, sfx_pstart);
+                    sound.S_StartSound(plat.mapSector.soundorg, sfx_pstart);
                 }
                 break;
             case in_stasis:
@@ -182,7 +182,7 @@ public class Platform implements Thinker {
         Platform plat;
         int secnum;
         int rtn;
-        MapSector sec;
+        MapSector ms;
 
         secnum = -1;
         rtn = 0;
@@ -203,7 +203,8 @@ public class Platform implements Thinker {
 
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line, secnum)) >= 0) {
             //sec = ps.sectors[secnum];
-            sec = ps.sectors.get(secnum);
+            Sector sec = ps.sectors.get(secnum).sector;
+            MapSector mSec = ps.lookupMapSectorFor(sec);
 
             if (sec.specialdata != null) {
                 continue;
@@ -216,8 +217,8 @@ public class Platform implements Thinker {
             Tick.P_AddThinker(plat);
 
             plat.type = type;
-            plat.sector = sec;
-            plat.sector.specialdata = plat;
+            plat.mapSector = mSec;
+            plat.mapSector.sector.specialdata = plat;
             plat.setFunction( new T_PlatRaise() );
             plat.crush = false;
             plat.tag = line.tag;
@@ -226,25 +227,25 @@ public class Platform implements Thinker {
                 case raiseToNearestAndChange:
                     plat.speed = PLATSPEED / 2;
                     //sec.setFloorPic( ps.sides[line.sidenum[0]].sector.getFloorPic() );
-                    sec.setFloorPic( ps.sides.get(line.sidenum[0]).sector.getFloorPic(Game.getInstance().wad) );
+                    sec.setFloorPic( ps.sides.get(line.sidenum[0]).mapSector.sector.getFloorPic(Game.getInstance().wad) );
                     plat.high = SpecialEffects.P_FindNextHighestFloor(sec, sec.floorheight);
                     plat.wait = 0;
                     plat.status = up;
                     // NO MORE DAMAGE, IF APPLICABLE
                     sec.special = 0;
 
-                    sound.S_StartSound(sec.soundorg, sfx_stnmov);
+                    sound.S_StartSound(mSec.soundorg, sfx_stnmov);
                     break;
 
                 case raiseAndChange:
                     plat.speed = PLATSPEED / 2;
                     //sec.setFloorPic( ps.sides[line.sidenum[0]].sector.getFloorPic() );
-                    sec.setFloorPic( ps.sides.get(line.sidenum[0]).sector.getFloorPic(Game.getInstance().wad) );
+                    sec.setFloorPic( ps.sides.get(line.sidenum[0]).mapSector.sector.getFloorPic(Game.getInstance().wad) );
                     plat.high = sec.floorheight + amount * FRACUNIT;
                     plat.wait = 0;
                     plat.status = up;
 
-                    sound.S_StartSound(sec.soundorg, sfx_stnmov);
+                    sound.S_StartSound(mSec.soundorg, sfx_stnmov);
                     break;
 
                 case downWaitUpStay:
@@ -258,7 +259,7 @@ public class Platform implements Thinker {
                     plat.high = sec.floorheight;
                     plat.wait = 35 * PLATWAIT;
                     plat.status = down;
-                    sound.S_StartSound(sec.soundorg, sfx_pstart);
+                    sound.S_StartSound(mSec.soundorg, sfx_pstart);
                     break;
 
                 case blazeDWUS:
@@ -272,7 +273,7 @@ public class Platform implements Thinker {
                     plat.high = sec.floorheight;
                     plat.wait = 35 * PLATWAIT;
                     plat.status = down;
-                    sound.S_StartSound(sec.soundorg, sfx_pstart);
+                    sound.S_StartSound(mSec.soundorg, sfx_pstart);
                     break;
 
                 case perpetualRaise:
@@ -292,7 +293,7 @@ public class Platform implements Thinker {
                     plat.wait = 35 * PLATWAIT;
                     plat.status = Status.values()[Random.getInstance().P_Random() & 1];
 
-                    sound.S_StartSound(sec.soundorg, sfx_pstart);
+                    sound.S_StartSound(mSec.soundorg, sfx_pstart);
                     break;
             }
             P_AddActivePlat(plat);
@@ -347,7 +348,7 @@ public class Platform implements Thinker {
         Platform activeplats[] = Game.getInstance().playerSetup.effects.activeplats;
         for (int i = 0;i < MAXPLATS;i++) {
             if (plat == activeplats[i]) {
-                (activeplats[i]).sector.specialdata = null;
+                (activeplats[i]).mapSector.sector.specialdata = null;
                 Tick.P_RemoveThinker(activeplats[i]);
                 activeplats[i] = null;
 

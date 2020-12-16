@@ -618,7 +618,7 @@ public class Finale {
         F_CastPrint (castorder[castnum].name);
 
         // draw the current frame in the middle of the screen
-        sprdef = game.things.sprites[caststate.sprite.ordinal()];
+        sprdef = game.things.rThings.sprites[caststate.sprite.ordinal()];
         sprframe = sprdef.spriteframes[ (int)caststate.frame & FF_FRAMEMASK];
         lump = sprframe.lump[0];
         flip = sprframe.flip[0]>0;

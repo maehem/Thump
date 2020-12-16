@@ -895,7 +895,7 @@ public class Interaction {
         // player specific
         if (player!=null) {
             // end of game hell hack
-            if (target.subsector.sector.special == 11
+            if (target.subsector.mapSector.sector.special == 11
                 && damage >= target.health)
             {
                 damage = target.health - 1;

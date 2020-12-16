@@ -334,7 +334,7 @@ public class MapUtil {
             if (thing.sprev != null) {
                 thing.sprev.snext = thing.snext;
             } else {
-                thing.subsector.mapSector.thinglist = thing.snext;
+                thing.subsector.mapSector.sector.thinglist = thing.snext;
             }
         }
 
@@ -384,13 +384,13 @@ public class MapUtil {
             sec = ss.mapSector;
 
             thing.sprev = null;
-            thing.snext = sec.thinglist;
+            thing.snext = sec.sector.thinglist;
 
-            if (sec.thinglist!=null) {
-                sec.thinglist.sprev = thing;
+            if (sec.sector.thinglist!=null) {
+                sec.sector.thinglist.sprev = thing;
             }
 
-            sec.thinglist = thing;
+            sec.sector.thinglist = thing;
         }
 
         // link into blockmap

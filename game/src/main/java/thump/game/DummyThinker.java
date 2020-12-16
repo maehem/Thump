@@ -15,17 +15,17 @@ import thump.wad.map.ThinkerAction;
 public class DummyThinker implements Thinker {
 
     private ThinkerAction function;
-    private Thinker thinker;
+    private Thinker prev;
     private Thinker next;
 
     @Override
     public void setPrevThinker(Thinker thinker) {
-        this.thinker = thinker;
+        this.prev = thinker;
     }
 
     @Override
     public Thinker getPrevThinker() {
-        return null;
+        return prev;
     }
 
     @Override

@@ -3,6 +3,9 @@
  */
 package thump.base;
 
+import java.text.NumberFormat;
+import java.util.logging.Level;
+import static thump.base.Defines.logger;
 import static thump.base.FixedPoint.FRACBITS;
 
 /**
@@ -71,27 +74,57 @@ public class Tables {
         //return (int) ( Math.tanh(i/(double)SLOPERANGE)*Integer.MAX_VALUE );
     }
     
-    
-    public static int tantoangle( int index ) {  // 2048 indexes  
+    /**
+     * Tan to angle.
+     * y=arctan(x)
+     * 
+     * output is 0 to PI/2,  scaled up to 0 - 0x20000000
+     * @param index
+     * @return 
+     */
+    public static long tantoangle( int index ) {  // 2048 indexes  
         if ( index == 0 ) {
             return 0;
         }
-//        double tan = 
-//        double aa = Math.atan(0);
-//        double bb = Math.atan(32);
-//        double cc = Math.atan(64);
-//        double dd = Math.atan(96);
-//        double ee = Math.atan(128);
-//        double ff = Math.atan(160);
-//        double gg = Math.atan(192);
-//        double hh = Math.atan(224);
-//        double ii = Math.atan(0.707);
-        double atan = Math.atan((double)index/SLOPERANGE/2);
-        int reval = (int) (atan*0xFFFFFFFFL);
-        return reval;
+        //  2048 = 2 * PI
+//        double rad = ((index-1016) * ( /*2.0**/Math.PI/SLOPERANGE ));
+//        double atan = Math.atan((double)index/SLOPERANGE/2);
+//        double atan = Math.atan(rad)+1;  //  0.0 to 2.0
+
+        //long reval = (long)(atan/**0xFFFFFFFFL*/);
+//        long reval = (long)(atan*0x40000L);
+//        return reval;
         //return (int) (Math.atan(i/(double)SLOPERANGE)*Integer.MAX_VALUE);
         
-        // 0-90 degrees
+        return (long) (Math.atan(index/(1304.93*Math.PI/2.0)) * 0x20000000 * 1.27434);
+    }
+    
+    public static void dumpDoubleTan() {  // desired range:   0, 333772, ...   536870912
+        logger.log(Level.CONFIG, "atan(rad):");
+        double frac = 0x20000000/Math.PI/2.0;
+        for ( int i=0; i<2048; i++ ) {
+            //logger.log(Level.CONFIG, "    {0}: {1}", new Object[]{i, Math.atan(i/10.0d)});
+            logger.log(Level.CONFIG, "    {0}: {1}", new Object[]{i,  Math.atan(i/(1304.93*Math.PI/2.0)) * 0x20000000 * 1.27434  });
+        }
+    }
+    
+    public static void dumpTanToAngle() {
+        logger.log(Level.CONFIG, "Tan to Angle table:");
+        NumberFormat nf = NumberFormat.getInstance();
+        for (int i=0; i< 2048; i+=8 ) {
+            logger.log(Level.CONFIG, "     {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}",
+                    new Object[]{ 
+                        nf.format(tantoangle(i)),
+                        nf.format(tantoangle(i+1)),
+                        nf.format(tantoangle(i+2)),
+                        nf.format(tantoangle(i+3)),
+                        nf.format(tantoangle(i+4)),
+                        nf.format(tantoangle(i+5)),
+                        nf.format(tantoangle(i+6)),
+                        nf.format(tantoangle(i+7))
+                    }
+            );
+        }
     }
 
     // Effective size is 4096.
@@ -116,6 +149,9 @@ public class Tables {
     //extern angle_t		tantoangle[SLOPERANGE+1];
 
 
+    public static final int ang2deg( long angle ) {
+        return (int)(angle/0xAAAAAAL);
+    }
 
     public static final int SlopeDiv( int num, int den) {
         int 	ans;

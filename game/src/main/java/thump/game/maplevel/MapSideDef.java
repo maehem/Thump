@@ -9,20 +9,21 @@ import thump.wad.map.Side;
  *
  * @author mark
  */
-public class MapSideDef extends Side {
-        
+public class MapSideDef /*extends Side*/ {
+    public final Side side;
   // Front sector, towards viewer.
     public MapSector mapSector;
 
-    public MapSideDef(int textureoffset, int rowoffset, 
-            String toptexture, String bottomtexture, String midtexture, 
-            int sector) {
-        super(textureoffset, rowoffset, toptexture, bottomtexture, midtexture, sector);
-    }
+//    public MapSideDef(int textureoffset, int rowoffset, 
+//            String toptexture, String bottomtexture, String midtexture, 
+//            int sector) {
+//        super(textureoffset, rowoffset, toptexture, bottomtexture, midtexture, sector);
+//    }
     
-    public MapSideDef(Side s) {
-        super(s);
-        this.mapSector = (MapSector) sector;
+    public MapSideDef(Side side) {
+        this.side = side;
+        //super(s);
+        //this.mapSector = (MapSector) sector;
     }
   
 //    public Sector getSector(MapLump map) {

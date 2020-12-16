@@ -3,8 +3,8 @@
  */
 package thump.render;
 
-import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +12,7 @@ import thump.base.BoundingBox;
 import thump.base.Defines;
 import static thump.base.Defines.SCREENHEIGHT;
 import static thump.base.Defines.SCREENWIDTH;
+import thump.wad.DrawUtils;
 import thump.wad.Wad;
 import thump.wad.lump.Lump;
 import thump.wad.lump.PictureLump;
@@ -267,12 +268,13 @@ public class Video {
 //        
 //        g.drawImage(src, sx, sy, null);
 //        g.dispose();
-        int destX = x;
+        //int destX = x;
         Column columns[] = patch.pixelData;
         for (Column column : columns) {
             //column.draw(screens[scrn], destX, y);
             drawColumn(column, screens[scrn], x, dy);
-            destX++;
+            x++;
+            //destX++;
         }
 
         /*
@@ -420,7 +422,8 @@ public class Video {
         #endif 
          */
         //BufferedImage src = (BufferedImage) patchData.getColorImage(0/*Stats.getInstance().wad.getPlayPalLump().paletteList.get(0)*/);
-        BufferedImage src = PatchData2Image(patchData, wad.getPlayPalLump().paletteList.get(0));
+        //BufferedImage src = PatchData2Image(patchData, wad.getPlayPalLump().paletteList.get(0));
+        Image src = DrawUtils.getColorImage(patchData, wad.getPlayPalLump().paletteList, 0);
         //BufferedImage dest = screenImage[scrn];
         Graphics g = getGraphics(scrn);
         //Graphics g = VideoInterface.getInstance().getStrategy().getDrawGraphics();
@@ -609,22 +612,22 @@ public class Video {
         //frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
                         
         do {
-            if (y>=SCREENHEIGHT) {
+            if (y >= SCREENHEIGHT) {
                 return;
             }
             try {
-                if (vals[y]>=0) { // Transparency is -1 so don't draw for negative value.
-                    screen.area[dy*SCREENWIDTH+x] = vals[y];
+                if (vals[y] >= 0) { // Transparency is -1 so don't draw for negative value.
+                    screen.area[dy * SCREENWIDTH + x] = vals[y];
                 }
-            y++;
-            dy++;
-            //frac += fracstep;
-            } catch (ArrayIndexOutOfBoundsException ex ) {
+                y++;
+                dy++;
+                //frac += fracstep;
+            } catch (ArrayIndexOutOfBoundsException ex) {
                 // chicken!
-                int i=0;
+                int i = 0;
             }
             count--;
-        } while (count>0); 
+        } while (count > 0);
     }
     
     private static BufferedImage PatchData2Image(PatchData data, int[] palette) {

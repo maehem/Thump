@@ -40,7 +40,7 @@ public class Sector {
     public int          linecount;
     public Line[]       lines;	// [linecount] size
     
-    public Object    soundorg;    // MapObject origin for any sounds played by the sector
+    //public Object    soundorg;    // MapObject origin for any sounds played by the sector
     private int floorpicNum = -1;
     private int ceilingpicNum = -1;
 
@@ -54,15 +54,16 @@ public class Sector {
         this.tag = tag;
     }
     
-    public Sector( Sector sector ) {
-        this.floorheight = sector.floorheight;
-        this.ceilingheight = sector.ceilingheight;
-        this.floorpic = sector.floorpic;
-        this.ceilingpic = sector.ceilingpic;
-        this.lightlevel = sector.lightlevel;
-        this.special = sector.special;
-        this.tag = sector.tag;        
-    }
+//    public Sector( Sector sector ) {
+//        this.floorheight = sector.floorheight;
+//        this.ceilingheight = sector.ceilingheight;
+//        this.floorpic = sector.floorpic;
+//        this.ceilingpic = sector.ceilingpic;
+//        this.lightlevel = sector.lightlevel;
+//        this.special = sector.special;
+//        this.tag = sector.tag;
+//        this.thinglist = sector.thinglist;
+//    }
     
     public int getFloorPic(Wad wad) {
         if (floorpicNum == -1 ) {

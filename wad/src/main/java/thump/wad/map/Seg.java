@@ -38,15 +38,19 @@ public class Seg {
     public Side sidedef;
     public Line linedef;
 
-    public Seg(MapLump map, int start, int end, int angle, int lineDef, int side, int offset) {
+    public Seg(MapLump map, int start, int end, long angle, int lineDef, int side, int offset) {
         this.map = map;
         this.start = start;
         this.end = end;
-        this.angle = ((long)(angle&0xFFFF))<<FRACBITS;
+        this.angle = ((long)(angle&0xFFFFFFFL))<<FRACBITS;
         this.lineDefNum = lineDef;
         this.side = side;
         this.offset = offset<<FRACBITS;
         
+    }
+    
+    public Seg( Seg s ) {
+        this( s.map, s.start, s.end, s.angle, s.lineDefNum, s.side, s.offset );
     }
     
     @Override

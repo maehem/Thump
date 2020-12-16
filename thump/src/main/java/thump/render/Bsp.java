@@ -33,7 +33,6 @@ public class Bsp {
 
     public ClipRange	solidsegs[] = new ClipRange[MAXSEGS];
     
-    //private static Bsp instance = null;
     private final Renderer renderer;
     
     public Bsp(Renderer renderer) {
@@ -297,7 +296,7 @@ public class Bsp {
         // Does not cross a pixel?
         if (x1 == x2) {
             logger.log(Level.CONFIG, "Bsp.R_AddLine():  x1 == x2 ,  {0} == {1}   returning...\n", new Object[]{ x1, x2 });
-//MJK            return;
+            return;
         }				
 
         backsector = line.backsector;

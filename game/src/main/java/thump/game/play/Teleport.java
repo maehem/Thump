@@ -61,7 +61,7 @@ public class Teleport {
         //for (i = 0; i < game.playerSetup.sectors.length; i++) {
         for (i = 0; i < game.playerSetup.sectors.size(); i++) {
             //if (game.playerSetup.sectors[i].tag == tag) {
-            if (game.playerSetup.sectors.get(i).tag == tag) {
+            if (game.playerSetup.sectors.get(i).sector.tag == tag) {
                 //thinker = game.thinkercap.next;
                 for (thinker = game.thinkercap.getNextThinker();
                         thinker != game.thinkercap;
@@ -78,11 +78,11 @@ public class Teleport {
                         continue;
                     }
 
-                    sector = m.subsector.sector;
+                    sector = m.subsector.mapSector.sector;
                     // wrong sector
                     //if (sector - sectors != i) {
                     //if ( sector != game.playerSetup.sectors[i] ) {
-                    if ( sector != game.playerSetup.sectors.get(i) ) {
+                    if ( sector != game.playerSetup.sectors.get(i).sector ) {
                         continue;
                     }
 

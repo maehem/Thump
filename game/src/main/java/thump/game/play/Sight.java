@@ -148,7 +148,7 @@ public class Sight {
 //                     numsubsectors);
 //    #endif
         //sub = game.playerSetup.subsectors[num];
-        sub = game.playerSetup.subsectors.get(num);
+        sub = game.playerSetup.subsectors.get(num).subsector;
 
         // check lines
         count = sub.numlines;
@@ -156,7 +156,7 @@ public class Sight {
         //seg = game.playerSetup.segs[index];
 
         for (; count>0; index++, count--) {
-            seg = game.playerSetup.segs[index];
+            seg = game.playerSetup.segs.get(index).seg;
             
             line = seg.linedef;
 
@@ -307,8 +307,8 @@ public class Sight {
         // First check for trivial rejection.
 
         // Determine subsector entries in REJECT table.
-        s1 = (game.playerSetup.getSecNum(t1.subsector.sector)); // - game.playerSetup.sectors);
-        s2 = (game.playerSetup.getSecNum(t2.subsector.sector)); // - game.playerSetup.sectors);
+        s1 = (game.playerSetup.getSecNum(t1.subsector.mapSector.sector)); // - game.playerSetup.sectors);
+        s2 = (game.playerSetup.getSecNum(t2.subsector.mapSector.sector)); // - game.playerSetup.sectors);
         //pnum = s1*game.playerSetup.sectors.length + s2;
         pnum = s1*game.playerSetup.sectors.size() + s2;
         bytenum = pnum>>3;

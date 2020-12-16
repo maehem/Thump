@@ -87,6 +87,10 @@ public final class DoomMain {
         
     public DoomMain( List<String> args) throws FileNotFoundException {
         logger.log(Level.CONFIG, "{0}", title);
+        
+        //dumpTanToAngle();  // Debug
+        //dumpDoubleTan();
+        
         game.args = args;
         //ThumpLogger.init();  // Sets up or logging handlers and level.
         game.setDoomMain(this);
@@ -613,7 +617,7 @@ public final class DoomMain {
 
         // draw the view directly
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.gametic>0) {
-            logger.finer("Render Player View");
+            logger.config("************  Render Player View  *************");
             R_RenderPlayerView (game.players[game.displayplayer]);
             
             if (game.gamestate == GS_LEVEL && game.gametic>0) {
@@ -629,7 +633,7 @@ public final class DoomMain {
 
         // see if the border needs to be initially drawn
         if (game.gamestate == GS_LEVEL && oldgamestate != GS_LEVEL) {
-            logger.config("Fill Back Screen");
+            logger.config("Fill Back Screen Border");
             viewactivestate = false;        // view was not active
             game.renderer.draw.R_FillBackScreen (
                     game.wad,
@@ -916,14 +920,11 @@ public final class DoomMain {
             break;
           case 4:
             game.gamestate = GS_DEMOSCREEN;
-            if ( game.gameMode == GameMode.COMMERCIAL)
-            {
+            if ( game.gameMode == GameMode.COMMERCIAL) {
                 pagetic = 35 * 11;
                 pagename = "TITLEPIC";
                 game.sound.S_StartMusic(mus_dm2ttl);
-            }
-            else
-            {
+            } else {
                 pagetic = 200;
 
                 if ( game.gameMode == GameMode.RETAIL ) {
@@ -1138,26 +1139,52 @@ public final class DoomMain {
         logger.severe("Game mode indeterminate");
     }
 
+    PlayerView pv=null;
     //
     // R_RenderView
     //
     public void R_RenderPlayerView (Player player) {
-        PlayerView pv = new PlayerView(
+        if ( pv==null ) {
+            pv = new PlayerView(
                 player.mo.x, player.mo.y, player.mo.angle,
                 player.powers[Defines.PowerType.pw_invisibility.ordinal()], 
-                player.mo.subsector.sector.lightlevel, 
+                player.mo.subsector.mapSector.sector.lightlevel, 
                 player.extralight, 
                 player.viewz, player.fixedcolormap,
                 player.psprites);
+        } else {
+            pv.x = player.mo.x;
+            pv.y = player.mo.y;
+//            if ( pv.angle != player.mo.angle ) {
+//                logger.log(Level.CONFIG, "Player angle has chenged:  old:{0}  new:{1}",
+//                        new Object[]{Long.toHexString(player.mo.angle), Long.toHexString(pv.angle)});
+//            }
+            pv.angle = player.mo.angle;
+            pv.invisibility = player.powers[Defines.PowerType.pw_invisibility.ordinal()];
+            pv.lightlevel = player.mo.subsector.mapSector.sector.lightlevel;
+            pv.extralight = player.extralight;
+            pv.viewz = player.viewz;
+            pv.fixedcolormap = player.fixedcolormap;
+            pv.psprites = player.psprites;
+        }
         
         game.playerView = pv;        
         game.renderer.R_SetupFrame (pv);
         
-        //game.renderer.clear();
+
+        //TODO: Only blank out renderable window area. Otherwise Status Bar is
+        // blacked out too.
+        //game.renderer.video.screens[0].clear();
+        
         game.things.R_ClearSprites();
         
         game.net.NetUpdate (); // check for new console commands.
 
+        // Prepare list of subsectors
+        SubSector[] renderSS = new SubSector[game.playerSetup.subsectors.size()];
+        for ( int i=0; i< renderSS.length; i++ ) {
+            renderSS[i] = game.playerSetup.subsectors.get(i).subsector;
+        }
         // The head node is the last node output.
         //bsp.R_RenderBSPNode (numnodes-1);
         game.renderer.bsp.R_RenderBSPNode (
@@ -1166,13 +1193,14 @@ public final class DoomMain {
                 (ArrayList<Node>)(ArrayList<?>)(game.playerSetup.nodes),
                 //game.playerSetup.nodes,
                 game.wad, 
-                (ArrayList<SubSector>)(ArrayList<?>)(game.playerSetup.subsectors),
-                game.playerSetup.segs   );
+                renderSS, // (ArrayList<SubSector>)(ArrayList<?>)(game.playerSetup.subsectors),
+                game.playerSetup.getSegs()
+        );
         game.net.NetUpdate (); // Check for new console commands.
         game.renderer.plane.R_DrawPlanes(
                 game.wad.flatsLump,
-                game.things.pspriteiscale
-);
+                game.things.rThings.pspriteiscale
+        );
         game.net.NetUpdate (); // Check for new console commands.
         game.things.R_DrawMasked();        
         game.net.NetUpdate (); // Check for new console commands.			

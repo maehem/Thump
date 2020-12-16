@@ -22,6 +22,7 @@ import thump.game.Player;
 import static thump.game.Player.Cheat.CF_GODMODE;
 import thump.game.PlayerSetup;
 import thump.game.maplevel.MapObject;
+import thump.game.maplevel.MapSector;
 import thump.game.maplevel.MapSideDef;
 import thump.game.thinkeraction.T_MoveFloor;
 import static thump.game.play.Ceiling.MAXCEILINGS;
@@ -179,7 +180,7 @@ public class SpecialEffects {  //  p_spec
 
         //return ps.sides[(ps.sectors[currentSector].lines[line]).sidenum[side]];
         return ps.sides.get(
-                (ps.sectors.get(currentSector).lines[line]).sidenum[side]
+                (ps.sectors.get(currentSector).sector.lines[line]).sidenum[side]
         );
     }
 
@@ -192,19 +193,19 @@ public class SpecialEffects {  //  p_spec
     Sector getSector(int currentSector, int line, int side) {
         PlayerSetup ps = Game.getInstance().playerSetup;
 
-        return getSide(currentSector, line, side).getSector(ps.map);
+        return getSide(currentSector, line, side).side.getSector(ps.map);
     }
 
     //
     // twoSided()
-    // Given the sector number and the line number,
+    // Given the secNum number and the line number,
     //  it will tell you whether the line is two-sided or not.
     //
-    public static int twoSided(int sector, int line) {  // TODO make this a boolean.
+    public static int twoSided(int secNum, int line) {  // TODO make this a boolean.
         PlayerSetup ps = Game.getInstance().playerSetup;
 
-        //return (ps.sectors[sector].lines[line]).flags & ML_TWOSIDED;
-        return (ps.sectors.get(sector).lines[line]).flags & ML_TWOSIDED;
+        //return (ps.sectors[secNum].lines[line]).flags & ML_TWOSIDED;
+        return (ps.sectors.get(secNum).sector.lines[line]).flags & ML_TWOSIDED;
     }
 
     //
@@ -384,7 +385,7 @@ public class SpecialEffects {  //  p_spec
         //for (int i = start + 1; i < ps.sectors.length; i++) {
         for (int i = start + 1; i < ps.sectors.size(); i++) {
             //if (ps.sectors[i].tag == line.tag) {
-            if (ps.sectors.get(i).tag == line.tag) {
+            if (ps.sectors.get(i).sector.tag == line.tag) {
                  return i;
             }
         }
@@ -927,7 +928,7 @@ public class SpecialEffects {  //  p_spec
     public static void P_PlayerInSpecialSector(Player player) {
         Sector sector;
 
-        sector = player.mo.subsector.sector;
+        sector = player.mo.subsector.mapSector.sector;
 
         // Falling, not all the way down yet?
         if (player.mo.z != sector.floorheight) {
@@ -1041,7 +1042,7 @@ public class SpecialEffects {  //  p_spec
                 case 48:
                     // EFFECT FIRSTCOL SCROLL +
                     //ps.sides[line.sidenum[0]].textureoffset += FRACUNIT;
-                    ps.sides.get(line.sidenum[0]).textureoffset += FRACUNIT;
+                    ps.sides.get(line.sidenum[0]).side.textureoffset += FRACUNIT;
                     break;
             }
         }
@@ -1055,19 +1056,19 @@ public class SpecialEffects {  //  p_spec
                     switch (buttonlist[i].where) {
                         case TOP:
                             //ps.sides[buttonlist[i].line.sidenum[0]]
-                            ps.sides.get(buttonlist[i].line.sidenum[0])
+                            ps.sides.get(buttonlist[i].line.sidenum[0]).side
                                     .setTopTextureNum(buttonlist[i].btexture);
                             break;
 
                         case MIDDLE:
                             //ps.sides[buttonlist[i].line.sidenum[0]]
-                            ps.sides.get(buttonlist[i].line.sidenum[0])
+                            ps.sides.get(buttonlist[i].line.sidenum[0]).side
                                     .setMidTextureNum(buttonlist[i].btexture);
                             break;
 
                         case BOTTOM:
                             //ps.sides[buttonlist[i].line.sidenum[0]]
-                            ps.sides.get(buttonlist[i].line.sidenum[0])
+                            ps.sides.get(buttonlist[i].line.sidenum[0]).side
                                     .setBottomTextureNum(buttonlist[i].btexture);
                             break;
                     }
@@ -1098,7 +1099,7 @@ public class SpecialEffects {  //  p_spec
         rtn = 0;
         while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0) {
             //s1 = ps.sectors[secnum];
-            s1 = ps.sectors.get(secnum);
+            s1 = ps.sectors.get(secnum).sector;
 
             // ALREADY MOVING?  IF SO, KEEP GOING...
             if (s1.specialdata!=null ) {
@@ -1123,7 +1124,7 @@ public class SpecialEffects {  //  p_spec
                 floor.type = donutRaise;
                 floor.crush = false;
                 floor.direction = 1;
-                floor.sector = s2;
+                floor.mapSector = ps.lookupMapSectorFor(s2);
                 floor.speed = FLOORSPEED / 2;
                 floor.texture = s3.getFloorPic(Game.getInstance().wad);
                 floor.newspecial = 0;
@@ -1138,7 +1139,7 @@ public class SpecialEffects {  //  p_spec
                 floor.type = lowerFloor;
                 floor.crush = false;
                 floor.direction = -1;
-                floor.sector = s1;
+                floor.mapSector = ps.lookupMapSectorFor(s1);
                 floor.speed = FLOORSPEED / 2;
                 floor.floordestheight = s3.floorheight;
                 break;
@@ -1191,7 +1192,8 @@ public class SpecialEffects {  //  p_spec
         //sector = ps.sectors;
         //for (i=0 ; i<numsectors ; i++, sector++) {
         i = 0;
-        for (Sector sector : ps.sectors) {
+        for (MapSector ms : ps.sectors) {
+            Sector sector = ms.sector;
             if (0 == sector.special) {
                 continue;  // just make this a case?
             }

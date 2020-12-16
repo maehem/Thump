@@ -8,6 +8,7 @@ import static thump.game.Defines.Card.*;
 import thump.game.Game;
 import thump.game.Player;
 import thump.game.maplevel.MapObject;
+import thump.game.maplevel.MapSector;
 import thump.game.play.SpecialEffects.Result;
 import static thump.game.play.SpecialEffects.Result.crushed;
 import static thump.game.play.SpecialEffects.Result.pastdest;
@@ -40,7 +41,7 @@ public class VDoor implements Thinker {
 
     //Thinker thinker;
     Type    type;
-    Sector  sector;
+    MapSector  mapSector;
     int     topheight;
     int     speed;
 
@@ -107,19 +108,19 @@ public class VDoor implements Thinker {
                 {
                   case blazeRaise:
                     door.direction = -1; // time to go back down
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_bdcls);
                     break;
 
                   case normal:
                     door.direction = -1; // time to go back down
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_dorcls);
                     break;
 
                   case close30ThenOpen:
                     door.direction = 1;
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_doropn);
                     break;
 
@@ -137,7 +138,7 @@ public class VDoor implements Thinker {
                   case raiseIn5Mins:
                     door.direction = 1;
                     door.type = normal;
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_doropn);
                     break;
 
@@ -149,23 +150,23 @@ public class VDoor implements Thinker {
 
           case -1:
             // DOWN
-            res = Floor.T_MovePlane(door.sector,
+            res = Floor.T_MovePlane(door.mapSector.sector,
                               door.speed,
-                              door.sector.floorheight,
+                              door.mapSector.sector.floorheight,
                               false,1,door.direction);
             if (res == pastdest) {
                 switch(door.type) {
                   case blazeRaise:
                   case blazeClose:
-                    door.sector.specialdata = null;
+                    door.mapSector.sector.specialdata = null;
                     Tick.P_RemoveThinker (door);  // unlink and free
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_bdcls);
                     break;
 
                   case normal:
                   case close:
-                    door.sector.specialdata = null;
+                    door.mapSector.sector.specialdata = null;
                     Tick.P_RemoveThinker (door);  // unlink and free
                     break;
 
@@ -187,7 +188,7 @@ public class VDoor implements Thinker {
 
                   default:
                     door.direction = 1;
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                                  sfx_doropn);
                     break;
                 }
@@ -196,7 +197,7 @@ public class VDoor implements Thinker {
 
           case 1:
             // UP
-            res = Floor.T_MovePlane(door.sector,
+            res = Floor.T_MovePlane(door.mapSector.sector,
                               door.speed,
                               door.topheight,
                               false,1,door.direction);
@@ -213,7 +214,7 @@ public class VDoor implements Thinker {
                   case close30ThenOpen:
                   case blazeOpen:
                   case open:
-                    door.sector.specialdata = null;
+                    door.mapSector.sector.specialdata = null;
                     Tick.P_RemoveThinker (door);  // unlink and free
                     break;
 
@@ -287,7 +288,8 @@ public class VDoor implements Thinker {
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line,secnum)) >= 0)
         {
             //sec = Game.getInstance().playerSetup.sectors[secnum];
-            sec = Game.getInstance().playerSetup.sectors.get(secnum);
+            MapSector ms = Game.getInstance().playerSetup.sectors.get(secnum);
+            sec = ms.sector;
             if (null!=sec.specialdata) {
                 continue;
             }
@@ -301,7 +303,7 @@ public class VDoor implements Thinker {
             sec.specialdata = door;
 
             door.setFunction( new T_VerticalDoor() );
-            door.sector = sec;
+            door.mapSector = ms;
             door.type = type;
             door.topwait = VDOORWAIT;
             door.speed = VDOORSPEED;
@@ -312,7 +314,7 @@ public class VDoor implements Thinker {
                 door.topheight -= 4*FRACUNIT;
                 door.direction = -1;
                 door.speed = VDOORSPEED * 4;
-                Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                              sfx_bdcls);
                 break;
 
@@ -320,14 +322,14 @@ public class VDoor implements Thinker {
                 door.topheight = SpecialEffects.P_FindLowestCeilingSurrounding(sec);
                 door.topheight -= 4*FRACUNIT;
                 door.direction = -1;
-                Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                              sfx_dorcls);
                 break;
 
               case close30ThenOpen:
                 door.topheight = sec.ceilingheight;
                 door.direction = -1;
-                Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                              sfx_dorcls);
                 break;
 
@@ -338,7 +340,7 @@ public class VDoor implements Thinker {
                 door.topheight -= 4*FRACUNIT;
                 door.speed = VDOORSPEED * 4;
                 if (door.topheight != sec.ceilingheight) {
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                             sfx_bdopn);
                 }
                 break;
@@ -349,7 +351,7 @@ public class VDoor implements Thinker {
                 door.topheight = SpecialEffects.P_FindLowestCeilingSurrounding(sec);
                 door.topheight -= 4*FRACUNIT;
                 if (door.topheight != sec.ceilingheight) {
-                    Game.getInstance().sound.S_StartSound(door.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(door.mapSector.soundorg,
                             sfx_doropn);
                 }
                 break;
@@ -423,7 +425,10 @@ public class VDoor implements Thinker {
 
         // if the sector has an active thinker, use it
         //sec = Game.getInstance().playerSetup.sides[ line.sidenum[side^1]].getSector(Game.getInstance().playerSetup.map);
-        sec = Game.getInstance().playerSetup.sides.get(line.sidenum[side^1]).getSector(Game.getInstance().playerSetup.map);
+        sec = Game.getInstance()
+                .playerSetup.sides.get(line.sidenum[side^1]).side
+                .getSector(Game.getInstance().playerSetup.map);
+        MapSector ms = Game.getInstance().playerSetup.lookupMapSectorFor(sec);
         //secnum = sec-sectors;
 
         if (sec.specialdata!=null) {
@@ -452,16 +457,16 @@ public class VDoor implements Thinker {
         switch(line.special) {
           case 117:	// BLAZING DOOR RAISE
           case 118:	// BLAZING DOOR OPEN
-            Game.getInstance().sound.S_StartSound(sec.soundorg,sfx_bdopn);
+            Game.getInstance().sound.S_StartSound(ms.soundorg,sfx_bdopn);
             break;
 
           case 1:	// NORMAL DOOR SOUND
           case 31:
-            Game.getInstance().sound.S_StartSound(sec.soundorg,sfx_doropn);
+            Game.getInstance().sound.S_StartSound(ms.soundorg,sfx_doropn);
             break;
 
           default:	// LOCKED DOOR SOUND
-            Game.getInstance().sound.S_StartSound(sec.soundorg,sfx_doropn);
+            Game.getInstance().sound.S_StartSound(ms.soundorg,sfx_doropn);
             break;
         }
 
@@ -472,7 +477,7 @@ public class VDoor implements Thinker {
         Tick.P_AddThinker (door);
         sec.specialdata = door;
         door.setFunction( new T_VerticalDoor());
-        door.sector = sec;
+        door.mapSector = ms;
         door.direction = 1;
         door.speed = VDOORSPEED;
         door.topwait = VDOORWAIT;
@@ -523,7 +528,7 @@ public class VDoor implements Thinker {
         sec.special = 0;
 
         door.setFunction( new T_VerticalDoor() );
-        door.sector = sec;
+        door.mapSector = Game.getInstance().playerSetup.lookupMapSectorFor(sec);
         door.direction = 0;
         door.type = normal;
         door.speed = VDOORSPEED;
@@ -544,7 +549,7 @@ public class VDoor implements Thinker {
         sec.special = 0;
 
         door.setFunction( new T_VerticalDoor() );
-        door.sector = sec;
+        door.mapSector = Game.getInstance().playerSetup.lookupMapSectorFor(sec);
         door.direction = 2;
         door.type = raiseIn5Mins;
         door.speed = VDOORSPEED;

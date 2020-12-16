@@ -27,6 +27,7 @@ import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_CORPSE;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_FLOAT;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_INFLOAT;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_JUSTHIT;
+import thump.wad.map.Sector;
 
 /**
  *
@@ -92,11 +93,12 @@ public class Enemy {
 
     private MapObject		soundtarget;
 
-    private void P_RecursiveSound( MapSector sec, int soundblocks ) {
+    private void P_RecursiveSound( MapSector ms, int soundblocks ) {
         int     i;
         Line	check;
         MapSector	other;
-
+        Sector sec = ms.sector;
+        
         // wake up all monsters in this sector
         if (sec.validcount == game.renderer.validcount
             && sec.soundtraversed <= soundblocks+1) {
@@ -105,7 +107,7 @@ public class Enemy {
 
         sec.validcount = game.renderer.validcount;
         sec.soundtraversed = soundblocks+1;
-        sec.soundtarget = soundtarget;
+        ms.soundtarget = soundtarget;
 
         for (i=0 ;i<sec.linecount ; i++) {
             check = sec.lines[i];
@@ -128,7 +130,8 @@ public class Enemy {
 //            } else {
 //                other = sides[ check.sidenum[0] ].sector;
 //            }
-            if ( sides.get(check.sidenum[0] ).sector == sec) {
+            //if ( sides.get(check.sidenum[0] ).sector == sec) {
+            if ( sides.get(check.sidenum[0] ).mapSector == ms) {
                 other = sides.get(check.sidenum[1]).mapSector;
             } else {
                 other = sides.get(check.sidenum[0]).mapSector;

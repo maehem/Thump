@@ -163,7 +163,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Applies current palette colors.
      */
     public void I_UpdateNoBlit () {
-        logger.log(Level.CONFIG, "I_UpdateNoBlit()");
+        logger.log(Level.FINEST, "I_UpdateNoBlit()");
         //BufferedImage s = Game.getInstance().video.screenImage[0];
         for (int sn = 0; sn<5; sn++) {
             //viewCanvas.repaint();
@@ -198,7 +198,7 @@ public class VideoInterface implements KeyListener, ComponentListener {
      * Draws the draw buffer to the screen.
      */
     public void I_FinishUpdate (){
-        logger.log(Level.CONFIG, "I_FinishUpdate()");
+        logger.log(Level.FINEST, "I_FinishUpdate()");
         BufferedImage s = Game.getInstance().renderer.video.screenImage[0];
         Graphics g = viewCanvas.getStrategy().getDrawGraphics();
         g.drawImage(s, 0, 0 , 

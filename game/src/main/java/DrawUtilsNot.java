@@ -35,7 +35,7 @@ import thump.wad.mapraw.PatchData;
  *
  * @author mark
  */
-public class DrawUtils {
+public class DrawUtilsNot {
     
     /**
      * Draw the map and details into an image.
@@ -44,7 +44,7 @@ public class DrawUtils {
     public static Image getMapImage(MapLump mapLump) {
         // Get a base image with lines and vertex drawn.
         //Image img = this.lineDefs.getImage(1200);
-        Image img = DrawUtils.getLineDefImage(mapLump.getLineDefs(), 1200);
+        Image img = getLineDefImage(mapLump.getLineDefs(), 1200);
         // Create a buffered image with transparency
         BufferedImage bimage = new BufferedImage(img.getWidth(null)+(2*mapLump.margin), img.getHeight(null)+(2*mapLump.margin), BufferedImage.TYPE_INT_ARGB);
 

@@ -3,14 +3,15 @@
  */
 package thump.render;
 
+import java.util.logging.Level;
 import static thump.base.Defines.SCREENHEIGHT;
 import static thump.base.Defines.SCREENWIDTH;
+import static thump.base.Defines.logger;
 import static thump.base.FixedPoint.FRACBITS;
 import thump.wad.Wad;
 import thump.wad.lump.PictureLump;
 import thump.wad.map.Flat;
 import thump.wad.mapraw.Column;
-import thump.wad.mapraw.MapPatch;
 import thump.wad.mapraw.PatchData;
 
 /**
@@ -141,28 +142,30 @@ public class Draw {
     public void R_DrawColumn(Screen dest) {
         int		frac;
         int		fracstep;
-        int count = dc_yh - dc_yl; 
+
+        if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT ) {
+            logger.log(Level.CONFIG, "R_DrawColumn: {0} to {1} at {2}", new Object[]{dc_yl, dc_yh, dc_x});
+        }
 
         // Zero length, column does not exceed a pixel.
-        if (count < 0) {
+        int count = dc_yh - dc_yl; 
+        if (count <= 0) {
             return;
         } 
         int y = ylookup[dc_yl];
         int x = columnofs[dc_x];  
 
-        //int[] dest = Game.getInstance().video.screens[0];
-        //Screen dest = Game.getInstance().video.screens[0];
-
         int [] vals = dc_source.getRawVals();
         fracstep = dc_iscale; 
         frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
-                        
+        
         do {
 //            dest.area[x+y*SCREENWIDTH] = dc_colormap[vals[(frac>>FRACBITS)&127]];
             dest.area[x+y] = dc_colormap[vals[(frac>>FRACBITS)&127]];
-            y++;
+            //y++;
+            y+=SCREENWIDTH;
             frac += fracstep;
-        } while ((count--)>0); 
+        } while ((count--)>0);
         
     }
 
@@ -273,10 +276,10 @@ public class Draw {
 
         do {
             // Hack. Does not work corretly.
-            dest.area[x+y*SCREENWIDTH] = dc_colormap[colVals[(frac>>FRACBITS)&127]];
-            dest.area[(x+1)*y] = dc_colormap[colVals[(frac>>FRACBITS)&127]];
+            dest.area[x+y] = dc_colormap[colVals[(frac>>FRACBITS)&127]];
+            dest.area[x+1+y] = dc_colormap[colVals[(frac>>FRACBITS)&127]];
             
-            y++;
+            y+=SCREENWIDTH;
             frac += fracstep; 
 
         } while ((count--)>0);
@@ -393,9 +396,20 @@ public class Draw {
             //  left or right of the current one.
             // Add index from colormap to index.
             //*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]]];
-            dest.area[x+y*SCREENWIDTH] = colormaps[6][dest.area[x*(y+fuzzoffset[fuzzpos])]];
+            //dest.area[x+y*SCREENWIDTH] = colormaps[6][dest.area[x*(y+fuzzoffset[fuzzpos])]];
+            int destIdx = x+y;
+            if ( destIdx >= SCREENWIDTH*SCREENHEIGHT ) {
+                break;
+            }
+            int destFuzzIdx = destIdx + fuzzoffset[fuzzpos];  // Will be -1, 0 or +1;
+            int fuzzVal = colormaps[6][ dest.area[destFuzzIdx]&0xFF ]&0xFF;
+            dest.area[destIdx] = fuzzVal;
             
-            y++; // Next row.
+            //int name = dest.area[x+y+fuzzoffset[fuzzpos]];
+            //dest.area[x+y] = colormaps[6][name&0xFF];
+            
+            //y++; // Next row.
+            y+=SCREENWIDTH;
 
             fuzzpos++;
             // Clamp table lookup index.
@@ -483,12 +497,12 @@ public class Draw {
             //  used with PLAY sprites.
             // Thus the "green" ramp of the player 0 sprite
             //  is mapped to gray, red, black/indigo. 
-            dest.area[x+y*SCREENWIDTH] = dc_colormap[dc_translation[colVals[frac>>FRACBITS]]];
+            dest.area[x+y] = dc_colormap[dc_translation[colVals[frac>>FRACBITS]]];
             //dest += SCREENWIDTH;
 
             //frac += fracstep; 
             
-            y++; // Next row.
+            y+=SCREENWIDTH; // Next row.
 
             frac += fracstep;
             //count--;
@@ -553,7 +567,7 @@ public class Draw {
     int			ds_ystep;
 
     // start of a 64*64 tile image 
-    byte[]		ds_source;	// Should be an object!
+    int[]		ds_source;	// Should be an object!
 
     // just for profiling
     int			dscount;
@@ -593,6 +607,9 @@ public class Draw {
 
         Screen dest = renderer.video.screens[0];
         //dest = ylookup[ds_y] + columnofs[ds_x1];
+        if ( ds_x1 < 0 ) {
+            int ii=0;  // debug breakpoint
+        }
         int x = columnofs[ds_x1];
         int y = ylookup[ds_y];
 
@@ -606,8 +623,18 @@ public class Draw {
             // Lookup pixel from flat texture tile,
             //  re-index using light/colormap.
             //*dest++ = ds_colormap[ds_source[spot]];
-            dest.area[x+y*SCREENWIDTH] = ds_colormap[ds_source[spot]];
+            //try{
+                int ds_src = ds_source[spot];
+                byte ds_cmap = ds_colormap[ds_src];
+//                if (x+y*SCREENWIDTH > 64000 ) {
+//                    int ddd=0;  // breakpoint;
+//                }
+            //dest.area[x+y*SCREENWIDTH] = ds_cmap;
+            dest.area[x+y] = ds_cmap;
 
+            //} catch (ArrayIndexOutOfBoundsException e) {
+            //    int ddd=0;  // breakpoint
+            //}
             x++;
             
 
@@ -736,7 +763,10 @@ public class Draw {
             //  while scale is adjusted appropriately.
             //*dest++ = ds_colormap[ds_source[spot]]; 
             dest.area[x+y*SCREENWIDTH] = ds_colormap[ds_source[spot]];
-            x+=2;
+            x++;
+            dest.area[x+y*SCREENWIDTH] = ds_colormap[ds_source[spot]];
+            x++;
+            //x+=2;
 
             xfrac += ds_xstep; 
             yfrac += ds_ystep; 

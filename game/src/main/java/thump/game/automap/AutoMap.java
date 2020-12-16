@@ -33,6 +33,8 @@ import thump.game.maplevel.MapSector;
 import static thump.game.play.Local.MAPBLOCKUNITS;
 import static thump.game.play.Local.PLAYERRADIUS;
 import thump.render.Screen;
+import thump.wad.lump.Lump;
+import thump.wad.lump.PictureLump;
 import thump.wad.map.Degenmobj;
 import thump.wad.map.Line;
 import static thump.wad.map.Line.ML_DONTDRAW;
@@ -242,7 +244,7 @@ public class AutoMap {
 
 
 
-    int 	cheating = 0;
+    int 	cheating = 1;
     boolean 	grid = false;
 
     int 	leveljuststarted = 1; 	// kluge until AM_LevelInit() is called
@@ -261,7 +263,7 @@ public class AutoMap {
 
     int 	lightlev; 		// used for funky strobing effect
     //BufferedImage	fb; 			// pseudo-frame buffer
-    Screen fb = null;
+    Screen      fb = null;
     int 	amclock;
 
     Mpoint      m_paninc = new Mpoint(); // how far the window pans each tic (map coords)
@@ -544,7 +546,11 @@ public class AutoMap {
 
         for (int i=0;i<10;i++) {
             //sprintf(namebuf, "AMMNUM%d", i);
-            marknums[i] = game.wad.getPatchByName("AMMNUM" + i);
+            //marknums[i] = game.wad.getPatchByName("AMMNUM" + i);
+            Lump lump = game.wad.findByName("AMMNUM" + i);
+            if ( lump instanceof PictureLump ) {
+                marknums[i] = ((PictureLump)lump).pic;
+            }
             //marknums[i] = W_CacheLumpName(namebuf, PU_STATIC);
         }
 
@@ -1113,6 +1119,8 @@ public class AutoMap {
             int color) {
         
         Fline fl = new Fline();
+        
+        // TODO:   fl.a and fl.b not set.
 
         if (AM_clipMline(ml, fl)) {
             AM_drawFline(fl, color); // draws it on frame buffer using fb coords
@@ -1242,7 +1250,7 @@ public class AutoMap {
       int		lineguylines,  //oh my
       int	scale,
       long	angle,
-      int		color,
+      int	color,
       int	x,
       int	y )
     {
@@ -1339,8 +1347,8 @@ public class AutoMap {
 //                thing = thing.snext;
 //            }
 //        }
-        for (MapSector s: game.playerSetup.sectors) {
-            Degenmobj thing = s.thinglist;
+        for (MapSector ms: game.playerSetup.sectors) {
+            Degenmobj thing = ms.sector.thinglist;
             while (thing!=null) {
                 AM_drawLineCharacter( thintriangle_guy, NUMTHINTRIANGLEGUYLINES,
                      16<<FRACBITS, thing.angle, colors+lightlev, 

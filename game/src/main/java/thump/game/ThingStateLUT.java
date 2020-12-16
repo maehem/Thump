@@ -4571,5 +4571,13 @@ public static final MobJInfo mobjinfo[] = {
     
 };
 
+    public static int indexOfState(State state) {
+        for ( int i=0; i<states.length; i++ ) {
+            if ( states[i].equals(state) ) {
+                return i;
+            }
+        }
+        return -1;
+    }
     
 }

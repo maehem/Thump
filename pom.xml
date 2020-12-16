@@ -6,14 +6,14 @@
     <version>0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>thump</module>
+        <!-- <module>thump</module>   OLD MODULE! Use for reference only.  Will be deleted in next branch.  -->
         <module>wad</module>
         <module>base</module>
         <module>game</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.source>15</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
     </properties>
     <dependencies>
@@ -42,23 +42,6 @@
                     <mainClass>thump.Thump</mainClass>
                 </configuration>
                 <executions>
-                    <execution>
-                        <!-- Default configuration for running -->
-                        <id>default-cli</id>
-                        <configuration>
-                            <mainClass>thump.Thump</mainClass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Configuration for debugging -->
-                        <id>debug</id>
-                        <configuration>
-                            <options>
-                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000</option>
-                            </options>
-                            <mainClass>thump.Thump</mainClass>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>

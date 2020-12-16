@@ -282,7 +282,7 @@ public class User {
 
         P_CalcHeight (player);
 
-        if (player.mo.subsector.sector.special>0) {
+        if (player.mo.subsector.mapSector.sector.special>0) {
 // p_spec            P_PlayerInSpecialSector (player);
         }
 

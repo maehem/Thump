@@ -5,6 +5,7 @@ package thump.game.play;
 
 import static thump.base.FixedPoint.FRACUNIT;
 import thump.game.Game;
+import thump.game.maplevel.MapSector;
 import static thump.game.play.Ceiling.Type.lowerToFloor;
 import thump.game.thinkeraction.T_MoveCeiling;
 import static thump.game.play.SpecialEffects.Result.crushed;
@@ -37,7 +38,7 @@ public class Ceiling implements Thinker {
 
     //Thinker thinker;
     Type    type;
-    Sector  sector;
+    MapSector  mapSector;
     int     bottomheight;
     int     topheight;
     int     speed;
@@ -98,7 +99,7 @@ public class Ceiling implements Thinker {
             break;
           case 1:
             // UP
-            res = Floor.T_MovePlane(ceiling.sector,
+            res = Floor.T_MovePlane(ceiling.mapSector.sector,
                               ceiling.speed,
                               ceiling.topheight,
                               false,1,ceiling.direction);
@@ -109,7 +110,7 @@ public class Ceiling implements Thinker {
                   case silentCrushAndRaise:
                     break;
                   default:
-                    Game.getInstance().sound.S_StartSound(ceiling.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(ceiling.mapSector.soundorg,
                                  sfx_stnmov);
                     // ?
                     break;
@@ -125,7 +126,7 @@ public class Ceiling implements Thinker {
                     break;
 
                   case silentCrushAndRaise:
-                    Game.getInstance().sound.S_StartSound(ceiling.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(ceiling.mapSector.soundorg,
                                  sfx_pstop);
                   case fastCrushAndRaise:
                   case crushAndRaise:
@@ -141,7 +142,7 @@ public class Ceiling implements Thinker {
 
           case -1:
             // DOWN
-            res = Floor.T_MovePlane(ceiling.sector,
+            res = Floor.T_MovePlane(ceiling.mapSector.sector,
                               ceiling.speed,
                               ceiling.bottomheight,
                               ceiling.crush,1,ceiling.direction);
@@ -151,7 +152,7 @@ public class Ceiling implements Thinker {
                 {
                   case silentCrushAndRaise: break;
                   default:
-                    Game.getInstance().sound.S_StartSound(ceiling.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(ceiling.mapSector.soundorg,
                                  sfx_stnmov);
                 }
             }
@@ -159,7 +160,7 @@ public class Ceiling implements Thinker {
             if (res == pastdest) {
                 switch(ceiling.type) {
                   case silentCrushAndRaise:
-                    Game.getInstance().sound.S_StartSound(ceiling.sector.soundorg,
+                    Game.getInstance().sound.S_StartSound(ceiling.mapSector.soundorg,
                                  sfx_pstop);
                   case crushAndRaise:
                     ceiling.speed = CEILSPEED;
@@ -220,7 +221,8 @@ public class Ceiling implements Thinker {
 
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line,secnum)) >= 0) {
             //sec = Game.getInstance().playerSetup.sectors[secnum];
-            sec = Game.getInstance().playerSetup.sectors.get(secnum);
+            MapSector ms = Game.getInstance().playerSetup.sectors.get(secnum);
+            sec = ms.sector;
             if (sec.specialdata!=null) {
                 continue;
             }
@@ -232,7 +234,7 @@ public class Ceiling implements Thinker {
             Tick.P_AddThinker (ceiling);
             sec.specialdata = ceiling;
             ceiling.setFunction(new T_MoveCeiling());
-            ceiling.sector = sec;
+            ceiling.mapSector = ms;
             ceiling.crush = false;
 
             switch(type) {
@@ -297,7 +299,7 @@ public class Ceiling implements Thinker {
 
         for (int i = 0;i < MAXCEILINGS;i++) {
             if (activeceilings[i] == c) {
-                activeceilings[i].sector.specialdata = null;
+                activeceilings[i].mapSector.sector.specialdata = null;
                 Tick.P_RemoveThinker (activeceilings[i]);
                 activeceilings[i] = null;
                 break;

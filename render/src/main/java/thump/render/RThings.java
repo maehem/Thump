@@ -38,7 +38,7 @@ public class RThings {
     private Vissprite overflowsprite;
 
     public Spritedef sprites[];
-    protected int numsprites;
+    public int numsprites;  // use sprites.length
 
     // frontsector
     // pspritescale
@@ -70,16 +70,17 @@ public class RThings {
     public static final int FF_FRAMEMASK  = 0x7fff;
 
     // R_AddSprites()
-    // R_DrawMaskedColumn
+    // R_DrawMaskedColumn    TODO:  Move to Draw.
     // Used for sprites and masked mid textures.
     // Masked means: partly transparent, i.e. stored
     //  in posts/runs of opaque pixels.
     //
-    protected void R_DrawMaskedColumn(Renderer renderer, Column column) {
+    public void R_DrawMaskedColumn(Renderer renderer, Column column) {
         int topscreen;
         int bottomscreen;
         int basetexturemid;
 
+        //logger.log(Level.CONFIG, "R_DrawMaskedColumn");
         Draw draw = renderer.draw;
 
         basetexturemid = draw.dc_texturemid;
@@ -120,10 +121,13 @@ public class RThings {
         draw.dc_yl = (topscreen + FRACUNIT - 1) >> FRACBITS;
         draw.dc_yh = (bottomscreen - 1) >> FRACBITS;
 
-        if (draw.dc_yh >= mfloorclip[draw.dc_x]) {
+        if ( null == mfloorclip || null == mceilingclip ) {
+            int ii=0;  // debug breakpoint
+        }
+        if (null != mfloorclip && draw.dc_yh >= mfloorclip[draw.dc_x]) {
             draw.dc_yh = mfloorclip[draw.dc_x] - 1;
         }
-        if (draw.dc_yl <= mceilingclip[draw.dc_x]) {
+        if (null != mceilingclip && draw.dc_yl <= mceilingclip[draw.dc_x]) {
             draw.dc_yl = mceilingclip[draw.dc_x] + 1;
         }
 
@@ -149,7 +153,7 @@ public class RThings {
         //MapObject thing;
         //int lightnum;
 
-        logger.log(Level.CONFIG, "Things.R_AddSprites for sector:\n{0}\n", sec.toString());
+        logger.log(Level.CONFIG, "Things.R_AddSprites for sector: {0}", sec.toString());
         // BSP is traversed by subsector.
         // A sector might have been split into several
         //  subsectors during BSP building.
@@ -246,6 +250,10 @@ public class RThings {
 //            I_Error ("R_ProjectSprite: invalid sprite number %i ",
 //                     thing.sprite);
 //    #endif
+
+    if ( thing.sprite == null ) {
+        int i=0;  // Debug breakpoint
+    }
         sprdef = sprites[thing.sprite.ordinal()];
 //    #ifdef RANGECHECK
 //        if ( (thing.frame&FF_FRAMEMASK) >= sprdef.numframes )
@@ -256,13 +264,27 @@ public class RThings {
 
         if (sprframe.rotate>0) {
             // choose a different rotation based on player view
-            ang = renderer.R_PointToAngle (thing.x, thing.y)&0xffffL;
-            rot = (ang-thing.angle+(ANG45/2)*9)>>29;
+            ang = renderer.R_PointToAngle (thing.x, thing.y)&0xFFFFFFFFL;
+            rot = ((ang-thing.angle+(ANG45/2)*9)&0xFFFFFFFFL)>>29;
+            logger.log(Level.CONFIG, 
+                    "Rot:  \n    ang:{0}  -  thing.angle:{1}  =  {2}+\n" +
+                            "    ANG45/2:{3}  ==>  * 9 : {4}\n" +
+                            "    ((ang-thing.angle+(ANG45/2)*9)>>29): {5}\n", 
+                    new Object[]{
+                        Long.toHexString(ang), Long.toHexString(thing.angle),
+                        Long.toHexString(ang-thing.angle),
+                        Long.toHexString(ANG45/2), Long.toHexString( ang-thing.angle+(ANG45/2)*9 ),
+                        Long.toHexString(((ang-thing.angle+(ANG45/2)*9)>>29))
+                    }
+            );
 //            rot = (int)(ang-(thing.angle&0xffffffff));
 //            long xxx = ANG45/2;
 //            rot += xxx*9;
 //            rot >>= 29;
-            logger.log(Level.CONFIG, "ang: {0}   rot:{1} \n", new Object[]{Long.toHexString(ang), Long.toHexString(rot)});
+            logger.log(Level.CONFIG, 
+                    "ang: 0x{0}   rot: 0x{1}", 
+                    new Object[]{Long.toHexString(ang), Long.toHexString(rot)}
+            );
             lump = sprframe.lump[(int)rot];
             flip = sprframe.flip[(int)rot]>0;
         } else {

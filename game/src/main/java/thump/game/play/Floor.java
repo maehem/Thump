@@ -6,7 +6,7 @@ package thump.game.play;
 import static thump.base.FixedPoint.FRACUNIT;
 import thump.game.Game;
 import thump.game.PlayerSetup;
-import thump.game.maplevel.MapSideDef;
+import thump.game.maplevel.MapSector;
 import static thump.game.play.Floor.Type.raiseFloorCrush;
 import thump.game.play.SpecialEffects.Result;
 import static thump.game.play.SpecialEffects.Result.crushed;
@@ -21,6 +21,7 @@ import thump.wad.Wad;
 import thump.wad.map.Line;
 import static thump.wad.map.Line.ML_TWOSIDED;
 import thump.wad.map.Sector;
+import thump.wad.map.Side;
 import thump.wad.map.Thinker;
 import thump.wad.map.ThinkerAction;
 
@@ -68,7 +69,7 @@ public class Floor implements Thinker {
     //public Thinker thinker;
     public Type    type;
     public boolean crush;
-    public Sector  sector;
+    public MapSector  mapSector;
     public int     direction;
     public int     newspecial;
     public int     texture;
@@ -252,26 +253,26 @@ public class Floor implements Thinker {
     // MOVE A FLOOR TO IT'S DESTINATION (UP OR DOWN)
     //
     public static void T_MoveFloor(Floor floor) {
-
-        Result res = T_MovePlane(floor.sector,
+        Sector fs = floor.mapSector.sector;
+        Result res = T_MovePlane(fs,
                 floor.speed,
                 floor.floordestheight,
                 floor.crush, 0, floor.direction);
 
         if (0 == (Game.getInstance().leveltime & 7)) {
             Game.getInstance().sound.S_StartSound(
-                    floor.sector.soundorg,
+                    floor.mapSector.soundorg,
                     sfx_stnmov);
         }
 
         if (res == pastdest) {
-            floor.sector.specialdata = null;
+            fs.specialdata = null;
 
             if (floor.direction == 1) {
                 switch (floor.type) {
                     case donutRaise:
-                        floor.sector.special = floor.newspecial;
-                        floor.sector.setFloorPic(floor.texture);
+                        fs.special = floor.newspecial;
+                        fs.setFloorPic(floor.texture);
                         break;
                     default:
                         break;
@@ -279,8 +280,8 @@ public class Floor implements Thinker {
             } else if (floor.direction == -1) {
                 switch (floor.type) {
                     case lowerAndChange:
-                        floor.sector.special = floor.newspecial;
-                        floor.sector.setFloorPic(floor.texture);
+                        fs.special = floor.newspecial;
+                        fs.setFloorPic(floor.texture);
                         break;
                     default:
                         break;
@@ -289,7 +290,7 @@ public class Floor implements Thinker {
             Tick.P_RemoveThinker(floor);
 
             Game.getInstance().sound.S_StartSound(
-                    floor.sector.soundorg,
+                    floor.mapSector.soundorg,
                     sfx_pstop);
         }
 
@@ -303,7 +304,6 @@ public class Floor implements Thinker {
         int secnum;
         int rtn;
         int i;
-        Sector sec;
         Floor floor;
 
         secnum = -1;
@@ -313,7 +313,8 @@ public class Floor implements Thinker {
     
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line, secnum)) >= 0) {
             //sec = Game.getInstance().playerSetup.sectors[secnum];
-            sec = Game.getInstance().playerSetup.sectors.get(secnum);
+            MapSector ms = Game.getInstance().playerSetup.sectors.get(secnum);
+            Sector sec = ms.sector;
 
             // ALREADY MOVING?  IF SO, KEEP GOING...
             if (sec.specialdata!=null) {
@@ -334,7 +335,7 @@ public class Floor implements Thinker {
             switch (floortype) {
                 case lowerFloor:
                     floor.direction = -1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     floor.floordestheight
                             = SpecialEffects.P_FindHighestFloorSurrounding(sec);
@@ -342,7 +343,7 @@ public class Floor implements Thinker {
 
                 case lowerFloorToLowest:
                     floor.direction = -1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     floor.floordestheight
                             = SpecialEffects.P_FindLowestFloorSurrounding(sec);
@@ -350,7 +351,7 @@ public class Floor implements Thinker {
 
                 case turboLower:
                     floor.direction = -1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED * 4;
                     floor.floordestheight
                             = SpecialEffects.P_FindHighestFloorSurrounding(sec);
@@ -363,7 +364,7 @@ public class Floor implements Thinker {
                     floor.crush = true;
                 case raiseFloor:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     floor.floordestheight
                             = SpecialEffects.P_FindLowestCeilingSurrounding(sec);
@@ -376,7 +377,7 @@ public class Floor implements Thinker {
 
                 case raiseFloorTurbo:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED * 4;
                     floor.floordestheight
                             = SpecialEffects.P_FindNextHighestFloor(sec, sec.floorheight);
@@ -384,7 +385,7 @@ public class Floor implements Thinker {
 
                 case raiseFloorToNearest:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     floor.floordestheight
                             = SpecialEffects.P_FindNextHighestFloor(sec, sec.floorheight);
@@ -392,24 +393,24 @@ public class Floor implements Thinker {
 
                 case raiseFloor24:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
-                    floor.floordestheight = floor.sector.floorheight
+                    floor.floordestheight = floor.mapSector.sector.floorheight
                             + 24 * FRACUNIT;
                     break;
                 case raiseFloor512:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
-                    floor.floordestheight = floor.sector.floorheight
+                    floor.floordestheight = floor.mapSector.sector.floorheight
                             + 512 * FRACUNIT;
                     break;
 
                 case raiseFloor24AndChange:
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
-                    floor.floordestheight = floor.sector.floorheight
+                    floor.floordestheight = floor.mapSector.sector.floorheight
                             + 24 * FRACUNIT;
      // shit
                     sec.setFloorPic( line.frontsector.getFloorPic(wad) );
@@ -419,14 +420,15 @@ public class Floor implements Thinker {
                 case raiseToTexture: {
                     int minsize = Integer.MAX_VALUE;
                     //Side side;
-                    MapSideDef side;
+                    //MapSideDef side;
+                    Side side;
 
                     floor.direction = 1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     for (i = 0; i < sec.linecount; i++) {
                         if (SpecialEffects.twoSided(secnum, i)>0) {
-                            side = SpecialEffects.getSide(secnum, i, 0);
+                            side = SpecialEffects.getSide(secnum, i, 0).side;
                             int texHeight = wad.getTextures().get(side.getBottomTextureNum(wad)).height;
 
                             if (side.getBottomTextureNum(wad) >= 0) {
@@ -434,7 +436,7 @@ public class Floor implements Thinker {
                                     minsize = texHeight;
                                 }
                             }
-                            side = SpecialEffects.getSide(secnum, i, 1);
+                            side = SpecialEffects.getSide(secnum, i, 1).side;
                             texHeight = wad.getTextures().get(side.getBottomTextureNum(wad)).height;
                             if (side.getBottomTextureNum(wad) >= 0) {
                                 if (texHeight < minsize) {
@@ -443,13 +445,13 @@ public class Floor implements Thinker {
                             }
                         }
                     }
-                    floor.floordestheight = floor.sector.floorheight + minsize;
+                    floor.floordestheight = floor.mapSector.sector.floorheight + minsize;
                 }
                 break;
 
                 case lowerAndChange:
                     floor.direction = -1;
-                    floor.sector = sec;
+                    floor.mapSector = ms;
                     floor.speed = FLOORSPEED;
                     floor.floordestheight
                             = SpecialEffects.P_FindLowestFloorSurrounding(sec);
@@ -459,7 +461,7 @@ public class Floor implements Thinker {
                     
                     for (i = 0; i < sec.linecount; i++) {
                         if (SpecialEffects.twoSided(secnum, i)>0) {
-                            if (ps.getSecNum(SpecialEffects.getSide(secnum, i, 0).sector) == secnum) {
+                            if (ps.getSecNum(SpecialEffects.getSide(secnum, i, 0).side.sector) == secnum) {
                                 sec = Game.getInstance().playerSetup.effects.getSector(secnum, i, 1);
 
                                 if (sec.floorheight == floor.floordestheight) {
@@ -510,7 +512,8 @@ public class Floor implements Thinker {
         rtn = 0;
         while ((secnum = SpecialEffects.P_FindSectorFromLineTag(line,secnum)) >= 0) {
             //sec = Game.getInstance().playerSetup.sectors[secnum];
-            sec = Game.getInstance().playerSetup.sectors.get(secnum);
+            MapSector ms = Game.getInstance().playerSetup.sectors.get(secnum);
+            sec = ms.sector;
 
             // ALREADY MOVING?  IF SO, KEEP GOING...
             if (null==sec.specialdata) {
@@ -525,7 +528,7 @@ public class Floor implements Thinker {
             sec.specialdata = floor;
             floor.setFunction( new T_MoveFloor());
             floor.direction = 1;
-            floor.sector = sec;
+            floor.mapSector = ms;
             switch(type) {
               case build8:
                 speed = FLOORSPEED/4;
@@ -588,7 +591,8 @@ public class Floor implements Thinker {
                     sec.specialdata = floor;
                     floor.setFunction( new T_MoveFloor());
                     floor.direction = 1;
-                    floor.sector = sec;
+                    //floor.mapSector = sec;
+                    floor.mapSector = ms;
                     floor.speed = speed;
                     floor.floordestheight = height;
                     ok = true;

@@ -11,19 +11,17 @@ import static thump.base.Defines.logger;
 import thump.base.FixedPoint;
 import static thump.base.FixedPoint.FRACBITS;
 import static thump.base.FixedPoint.FRACUNIT;
-import static thump.base.Tables.ANG45;
-import thump.game.maplevel.MapObject;
 import thump.game.play.PSprite;
 import thump.render.Bsp;
 import thump.render.Data;
 import thump.render.Draw;
 import thump.render.DrawSeg;
+import static thump.render.DrawSeg.SIL_BOTH;
 import static thump.render.DrawSeg.SIL_BOTTOM;
 import static thump.render.DrawSeg.SIL_TOP;
 import thump.render.RThings;
 import thump.render.Renderer;
 import static thump.render.Renderer.LIGHTLEVELS;
-import static thump.render.Renderer.LIGHTSCALESHIFT;
 import static thump.render.Renderer.LIGHTSEGSHIFT;
 import static thump.render.Renderer.MAXLIGHTSCALE;
 import thump.render.Segs;
@@ -35,7 +33,6 @@ import thump.render.colfuncs.ColFunc_DrawTranslatedColumn;
 import thump.wad.Wad;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_TRANSLATION;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_TRANSSHIFT;
-import thump.wad.map.Sector;
 import thump.wad.mapraw.Column;
 import thump.wad.mapraw.PatchData;
 
@@ -43,8 +40,10 @@ import thump.wad.mapraw.PatchData;
  *
  * @author mark
  */
-public class Things extends RThings {
+public class Things /*extends RThings*/ {
 
+    public final RThings rThings = new RThings();
+    
     private static final int BASEYCENTER = 100;
     
     private int newvissprite;
@@ -179,14 +178,16 @@ public class Things extends RThings {
 //        }
 //
 //        numsprites = i;
-        numsprites = namelist.length;
+        //int numsprites = rThings.numsprites;
+        
+        rThings.numsprites = namelist.length;
 
-        if (numsprites==0) {
+        if (rThings.numsprites==0) {
             return;
         }
 
         //sprites = Z_Malloc(numsprites *sizeof(*sprites), PU_STATIC, NULL);
-        sprites = new Spritedef[numsprites];
+        rThings.sprites = new Spritedef[rThings.numsprites];
         Data data = renderer.data;
         
         //start = data.firstspritelump-1;
@@ -196,8 +197,8 @@ public class Things extends RThings {
         // scan all the lump names for each of the names,
         //  noting the highest frame letter.
         // Just compare 4 characters as ints
-        for (i=0 ; i<numsprites ; i++) {
-            sprites[i] = new Spritedef();
+        for (i=0 ; i<rThings.numsprites ; i++) {
+            rThings.sprites[i] = new Spritedef();
             
             spritename = namelist[i];
             
@@ -246,7 +247,7 @@ public class Things extends RThings {
 
             // check the frames that were found for completeness
             if (maxframe == -1) {
-                sprites[i].numframes = 0;
+                rThings.sprites[i].numframes = 0;
                 continue;
             }
 
@@ -285,13 +286,13 @@ public class Things extends RThings {
             }
 
             // allocate space for the frames present and copy sprtemp to it
-            sprites[i].numframes = maxframe;
+            rThings.sprites[i].numframes = maxframe;
             //sprites[i].spriteframes = 
             //    Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
-            sprites[i].spriteframes = new Spriteframe[maxframe];
+            rThings.sprites[i].spriteframes = new Spriteframe[maxframe];
             //memcpy (sprites[i].spriteframes, sprtemp, maxframe*sizeof(spriteframe_t));
             for ( int j=0; j<maxframe; j++ ) {
-                sprites[i].spriteframes[j] = new Spriteframe(
+                rThings.sprites[i].spriteframes[j] = new Spriteframe(
                             sprtemp[j].rotate,
                             Arrays.copyOf(sprtemp[j].lump, sprtemp[j].lump.length),
                             Arrays.copyOf(sprtemp[j].flip, sprtemp[j].flip.length)
@@ -309,7 +310,8 @@ public class Things extends RThings {
     public void R_InitSprites(String[] namelist, Wad wad) {
 
         for (int i=0 ; i<SCREENWIDTH ; i++) {
-            negonearray[i] = -1;
+            //rThings.negonearray[i] = -1;
+            rThings.negonearray[i] = Integer.MAX_VALUE;
         }
 
         R_InitSpriteDefs (namelist, wad);
@@ -320,7 +322,7 @@ public class Things extends RThings {
     // Called at frame start.
     //
     void R_ClearSprites() {
-        vissprite_p = 0;
+        rThings.vissprite_p = 0;
     }
 
 
@@ -335,6 +337,7 @@ public class Things extends RThings {
         int		frac;
         PatchData		patch;
 
+        logger.log(Level.CONFIG, "draw vis sprite:   x1:{0}   x2:{1}", new Object[]{x1,x2});
 
         Renderer rend = renderer;
         Draw draw = rend.draw;
@@ -359,8 +362,8 @@ public class Things extends RThings {
         draw.dc_iscale = Math.abs(vis.xiscale)>>(rend.detailshift?1:0);
         draw.dc_texturemid = vis.texturemid;
         frac = vis.startfrac;
-        spryscale = vis.scale;
-        sprtopscreen = rend.centeryfrac - FixedPoint.mul(draw.dc_texturemid,spryscale);
+        rThings.spryscale = vis.scale;
+        rThings.sprtopscreen = rend.centeryfrac - FixedPoint.mul(draw.dc_texturemid,rThings.spryscale);
 
         for (draw.dc_x=vis.x1 ; draw.dc_x<=vis.x2 ; draw.dc_x++, frac += vis.xiscale) {
             texturecolumn = frac>>FRACBITS;
@@ -370,15 +373,11 @@ public class Things extends RThings {
 //    #endif
             //column = ((byte *)patch + LONG(patch.columnofs[texturecolumn]));
             column = patch.pixelData[texturecolumn];
-            R_DrawMaskedColumn (rend,column);
+            rThings.R_DrawMaskedColumn (rend,column);
         }
 
         rend.colfunc = rend.basecolfunc;
     }
-
-
-
-
 
     //
     // R_DrawPSprite
@@ -390,13 +389,7 @@ public class Things extends RThings {
        int sx,        // psp.sx
        int sy         // psp.sy
     ) {
-        int tx;
-        int x1;
-        int x2;
-        Spritedef sprdef;
         Spriteframe sprframe;
-        int lump;
-        boolean flip;
         Vissprite vis;
         //Vissprite avis;
 
@@ -407,24 +400,24 @@ public class Things extends RThings {
 //                     psp.state.sprite);
 //    #endif
         //sprdef =  sprites[psp.state.sprite.ordinal()];
-        sprdef =  sprites[spriteNum];
+        Spritedef sprdef =  rThings.sprites[spriteNum];
 //    #ifdef RANGECHECK
 //        if ( (psp.state.frame & FF_FRAMEMASK)  >= sprdef.numframes)
 //            I_Error ("R_ProjectSprite: invalid sprite frame %i : %i ",
 //                     psp.state.sprite, psp.state.frame);
 //    #endif
         //sprframe = sprdef.spriteframes[(int)psp.state.frame & FF_FRAMEMASK];
-        sprframe = sprdef.spriteframes[(int)frame & FF_FRAMEMASK];
+        sprframe = sprdef.spriteframes[(int)frame & rThings.FF_FRAMEMASK];
 
-        lump = sprframe.lump[0];
-        flip = sprframe.flip[0]>0;
+        int lump = sprframe.lump[0];
+        boolean flip = sprframe.flip[0]>0;
 
         // calculate edges of the shape
         //tx = psp.sx - 160 * FRACUNIT;
-        tx = sx - 160 * FRACUNIT;
+        int tx = sx - 160 * FRACUNIT;
 
         tx -= renderer.data.spriteoffset[lump];
-        x1 = (renderer.centerxfrac + FixedPoint.mul(tx, pspritescale)) >> FRACBITS;
+        int x1 = (renderer.centerxfrac + FixedPoint.mul(tx, rThings.pspritescale)) >> FRACBITS;
 
         // off the right side
         if (x1 > renderer.draw.viewwidth) {
@@ -432,7 +425,7 @@ public class Things extends RThings {
         }
 
         tx += renderer.data.spritewidth[lump];
-        x2 = ((renderer.centerxfrac + FixedPoint.mul(tx, pspritescale)) >> FRACBITS) - 1;
+        int x2 = ((renderer.centerxfrac + FixedPoint.mul(tx, rThings.pspritescale)) >> FRACBITS) - 1;
 
         // off the left side
         if (x2 < 0) {
@@ -446,13 +439,13 @@ public class Things extends RThings {
         vis.texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 - (sy - renderer.data.spritetopoffset[lump]);
         vis.x1 = x1 < 0 ? 0 : x1;
         vis.x2 = x2 >= renderer.draw.viewwidth ? renderer.draw.viewwidth - 1 : x2;
-        vis.scale = pspritescale << (renderer.detailshift?1:0);
+        vis.scale = rThings.pspritescale << (renderer.detailshift?1:0);
 
         if (flip) {
-            vis.xiscale = -pspriteiscale;
+            vis.xiscale = -rThings.pspriteiscale;
             vis.startfrac = renderer.data.spritewidth[lump] - 1;
         } else {
-            vis.xiscale = pspriteiscale;
+            vis.xiscale = rThings.pspriteiscale;
             vis.startfrac = 0;
         }
 
@@ -472,12 +465,12 @@ public class Things extends RThings {
             // fixed color
             vis.colormap = renderer.fixedcolormap;
         //} else if ((psp.state.frame & FF_FULLBRIGHT)>0) {
-        } else if ((frame & FF_FULLBRIGHT)>0) {
+        } else if ((frame & RThings.FF_FULLBRIGHT)>0) {
             // full bright
             vis.colormap = renderer.data.colormaps[0];
         } else {
             // local light
-            vis.colormap = spritelights[MAXLIGHTSCALE - 1];
+            vis.colormap = rThings.spritelights[MAXLIGHTSCALE - 1];
         }
 
         R_DrawVisSprite(vis, vis.x1, vis.x2);
@@ -501,16 +494,16 @@ public class Things extends RThings {
                 + renderer.extralight;
 
         if (lightnum < 0) {
-            spritelights = renderer.scalelight[0];
+            rThings.spritelights = renderer.scalelight[0];
         } else if (lightnum >= LIGHTLEVELS) {
-            spritelights = renderer.scalelight[LIGHTLEVELS - 1];
+            rThings.spritelights = renderer.scalelight[LIGHTLEVELS - 1];
         } else {
-            spritelights = renderer.scalelight[lightnum];
+            rThings.spritelights = renderer.scalelight[lightnum];
         }
 
         // clip to screen bounds
-        mfloorclip = screenheightarray;
-        mceilingclip = negonearray;
+        rThings.mfloorclip = rThings.screenheightarray;
+        rThings.mceilingclip = rThings.negonearray;
 
         // add all active psprites
         for (i = 0;
@@ -533,43 +526,105 @@ public class Things extends RThings {
     // R_SortVisSprites
     //
     void R_SortVisSprites() {
+//    int			i;
+//    int			count;
+//    vissprite_t*	ds;
+//    vissprite_t*	best;
+//    vissprite_t		unsorted;
+//    fixed_t		bestscale;
         int i;
         int count;
         Vissprite ds;
         Vissprite unsorted = new Vissprite();
-        Vissprite best = unsorted;
+        Vissprite best=null; // = unsorted;
         int bestscale;
+
+//    count = vissprite_p - vissprites;
+//	
+//    unsorted.next = unsorted.prev = &unsorted;
+//
+//    if (!count)
+//	return;
 
         //count = vissprite_p - vissprites;
         //count = vissprites.length - vissprite_p;
-        count = vissprite_p;
-
-        unsorted.next = unsorted;
-        unsorted.prev = unsorted;
-
+        count = rThings.vissprite_p;
         if (0==count) {
             return;
         }
 
-        for (int dsc = 0; dsc < vissprite_p; dsc++) {
-            if ( dsc < vissprite_p ) {
-                vissprites[dsc].next = vissprites[dsc + 1];
+        unsorted.next = unsorted;
+        unsorted.prev = unsorted;
+
+
+        
+        
+//    for (ds=vissprites ; ds<vissprite_p ; ds++)
+//    {
+//	ds->next = ds+1;
+//	ds->prev = ds-1;
+//    }
+        for (int dsc = 0; dsc < count; dsc++) {
+            if ( dsc == count-1 ) {
+                rThings.vissprites[dsc].next =  unsorted;                
+            } else {
+                rThings.vissprites[dsc].next = rThings.vissprites[dsc + 1];
             }
-            if ( dsc != 0 ) { 
-                vissprites[dsc].prev = vissprites[dsc - 1];
+           
+//            if ( dsc < rThings.vissprite_p ) {
+//                rThings.vissprites[dsc].next = rThings.vissprites[dsc + 1];
+//            }
+//            if ( dsc != 0 ) { 
+//                rThings.vissprites[dsc].prev = rThings.vissprites[dsc - 1];
+//            }
+            if ( dsc == 0 ) {
+                rThings.vissprites[dsc].prev =  unsorted; 
+                unsorted.next =  rThings.vissprites[dsc];
+            } else {
+                rThings.vissprites[dsc].prev = rThings.vissprites[dsc - 1];      
             }
         }
 
-        vissprites[0].prev =  unsorted;
-        unsorted.next =  vissprites[0];
-        vissprites[vissprite_p - 1].next =  unsorted;
-        unsorted.prev = vissprites[vissprite_p - 1];
+// Original C code
+//    vissprites[0].prev = &unsorted;
+//    unsorted.next = &vissprites[0];
+//    (vissprite_p-1)->next = &unsorted;
+//    unsorted.prev = vissprite_p-1;
+            unsorted.prev = rThings.vissprites[count-1];
+
+// Java code integrated into loop above
+//        rThings.vissprites[0].prev =  unsorted;
+//        unsorted.next =  rThings.vissprites[0];
+//        rThings.vissprites[rThings.vissprite_p - 1].next =  unsorted;
+//        unsorted.prev = rThings.vissprites[rThings.vissprite_p - 1];
+
+
+
 
         // pull the vissprites out by scale
         //best = 0;		// shut up the compiler warning
+//    vsprsortedhead.next = vsprsortedhead.prev = &vsprsortedhead;
+//    for (i=0 ; i<count ; i++)
+//    {
+//	bestscale = MAXINT;
+//	for (ds=unsorted.next ; ds!= &unsorted ; ds=ds->next)
+//	{
+//	    if (ds->scale < bestscale)
+//	    {
+//		bestscale = ds->scale;
+//		best = ds;
+//	    }
+//	}
+//	best->next->prev = best->prev;
+//	best->prev->next = best->next;
+//	best->next = &vsprsortedhead;
+//	best->prev = vsprsortedhead.prev;
+//	vsprsortedhead.prev->next = best;
+//	vsprsortedhead.prev = best;
+//    }
         vsprsortedhead.next = vsprsortedhead;
         vsprsortedhead.prev = vsprsortedhead;
-        
+        best = unsorted;  // get rid of possible null reference
         for (i = 0; i < count; i++) {
             bestscale = Integer.MAX_VALUE;
             for (ds = unsorted.next; ds != unsorted; ds = ds.next) {
@@ -601,6 +656,7 @@ public class Things extends RThings {
         int lowscale;
         int silhouette;
 
+        logger.log(Level.CONFIG, "R_DrawSprite()");
         for (x = spr.x1; x <= spr.x2; x++) {
             clipbot[x] = -2;
             cliptop[x] = -2;
@@ -612,6 +668,7 @@ public class Things extends RThings {
         Bsp bsp = renderer.bsp;
         
         for (int i = bsp.ds_p - 1; i >= 0; i--) {
+            logger.log(Level.CONFIG, "    render draw seg:{0}", i);
             ds = bsp.drawsegs[i];
             // determine if the drawseg obscures the sprite
             if (       ds.x1 > spr.x2
@@ -656,35 +713,60 @@ public class Things extends RThings {
             }
 
             switch (silhouette) {
-                case 1:
+                case SIL_BOTTOM:
                     // bottom sil
+                    logger.log(Level.CONFIG, "    bottom sil");
                     for (x = r1; x <= r2; x++) {
                         if (clipbot[x] == -2) {
-                            clipbot[x] = ds.sprbottomclip[x];
+                            if ( ds.sprbottomclip == null ) {
+                                logger.log(Level.CONFIG, "     ^-- sprbottomclip is null!");
+                            } else {
+                                clipbot[x] = ds.sprbottomclip[x];
+                            }
                         }
-                    }   break;
-                case 2:
+                    }
+                    break;
+                case SIL_TOP:
                     // top sil
+                    logger.log(Level.CONFIG, "    top sil");
                     for (x = r1; x <= r2; x++) {
+                        logger.log(Level.CONFIG, "  sil for-loop {0}", x);
                         if (cliptop[x] == -2) {
-                            cliptop[x] = ds.sprtopclip[x];
+                            if ( ds.sprtopclip == null ) {
+                                logger.log(Level.CONFIG, "     ^-- sprtopclip is null!");
+                            } else {
+                                cliptop[x] = ds.sprtopclip[x];
+                            }
                         }
-                    }   break;
-                case 3:
+                    }
+                    break;
+                case SIL_BOTH:
                     // both
+                    logger.log(Level.CONFIG, "    top and bottom sil");
                     for (x = r1; x <= r2; x++) {
                         if (clipbot[x] == -2) {
-                            clipbot[x] = ds.sprbottomclip[x];
+                            if( ds.sprbottomclip == null ) {
+                                logger.log(Level.CONFIG, "        ^-- sprbottomclip is null!");
+                            } else {
+                                clipbot[x] = ds.sprbottomclip[x];
+                            }
                         }
                         if (cliptop[x] == -2) {
-                            cliptop[x] = ds.sprtopclip[x];
+                            if( ds.sprtopclip == null ) {
+                                logger.log(Level.CONFIG, "        ^-- sprtopclip is null!");
+                            } else {
+                                cliptop[x] = ds.sprtopclip[x];
+                            }
                         }
-                    }   break;
+                    }
+                    break;
                 default:
                     break;
             }
+            logger.log(Level.CONFIG, "    sil switch done.");
 
         }
+        logger.log(Level.CONFIG, "    render draw segs done.");
 
         // all clipping has been performed, so draw the sprite
         // check for unclipped columns
@@ -698,8 +780,8 @@ public class Things extends RThings {
             }
         }
 
-        mfloorclip = clipbot;
-        mceilingclip = cliptop;
+        rThings.mfloorclip = clipbot;
+        rThings.mceilingclip = cliptop;
         R_DrawVisSprite(spr, spr.x1, spr.x2);
     }
 
@@ -714,8 +796,10 @@ public class Things extends RThings {
         
         R_SortVisSprites();
 
-        if (vissprite_p >= vissprites.length) {
+        //if (rThings.vissprite_p >= rThings.vissprites.length) {
+        if (rThings.vissprite_p > 0) {
             // draw all vissprites back to front
+            logger.log(Level.CONFIG, "    draw all visprites, back to front");
             for (spr = vsprsortedhead.next;
                     spr != vsprsortedhead;
                     spr = spr.next) {
@@ -725,6 +809,7 @@ public class Things extends RThings {
         }
 
         // render any remaining masked mid textures
+        logger.log(Level.CONFIG, "    render any ramaining masked mid textures");
         for (int i = renderer.bsp.ds_p - 1; i >= 0; i--) {
             ds = renderer.bsp.drawsegs[i];
             if (ds.maskedtexturecol!=-1) {
@@ -734,6 +819,7 @@ public class Things extends RThings {
 
         // draw the psprites on top of everything
         //  but does not draw on side views
+        logger.log(Level.CONFIG, "    draw the psprites on top of everything but not on side views");
         if (0==renderer.viewangleoffset) {
             R_DrawPlayerSprites();
         }
