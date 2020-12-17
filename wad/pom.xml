@@ -4,7 +4,7 @@
     <parent>
         <groupId>thump</groupId>
         <artifactId>Thump</artifactId>
-        <version>0.0-SNAPSHOT</version>
+        <version>20.003-SNAPSHOT</version>
     </parent>
     <artifactId>wad</artifactId>
     <packaging>jar</packaging>
@@ -15,4 +15,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <version>20.003-SNAPSHOT</version>
 </project>

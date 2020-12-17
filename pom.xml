@@ -3,13 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>thump</groupId>
     <artifactId>Thump</artifactId>
-    <version>0.0-SNAPSHOT</version>
+    <version>20.003-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <!-- <module>thump</module>   OLD MODULE! Use for reference only.  Will be deleted in next branch.  -->
         <module>wad</module>
         <module>base</module>
         <module>game</module>
+        <module>render</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +29,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
                 <configuration>
                     <release>11</release>
                     <showDeprecation>true</showDeprecation>
@@ -37,7 +38,7 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.3</version>
+                <version>0.0.5</version>
                 <configuration>
                     <mainClass>thump.Thump</mainClass>
                 </configuration>
