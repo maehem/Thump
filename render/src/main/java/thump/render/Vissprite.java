@@ -5,6 +5,7 @@
  */
 package thump.render;
 
+import java.text.MessageFormat;
 import static thump.render.Renderer.NUMCOLORMAPS;
 
 /**
@@ -43,5 +44,17 @@ public class Vissprite {
     public byte	colormap[] = new byte[NUMCOLORMAPS];
    
     public int         mobjflags;
+
+    @Override
+    public String toString() {
+        return MessageFormat.format( 
+                "        x1:{0}  x2:{1}\n" + 
+                "        gx:{2}  gy:{3}  gz:{4}  gzt:{5}\n" +
+                "        startfrac:{6}   scale:{7}  xiscale:{8}  texturemid:{9}  patch:{10}",
+            new Object[]{x1, x2, gx, gy, gz, gzt, startfrac, scale, xiscale, texturemid, patch }
+        );
+    }
+    
+    
     
 }
