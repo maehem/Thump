@@ -153,7 +153,7 @@ public class RThings {
         //MapObject thing;
         //int lightnum;
 
-        logger.log(Level.CONFIG, "Things.R_AddSprites for sector: {0}", sec.toString());
+        logger.log(Level.CONFIG, "RThings.R_AddSprites for sector: {0}", sec.toString());
         // BSP is traversed by subsector.
         // A sector might have been split into several
         //  subsectors during BSP building.
@@ -267,9 +267,8 @@ public class RThings {
             ang = renderer.R_PointToAngle (thing.x, thing.y)&0xFFFFFFFFL;
             rot = ((ang-thing.angle+(ANG45/2)*9)&0xFFFFFFFFL)>>29;
             logger.log(Level.CONFIG, 
-                    "Rot:  \n    ang:{0}  -  thing.angle:{1}  =  {2}+\n" +
-                            "    ANG45/2:{3}  ==>  * 9 : {4}\n" +
-                            "    ((ang-thing.angle+(ANG45/2)*9)>>29): {5}\n", 
+                    "Rot:  ang:{0}  -  thing.angle:{1}  =  {2}\n" +
+                    "      ANG45/2:{3}  ==>  * 9 : {4}   ((ang-thing.angle+(ANG45/2)*9)>>29): {5}", 
                     new Object[]{
                         Long.toHexString(ang), Long.toHexString(thing.angle),
                         Long.toHexString(ang-thing.angle),
@@ -282,7 +281,7 @@ public class RThings {
 //            rot += xxx*9;
 //            rot >>= 29;
             logger.log(Level.CONFIG, 
-                    "ang: 0x{0}   rot: 0x{1}", 
+                    "    ang: 0x{0}   rot: 0x{1}", 
                     new Object[]{Long.toHexString(ang), Long.toHexString(rot)}
             );
             lump = sprframe.lump[(int)rot];
@@ -359,7 +358,9 @@ public class RThings {
             }
 
             vis.colormap = spritelights[index];
-        }	
+        }
+        
+        logger.log(Level.CONFIG, "    new visSprite created:\n{0}", vis.toString());
     }
 
     //
