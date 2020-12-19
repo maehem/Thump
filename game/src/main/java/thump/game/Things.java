@@ -310,8 +310,8 @@ public class Things /*extends RThings*/ {
     public void R_InitSprites(String[] namelist, Wad wad) {
 
         for (int i=0 ; i<SCREENWIDTH ; i++) {
-            //rThings.negonearray[i] = -1;
-            rThings.negonearray[i] = Integer.MAX_VALUE;
+            rThings.negonearray[i] = -1;
+            //rThings.negonearray[i] = Integer.MAX_VALUE;
         }
 
         R_InitSpriteDefs (namelist, wad);
@@ -570,7 +570,7 @@ public class Things /*extends RThings*/ {
             } else {
                 rThings.vissprites[dsc].next = rThings.vissprites[dsc + 1];
             }
-           
+
 //            if ( dsc < rThings.vissprite_p ) {
 //                rThings.vissprites[dsc].next = rThings.vissprites[dsc + 1];
 //            }
@@ -809,7 +809,7 @@ public class Things /*extends RThings*/ {
         }
 
         // render any remaining masked mid textures
-        logger.log(Level.CONFIG, "    render any ramaining masked mid textures");
+        logger.log(Level.CONFIG, "    render any remaining masked mid textures");
         for (int i = renderer.bsp.ds_p - 1; i >= 0; i--) {
             ds = renderer.bsp.drawsegs[i];
             if (ds.maskedtexturecol!=-1) {
