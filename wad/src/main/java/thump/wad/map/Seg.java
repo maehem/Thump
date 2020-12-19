@@ -55,8 +55,8 @@ public class Seg {
     
     @Override
     public String toString() {
-        return  "seg: start:" + start+ "  end:" + end +
-                "    angle:" + Long.toHexString(angle) + "    lineDef:" + lineDefNum +
+        return  "\n    seg=> start:" + start+ "  end:" + end +
+                "\n    angle:" + Long.toHexString(angle) + "    lineDef:" + lineDefNum +
                 "    side:" + side + "   offset:" + offset
                 ;
     }
