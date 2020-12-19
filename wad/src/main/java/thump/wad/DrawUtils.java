@@ -405,12 +405,16 @@ public class DrawUtils {
                 for (int y = 0; y < vals.length; y++) {
                     //Color[] palette = wad.getPlayPalLump().paletteList.get(0);
                     int val = vals[y];
-                    int trans = 0xff;
+                    //int trans = 0xff;
+                    int c;
                     if (val == -1) {
-                        val = 0;
-                        trans = 0x00;
+                        //val = 0;
+                        //trans = 0x00;
+                        c = 0;  // transperent
+                    } else {
+                        c = palette[val];  // color from palette
                     }
-                    int c = palette[val];
+                    //int c = palette[val];
                     //int cc = trans << 24 | (c.getRed() & 0xFF) << 16 | (c.getGreen() & 0xFF) << 8 | c.getBlue() & 0xFF;
                     img.setRGB(x, y, c);
                 }
