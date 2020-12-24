@@ -374,7 +374,7 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
-        logger.log(Level.CONFIG, 
+        logger.log(Level.FINER, 
                 "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
                 new Object[]{x,_t1,_b1,_t2,_b2}
         );

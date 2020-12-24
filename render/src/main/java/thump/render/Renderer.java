@@ -341,8 +341,10 @@ public class Renderer {
         int x = px;
         int y = py;
 
+        logger.log(Level.FINE, "R_PointToAngle: x:{0}  y:{1}", new Object[]{px,py});
         x -= viewx;
         y -= viewy;
+        logger.log(Level.FINER, "    - viewx/y   x:{0}  y:{1}", new Object[]{px,py});
 
         if ((x == 0) && (y == 0)) {
             return 0;
@@ -356,70 +358,72 @@ public class Renderer {
                 // y>= 0
                 if (x > y) {
                     // octant 0
-                    logger.config("R_PointToAngle: octant 0");
+                    logger.log(Level.FINER,
+                            "               octant 0:  tangtoangle():{0}", 
+                            Long.toHexString(tantoangle(SlopeDiv(y, x))&0xFFFFFFFFL));
                     return tantoangle(SlopeDiv(y, x))&0xFFFFFFFFL;
                 } else {
                     // octant 1
-                    logger.config("R_PointToAngle: octant 1");
+                    logger.log(Level.FINER, 
+                            "               octant 1:   90-1-tantoangle():{0}", 
+                            Long.toHexString((ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
                     //return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                     return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
-            } else {
-                //logger.warning("R_PointToAngle: x>= 0  y<0\n");
-                // y<0
-                y = -y;
+            } else {   // y<0                
+                y = -y;  //flip it
 
                 if (x > y) {
-                    // octant 8
-                    logger.config("R_PointToAngle: octant 7");
+                    // octant 8   or is this 6 (typo in original C?)
                     int slpdiv = SlopeDiv(y, x);
-                    logger.log(Level.CONFIG, "    SlopDiv(x:{0},y:{1}) = {2}",
+                    logger.log(Level.FINER, 
+                            "               octant 7(or6):  SlopDiv(x:{0},y:{1}) = {2}",
                         new Object[]{x,y,slpdiv}
                     );
-                    logger.log(Level.CONFIG, 
-                            "    tantoangle(slopediv()) = 0x{0}",
-                            new Object[]{Long.toHexString(tantoangle(slpdiv))}
-                    );
-                    logger.log(Level.CONFIG, 
-                            "    ~tantoangle(slopediv()) = {0}",
-                            Long.toHexString((~tantoangle(slpdiv))&0xFFFFFFFFL)
+                    logger.log(Level.FINER, 
+                            "                      ~tantoangle(slopediv()) = {0}",
+                            Long.toHexString((~tantoangle(slpdiv)+1)&0xFFFFFFFFL)
                     );
 
-                    return (~tantoangle(SlopeDiv(y, x))+1)&0xFFFFFFFFL;
+                    return (~tantoangle(slpdiv)+1)&0xFFFFFFFFL;
                 } else {
                     // octant 7
-                    logger.config("R_PointToAngle: octant 6");
+                    logger.log(Level.FINER,
+                            "               octant 6(or7):  {0}", 
+                            Long.toHexString((ANG270 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL)
+                    );
                     return (ANG270 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             }
-        } else {
-            // x<0
+        } else {  // x<0
             x = -x;
 
-            if (y >= 0) {
-            //logger.warning("R_PointToAngle: x< 0  y>=0\n");
-                // y>= 0
-                if (x > y) {
-                    // octant 3
-                    logger.config("R_PointToAngle: octant 3");
+            if (y >= 0) {  // y>= 0                
+                if (x > y) {  // octant 3
+                    logger.log(Level.FINER, 
+                            "               octant 3: {0}",
+                            Long.toHexString((ANG180 - 1 + ~(tantoangle(SlopeDiv(y, x))))&0xFFFFFFFFL));
                     return (ANG180 - 1 + ~(tantoangle(SlopeDiv(y, x))))&0xFFFFFFFFL;
-                } else {
-                    // octant 2
-                    logger.config("R_PointToAngle: octant 2");
+                } else {   // octant 2
+                    logger.log( Level.CONFIG,
+                            "               octant 2:  {0}",
+                            Long.toHexString((ANG90 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
                     return (ANG90 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
-            } else {
-                // y<0
-                //logger.warning("R_PointToAngle: x< 0  y<0\n");
+            } else {  // y<0
                 y = -y;
 
                 if (x > y) {
                     // octant 4
-                    logger.config("R_PointToAngle: octant 4");
+                    logger.log(Level.FINER, 
+                            "               octant 4: {0}",
+                            Long.toHexString((ANG180 + tantoangle(SlopeDiv(y, x)))&0xFFFFFFFFL));
                     return (ANG180 + tantoangle(SlopeDiv(y, x)))&0xFFFFFFFFL;
                 } else {
                     // octant 5
-                    logger.config("R_PointToAngle: octant 5");
+                    logger.log(Level.FINER,
+                            "               octant 5: {0}",
+                            Long.toHexString((ANG270 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
                     return (ANG270 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
                 }
             }

@@ -826,7 +826,7 @@ public class Game {
                     { 
                         //SystemInterface.I_Error ("consistency failure ({0} should be {1})",
                         //         new Object[]{cmd.consistancy, consistancy[i][buf]}); 
-                        thump.base.Defines.logger.log(
+                        logger.log(
                                 Level.SEVERE,
                                 "consistency failure ({0} should be {1})",
                                  new Object[]{cmd.consistancy, consistancy[i][buf]});
