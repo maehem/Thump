@@ -7,7 +7,7 @@ package thump.base;
  *
  * @author mark
  */
-public class BoundingBox {
+public final class BoundingBox {
     public int left;
     public int top;
     public int right;
@@ -22,6 +22,7 @@ public class BoundingBox {
 
     public BoundingBox() {
         this(0,0,0,0);
+        M_ClearBox();
     }
 
     public void M_ClearBox() {
@@ -59,7 +60,7 @@ public class BoundingBox {
 
     @Override
     public String toString() {
-        return "l:" + left + " t:" + top + " r:" + right + " b:" + bottom;
+        return "l:" + (left>>16) + " t:" + (top>>16) + " r:" + (right>>16) + " b:" + (bottom>>16);
     }    
     
     public int[] toArray() {
