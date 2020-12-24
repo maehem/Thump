@@ -146,7 +146,8 @@ public class Draw {
         if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT ) {
             logger.log(Level.CONFIG, "R_DrawColumn: {0} to {1} at {2}", new Object[]{dc_yl, dc_yh, dc_x});
         }
-
+        logger.log(Level.CONFIG, "R_DrawColumn");
+        
         // Zero length, column does not exceed a pixel.
         int count = dc_yh - dc_yl; 
         if (count <= 0) {
@@ -161,7 +162,13 @@ public class Draw {
         
         do {
 //            dest.area[x+y*SCREENWIDTH] = dc_colormap[vals[(frac>>FRACBITS)&127]];
-            dest.area[x+y] = dc_colormap[vals[(frac>>FRACBITS)&127]];
+            int index = (frac>>FRACBITS)&127;
+            if ( index < vals.length ) {  // Ignore index outside of vals[] length.
+                int val = vals[index];
+                if ( val>=0 ) {  // val  -1  is clear
+                    dest.area[x+y] = dc_colormap[val];
+                }
+            }
             //y++;
             y+=SCREENWIDTH;
             frac += fracstep;
@@ -245,6 +252,7 @@ public class Draw {
             return;
         } 
 
+        logger.log(Level.CONFIG, "R_DrawColumnLow");
 //    #ifdef RANGECHECK 
 //        if ((unsigned)dc_x >= SCREENWIDTH
 //            || dc_yl < 0
@@ -323,6 +331,7 @@ public class Draw {
         int		frac;
         int		fracstep;	 
 
+        logger.log(Level.CONFIG, "R_DrawFuzzColumn");
         // Adjust borders. Low... 
         if (dc_yl==0) {
             dc_yl = 1;
@@ -445,6 +454,7 @@ public class Draw {
         if (count < 0) {
             return;
         }
+        logger.log(Level.CONFIG, "R_DrawTranslatedColumn");
 //    #ifdef RANGECHECK 
 //        if ((unsigned)dc_x >= SCREENWIDTH
 //            || dc_yl < 0

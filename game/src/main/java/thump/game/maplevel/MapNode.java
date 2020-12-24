@@ -37,7 +37,7 @@ public class MapNode extends Node {
         
         // single subsector is a special case
         //if (game.playerSetup.nodes.length==0) {
-        if (game.playerSetup.nodes.size()==0) {
+        if (game.playerSetup.nodes.isEmpty()) {
             //return game.playerSetup.subsectors[0];
             return game.playerSetup.subsectors.get(0);
         }

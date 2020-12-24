@@ -9,7 +9,7 @@ import thump.wad.map.Side;
  *
  * @author mark
  */
-public class MapSideDef /*extends Side*/ {
+public class MapSideDef {
     public final Side side;
   // Front sector, towards viewer.
     public MapSector mapSector;

@@ -153,7 +153,7 @@ public class RThings {
         //MapObject thing;
         //int lightnum;
 
-        logger.log(Level.CONFIG, "RThings.R_AddSprites for sector: {0}", sec.toString());
+        logger.log(Level.FINE, "RThings.R_AddSprites for sector:\n    {0}", sec.toString());
         // BSP is traversed by subsector.
         // A sector might have been split into several
         //  subsectors during BSP building.
@@ -177,6 +177,10 @@ public class RThings {
 
         //MapObject thing = sec.thinglist;
         Degenmobj thing = sec.thinglist;
+        if ( thing != null ) {
+            logger.log(Level.CONFIG, "    project sprites:\n{0}", thing.toString());
+        }
+        
         // Handle all things in sector.
         //for (thing = sec.thinglist; thing; thing = thing.snext) {
         while (thing != null) {
@@ -270,10 +274,9 @@ public class RThings {
                     "Rot:  ang:{0}  -  thing.angle:{1}  =  {2}\n" +
                     "      ANG45/2:{3}  ==>  * 9 : {4}   ((ang-thing.angle+(ANG45/2)*9)>>29): {5}", 
                     new Object[]{
-                        Long.toHexString(ang), Long.toHexString(thing.angle),
-                        Long.toHexString(ang-thing.angle),
+                        Long.toHexString(ang), Long.toHexString(thing.angle), Long.toHexString((ang-thing.angle)&0xFFFFFFFFL),
                         Long.toHexString(ANG45/2), Long.toHexString( ang-thing.angle+(ANG45/2)*9 ),
-                        Long.toHexString(((ang-thing.angle+(ANG45/2)*9)>>29))
+                        rot
                     }
             );
 //            rot = (int)(ang-(thing.angle&0xffffffff));
@@ -282,7 +285,7 @@ public class RThings {
 //            rot >>= 29;
             logger.log(Level.CONFIG, 
                     "    ang: 0x{0}   rot: 0x{1}", 
-                    new Object[]{Long.toHexString(ang), Long.toHexString(rot)}
+                    new Object[]{Long.toHexString(ang), rot}
             );
             lump = sprframe.lump[(int)rot];
             flip = sprframe.flip[(int)rot]>0;

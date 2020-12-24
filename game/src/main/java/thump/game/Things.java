@@ -29,7 +29,6 @@ import thump.render.Spritedef;
 import thump.render.Spriteframe;
 import thump.render.Vissprite;
 import thump.render.colfuncs.ColFunc_DrawTranslatedColumn;
-//import thump.render.colfuncs.ColFunc_DrawTranslatedColumn;
 import thump.wad.Wad;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_TRANSLATION;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.MF_TRANSSHIFT;
@@ -40,7 +39,7 @@ import thump.wad.mapraw.PatchData;
  *
  * @author mark
  */
-public class Things /*extends RThings*/ {
+public class Things {
 
     public final RThings rThings = new RThings();
     
@@ -61,12 +60,14 @@ public class Things /*extends RThings*/ {
         this.game = game;
     }
     
-    
-
-    //
-    // R_InstallSpriteLump
-    // Local function for R_InitSprites.
-    //
+    /**
+     * Install Sprite Lump
+     * 
+     * @param lump
+     * @param frame
+     * @param _rotation
+     * @param flipped 
+     */
     void R_InstallSpriteLump(
             int lump,
             int frame, // unsigned
@@ -116,9 +117,6 @@ public class Things /*extends RThings*/ {
 
         // the lump is only used for one rotation
         if (sprtemp[frame].rotate == 0) {
-//            SystemInterface.I_Error (
-//                    "R_InitSprites: Sprite {0} frame {1} has rotations "+
-//                    "and a rot=0 lump", new Object[]{spritename, 'A'+frame});
             logger.log(Level.SEVERE,
                     "R_InitSprites: Sprite {0} frame {1} has rotations "+
                     "and a rot=0 lump", new Object[]{spritename, 'A'+frame});
@@ -337,7 +335,7 @@ public class Things /*extends RThings*/ {
         int		frac;
         PatchData		patch;
 
-        logger.log(Level.CONFIG, "draw vis sprite:   x1:{0}   x2:{1}", new Object[]{x1,x2});
+        logger.log(Level.FINEST, "draw vis sprite:   x1:{0}   x2:{1}", new Object[]{x1,x2});
 
         Renderer rend = renderer;
         Draw draw = rend.draw;
@@ -347,7 +345,7 @@ public class Things /*extends RThings*/ {
 
         draw.dc_colormap = vis.colormap;
 
-        if (null!=draw.dc_colormap) {
+        if (null==draw.dc_colormap) {
             // NULL colormap = shadow draw
             rend.colfunc = rend.fuzzcolfunc;
         } else if ((vis.mobjflags & MF_TRANSLATION.getValue())>0) {

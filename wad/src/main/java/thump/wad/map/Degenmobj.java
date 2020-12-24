@@ -5,6 +5,7 @@
  */
 package thump.wad.map;
 
+import java.text.MessageFormat;
 import thump.base.Defines.SpriteNum;
 
 /**
@@ -28,6 +29,25 @@ public class Degenmobj {
 
     //public Thinker thinker=null;
 
+    @Override
+    public String toString() {
+        return MessageFormat.format(
+                "    Degenmobj:  x:{0}  y:{1}  z:{2}   angle:{3}  frame:{4}  flags:{5}  sprite:{6}\n        list:{7}",
+                new Object[]{x,y,z,Long.toHexString(angle),frame,Integer.toHexString(flags),sprite, nextList()}
+        );
+                
+    }
+
+    private String nextList() {
+        StringBuilder sb = new StringBuilder("this-->");
+        Degenmobj next = snext;
+        while (next!=null) {
+            sb.append("  --> ").append(next.hashCode());
+            next = next.snext;
+        }
+        return sb.toString();
+    }
+    
     public enum MobileObjectFlag {
         MF_SPECIAL(1),          // Call P_SpecialThing when touched.
         MF_SOLID(2),            // Blocks.

@@ -229,8 +229,7 @@ public class Map {
             return false;		// one sided line
         }
 
-        if ((tmthing.flags & MF_MISSILE.getValue())==0 )
-        {
+        if ((tmthing.flags & MF_MISSILE.getValue())==0 ) {
             if ( (ld.flags & ML_BLOCKING)>0 ) {
                 return false;	// explicitly blocking everything
             }
@@ -244,8 +243,7 @@ public class Map {
         util.P_LineOpening (ld);	
 
         // adjust floor / ceiling heights
-        if (util.opentop < tmceilingz)
-        {
+        if (util.opentop < tmceilingz) {
             tmceilingz = util.opentop;    // p_sight
             ceilingline = ld;
         }

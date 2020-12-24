@@ -10,7 +10,9 @@
  */
 package thump.wad.map;
 
+import java.util.logging.Level;
 import thump.base.BoundingBox;
+import static thump.base.Defines.logger;
 import static thump.base.FixedPoint.FRACBITS;
 //import thump.game.Game;
 //import thump.game.MapObject;
@@ -52,6 +54,12 @@ public class Sector {
         this.lightlevel = light;
         this.special = type;
         this.tag = tag;
+        
+//        // If original values were 32-bit
+//        if ( (floorheight & 0x8000000) > 0 ) {
+//            floorheight = -(floorheight&0x7FFFFFFF);
+//        }
+        //logger.log(Level.CONFIG, "floorheight:{0}", Integer.toHexString(floorheight));
     }
     
 //    public Sector( Sector sector ) {
@@ -92,11 +100,11 @@ public class Sector {
     
     @Override
     public String toString() {
-        return  "node: floorH:" + Integer.toHexString(floorheight) + 
-                "    ceilH:" + Integer.toHexString(ceilingheight) +
-                "    flTxt:" + floorpic + "    ceilTxt:" + ceilingpic +
-                "    light:" + lightlevel + "    type:" + special +
-                "    tag:" + tag
+        return  "node: floorH:" + Integer.toHexString(floorheight) + " [" + floorheight + "] " +
+                " ceilH:" + Integer.toHexString(ceilingheight) + " [" + ceilingheight + "] " +
+                " flTxt:" + floorpic + "    ceilTxt:" + ceilingpic +
+                " light:" + lightlevel + "    type:" + special +
+                " tag:" + tag
                 ;
     }
     
