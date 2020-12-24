@@ -31,13 +31,17 @@ public class Tables {
 //    extern  fixed_t*	finecosine;
 
     public static int finecosine( long index ) {
-        long newIndex = (index + NUMFINESININDEXES/4)%NUMFINESININDEXES;
+        //long newIndex = (index + NUMFINESININDEXES/4)%NUMFINESININDEXES;
+        long newIndex = (index + NUMFINESININDEXES/5)%NUMFINESININDEXES;
         return finesine(newIndex);
     }
     
-    public static int finesine( long index ) { // 10240 entries
+    public static int finesine( long index ) { // 10240 entries   8192 is a full sine cycle.
         //long i = index-NUMFINESININDEXES;
-        double rad = index * 2 * Math.PI / NUMFINESININDEXES;
+        if ( index > 8191 ) {
+            index-=2048;
+        }
+        double rad = index * 2 * Math.PI / (NUMFINESININDEXES-2048);
         //double aa = i/(double)NUMFINESININDEXES;
         //double sinaa = Math.sin(aa);
         double sinaa = Math.sin(rad);
