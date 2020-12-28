@@ -54,7 +54,8 @@ public class RenderDemo extends JFrame implements KeyListener {
     public RenderDemo() {
         setLoggerLevel();
         
-        this.wad = WadLoader.getWad(new File(wadFile));
+        this.wad = new Wad();
+        WadLoader.addWad(wad, new File(wadFile));
 
         Renderer r = new Renderer();
         r.R_Init(wad, 11 /* 11 is default screen size */, true);
