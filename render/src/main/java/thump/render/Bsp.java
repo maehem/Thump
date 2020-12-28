@@ -70,18 +70,18 @@ public class Bsp {
     void R_ClipSolidWallSegment(int first, int last, Wad wad) {
         logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
         //cliprange_t * next;
-        int nextIdx;
+        int nextIdx=0;
         //cliprange_t * start;
         int startIdx;
 
         Segs segs = Segs.getInstance();
         
-        //dumpSolidSegs();  // For Debug
-        
         // Find the first range that touches the range
         //  (adjacent pixels are touching).
         //start = solidsegs;
         startIdx = 0;
+        
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
         
         //while (start -> last < first - 1) {
         //    start++;
@@ -90,6 +90,7 @@ public class Bsp {
             startIdx++;
         }
         //logger.log(Level.CONFIG, "    1");
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
         //if (first < start -> first) {
         if ( first < solidsegs[startIdx].first ) {    
@@ -104,6 +105,8 @@ public class Bsp {
                         
                 //newend++;
                 newend++;
+                logger.log(Level.FINER, "Insert new clipost.");
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
                 //while (next != start) {
                 //    *next = *(next-1);
@@ -115,27 +118,22 @@ public class Bsp {
                     solidsegs[nextIdx].first = solidsegs[nextIdx-1].first;
                     solidsegs[nextIdx].last = solidsegs[nextIdx-1].last;
                     nextIdx--;
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 }
                 
                 //dumpSolidSegs(); // debug
                 //logger.log(Level.CONFIG, "    2");
+                solidsegs[nextIdx].first = first;//next->first = first;
+                solidsegs[nextIdx].last = last;//next->last = last;
                 
-                
-                
-                //next->first = first;
-                solidsegs[nextIdx].first = first;
-                //next->last = last;
-                solidsegs[nextIdx].last = last;
-                
-                //dumpSolidSegs(); // debug
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 
                 return;
             }
         //logger.log(Level.CONFIG, "    3");
 
             // There is a fragment above *start.
-            //R_StoreWallRange(first, start -> first - 1);
-            segs.R_StoreWallRange(first, solidsegs[startIdx].first - 1, renderer, wad);
+            segs.R_StoreWallRange(first, solidsegs[startIdx].first - 1, renderer, wad); //R_StoreWallRange(first, start -> first - 1);
 
             // Now adjust the clip size.
         }
@@ -151,10 +149,12 @@ public class Bsp {
 
         //next = start;
         nextIdx = startIdx;
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
         boolean crunch=false;
         //logger.log(Level.CONFIG, "    5");
         
+                logger.log(Level.FINER, "Insert new clipost.");
         //while (last >= (next+1)->first-1) {
         while (last >= solidsegs[nextIdx+1].first - 1) {
             // There is a fragment between two posts.
@@ -162,13 +162,16 @@ public class Bsp {
             segs.R_StoreWallRange (solidsegs[nextIdx].last + 1, solidsegs[nextIdx+1].first - 1, renderer, wad );
             //next++;
             nextIdx++;
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
             //if (last <= next->last) {
             if (last <= solidsegs[nextIdx].last) {
                 // Bottom is contained in next.
                 // Adjust the clip size.
+                logger.log(Level.FINER, "Bottom contained in next.  Adjust clip size.");
                 //start->last = next->last;	
                 solidsegs[startIdx].last = solidsegs[nextIdx].last;	
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 //goto crunch;
                 crunch=true;
         //logger.log(Level.CONFIG, "    crunch");
@@ -179,10 +182,12 @@ public class Bsp {
 
         if ( !crunch ) {
             // There is a fragment after *next.
+                logger.log(Level.FINE, "There is a fragment after next.");
             //R_StoreWallRange(next -> last + 1, last);
             segs.R_StoreWallRange(solidsegs[nextIdx].last + 1, last, renderer, wad);
         }
         // Adjust the clip size.
+        logger.log(Level.FINER, "Adjust clip size.");
 
         // Remove start+1 to next from the clip list,
         // because start now covers their area.
@@ -201,24 +206,28 @@ public class Bsp {
         //    // Remove a post.
         //     * ++start =  * next;
         //}
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
         while (nextIdx++ != newend) {
             // Remove a post.
+            logger.log(Level.FINER, "Remove a post.");
             startIdx++;
             // * ++start =  * next;
             solidsegs[startIdx].first = solidsegs[nextIdx].first;
             solidsegs[startIdx].last = solidsegs[nextIdx].last;
+            dumpSolidSegs(nextIdx, startIdx);  // For Debug
         }
         //dumpSolidSegs(); // debug
 
         //logger.log(Level.CONFIG, "    7");
         //newend = start + 1;
         newend = startIdx + 1;
+        dumpSolidSegs(nextIdx, startIdx);  // For Debug
     }
 
 
 
-    private void dumpSolidSegs() {
-        logger.log(Level.CONFIG, "    SolidSegs Dump");
+    private void dumpSolidSegs(int nextIdx, int startIdx) {
+        logger.log(Level.FINER, "    SolidSegs Dump ::   next:{0}  startIdx:{1}  newend:{2}", new Object[]{nextIdx, startIdx, newend});
         for ( int i=0; i<solidsegs.length;i++) {
             logger.log(Level.CONFIG, solidsegs[i].toString());
         }
@@ -230,151 +239,151 @@ public class Bsp {
     //  e.g. single sided LineDefs (middle texture)
     //  that entirely block the view.
     // 
-    void R_ClipSolidWallSegment2( int first, int last, Wad wad ) {
-//    cliprange_t*	next;
-//    cliprange_t*	start;
-
-        logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
-        int	next=0;  // next index
-        //int nextIndex = 0;
-        int	start = 0; // current start index
-        //int startIndex = 0;
-
-        // Find the first range that touches the range
-        //  (adjacent pixels are touching).
-//    start = solidsegs;
-        //start = 0;
-        
-        
-//    while (start->last < first-1)
-//	start++;
-        while (solidsegs[start].last < first-1) {
-            start++;
-        }
-
-//      if (first < start->first) {
-        if (first < solidsegs[start].first) {
-//	    if (last < start->first-1) {
-            if (last < solidsegs[start].first-1) {
-                // Post is entirely visible (above start), so insert a new clippost.
-                logger.log(Level.CONFIG, "    Post is entirely visible (above start). Insert a new clip post.");
-//	        R_StoreWallRange (first, last);
-                logger.log(Level.CONFIG, "    R_StoreWallRange(start:{0},stop:{1})", new Object[]{first, last});
-                Segs.getInstance().R_StoreWallRange (
-                        first, last,
-                        renderer, wad);
-//	    next = newend;
-                next = newend;
-//	    newend++;
-                newend++;
-                //newend = solidsegs[newend];
-
-//	    while (next != start)  {
-//		*next = *(next-1);
-//		next--;
-//	    }
-                while (next != start) {
-                    //*next = *(next-1);
-                    // Set value of next to next-1.
-                    solidsegs[next].first = solidsegs[next-1].first;
-                    //solidsegs[next].last = solidsegs[next-1].last; // Is this right?  Added as an experiment.
-                    //next--;
-                    next--;
-                }
-//	    next->first = first;
-//	    next->last = last;
-//	    return;
-                solidsegs[next].first = first;
-                solidsegs[next].last = last;
-                return;
-            }
-
-            // There is a fragment above *start.
-            logger.log(Level.CONFIG, "    There is a fragment above start.");
-//	R_StoreWallRange (first, start->first - 1);
-            Segs.getInstance().R_StoreWallRange (
-                    first, solidsegs[start].first - 1,
-                    renderer, wad);
-            // Now adjust the clip size.
-//	start->first = first;
-            logger.log(Level.CONFIG, "    solidsegs[start].first = first  =  {0}", first);
-            solidsegs[start].first = first;	
-        }
-
-        // Bottom contained in start?
-//    if (last <= start->last)
-//	return;			
-        if (last <= solidsegs[start].last) {
-            logger.log(Level.CONFIG, "    Bottom contained in start.");
-            return;
-        }			
-
-        next = start;
-//    next = start;
-        
-        boolean crunch = false;
-        
-        //while (last >= (next+1).first-1) {
-        while (last >= solidsegs[next+1].first-1) {
-            // There is a fragment between two posts.
-            logger.log(Level.CONFIG, "    There is a fragment between two posts.");
-//	R_StoreWallRange (next->last + 1, (next+1)->first - 1);
-            Segs.getInstance().R_StoreWallRange (
-                    solidsegs[next].last + 1, solidsegs[next+1].first - 1,
-                    renderer, wad);            
-//	next++;
-            next++;
-
-//	    if (last <= next->last) {
-            if (last <= solidsegs[next].last) {
-                // Bottom is contained in next. Adjust the clip size.
-                logger.log(Level.CONFIG, "    Bottom is contained in next. Adjust clip size.");
-//	    start->last = next->last;	
-                solidsegs[start].last = solidsegs[next].last;	
-//          goto crunch;
-                crunch = true;
-                break;
-            }
-        }
-
-        if ( !crunch ) { 
-            // There is a fragment after *next.
-            logger.log(Level.CONFIG, "    There is a fragment after next.");
-//    R_StoreWallRange (next->last + 1, last);
-            Segs.getInstance().R_StoreWallRange (
-                    solidsegs[next].last + 1, last,
-                    renderer, wad);
-            // Adjust the clip size.
-//    start->last = last; // Adjust the clip size.
-            solidsegs[start].last = last;
-        }
-
-        // Remove start+1 to next from the clip list,
-        // because start now covers their area.
-      //crunch:
-        if (next == start) {
-            // Post just extended past the bottom of one post.
-            logger.log(Level.CONFIG, "    Post just extended past the bottom of one post.");
-            return;
-        }
-
-//    while (next++ != newend)
-//    {
-//	// Remove a post.
-//	*++start = *next;
+//    void R_ClipSolidWallSegment2( int first, int last, Wad wad ) {
+////    cliprange_t*	next;
+////    cliprange_t*	start;
+//
+//        logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
+//        int	next=0;  // next index
+//        //int nextIndex = 0;
+//        int	start = 0; // current start index
+//        //int startIndex = 0;
+//
+//        // Find the first range that touches the range
+//        //  (adjacent pixels are touching).
+////    start = solidsegs;
+//        //start = 0;
+//        
+//        
+////    while (start->last < first-1)
+////	start++;
+//        while (solidsegs[start].last < first-1) {
+//            start++;
+//        }
+//
+////      if (first < start->first) {
+//        if (first < solidsegs[start].first) {
+////	    if (last < start->first-1) {
+//            if (last < solidsegs[start].first-1) {
+//                // Post is entirely visible (above start), so insert a new clippost.
+//                logger.log(Level.CONFIG, "    Post is entirely visible (above start). Insert a new clip post.");
+////	        R_StoreWallRange (first, last);
+//                logger.log(Level.CONFIG, "    R_StoreWallRange(start:{0},stop:{1})", new Object[]{first, last});
+//                Segs.getInstance().R_StoreWallRange (
+//                        first, last,
+//                        renderer, wad);
+////	    next = newend;
+//                next = newend;
+////	    newend++;
+//                newend++;
+//                //newend = solidsegs[newend];
+//
+////	    while (next != start)  {
+////		*next = *(next-1);
+////		next--;
+////	    }
+//                while (next != start) {
+//                    //*next = *(next-1);
+//                    // Set value of next to next-1.
+//                    solidsegs[next].first = solidsegs[next-1].first;
+//                    //solidsegs[next].last = solidsegs[next-1].last; // Is this right?  Added as an experiment.
+//                    //next--;
+//                    next--;
+//                }
+////	    next->first = first;
+////	    next->last = last;
+////	    return;
+//                solidsegs[next].first = first;
+//                solidsegs[next].last = last;
+//                return;
+//            }
+//
+//            // There is a fragment above *start.
+//            logger.log(Level.CONFIG, "    There is a fragment above start.");
+////	R_StoreWallRange (first, start->first - 1);
+//            Segs.getInstance().R_StoreWallRange (
+//                    first, solidsegs[start].first - 1,
+//                    renderer, wad);
+//            // Now adjust the clip size.
+////	start->first = first;
+//            logger.log(Level.CONFIG, "    solidsegs[start].first = first  =  {0}", first);
+//            solidsegs[start].first = first;	
+//        }
+//
+//        // Bottom contained in start?
+////    if (last <= start->last)
+////	return;			
+//        if (last <= solidsegs[start].last) {
+//            logger.log(Level.CONFIG, "    Bottom contained in start.");
+//            return;
+//        }			
+//
+//        next = start;
+////    next = start;
+//        
+//        boolean crunch = false;
+//        
+//        //while (last >= (next+1).first-1) {
+//        while (last >= solidsegs[next+1].first-1) {
+//            // There is a fragment between two posts.
+//            logger.log(Level.CONFIG, "    There is a fragment between two posts.");
+////	R_StoreWallRange (next->last + 1, (next+1)->first - 1);
+//            Segs.getInstance().R_StoreWallRange (
+//                    solidsegs[next].last + 1, solidsegs[next+1].first - 1,
+//                    renderer, wad);            
+////	next++;
+//            next++;
+//
+////	    if (last <= next->last) {
+//            if (last <= solidsegs[next].last) {
+//                // Bottom is contained in next. Adjust the clip size.
+//                logger.log(Level.CONFIG, "    Bottom is contained in next. Adjust clip size.");
+////	    start->last = next->last;	
+//                solidsegs[start].last = solidsegs[next].last;	
+////          goto crunch;
+//                crunch = true;
+//                break;
+//            }
+//        }
+//
+//        if ( !crunch ) { 
+//            // There is a fragment after *next.
+//            logger.log(Level.CONFIG, "    There is a fragment after next.");
+////    R_StoreWallRange (next->last + 1, last);
+//            Segs.getInstance().R_StoreWallRange (
+//                    solidsegs[next].last + 1, last,
+//                    renderer, wad);
+//            // Adjust the clip size.
+////    start->last = last; // Adjust the clip size.
+//            solidsegs[start].last = last;
+//        }
+//
+//        // Remove start+1 to next from the clip list,
+//        // because start now covers their area.
+//      //crunch:
+//        if (next == start) {
+//            // Post just extended past the bottom of one post.
+//            logger.log(Level.CONFIG, "    Post just extended past the bottom of one post.");
+//            return;
+//        }
+//
+////    while (next++ != newend)
+////    {
+////	// Remove a post.
+////	*++start = *next;
+////    }
+//        while (next++ != newend) {
+//            // Remove a post.
+//            //*++start = *next;
+//            logger.log(Level.CONFIG, "    Remove a post.");
+//
+//            start++;
+//            solidsegs[start].first = solidsegs[next].first;
+//        }
+//
+////    newend = start+1;
+//        newend = start+1;
 //    }
-        while (next++ != newend) {
-            // Remove a post.
-            //*++start = *next;
-            logger.log(Level.CONFIG, "    Remove a post.");
-
-            start++;
-            solidsegs[start].first = solidsegs[next].first;
-        }
-
-//    newend = start+1;
-        newend = start+1;
-    }
 
 //R_ClipSolidWallSegment
 //( int			first,
