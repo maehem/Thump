@@ -25,6 +25,8 @@ import static thump.game.play.Local.MAPBLOCKSIZE;
 import static thump.game.play.Local.MAPBTOFRAC;
 import thump.game.play.PITfuncs.PIT_AddLineIntercepts;
 import thump.game.play.PITfuncs.PIT_AddThingIntercepts;
+import thump.wad.lump.BlockMapLump;
+import thump.wad.lump.Lump;
 import thump.wad.map.Degenmobj;
 import static thump.wad.map.Degenmobj.MobileObjectFlag.*;
 import thump.wad.map.Line;
@@ -439,6 +441,9 @@ public class MapUtil {
     // to P_BlockLinesIterator, then make one or more calls
     // to it.
     //
+//	
+//    offset = *(blockmap+offset);
+//
     public boolean P_BlockLinesIterator(int x, int y, PITfunc func) { //boolean(*func)(Line) 
         int offset;
         //int list;
@@ -452,27 +457,55 @@ public class MapUtil {
             return true;
         }
 
-        //offset = y * ps.bmapwidth + x;
-        offset = y + x;
-
-        offset = ps.bmapOffsetList[offset];  // Needs rework based on original source.
+        offset = y * ps.bmapwidth + x;
+        //offset = y + x;
+        //    offset = *(blockmap+offset);
+        Short[] offsetList = ps.bmapList[offset]; // Needs rework based on original source.
         // This wants to be blockmaplump.offsetList[offset];
-        Short[] list = ps.bmapList[offset];
+//        Short[] list = ps.bmapList[offset];
+//        
+//        //for (list = ps.blockmaplump[offset]; list != -1; offset++) {
+//        for ( int i=0; i<list.length-1; i++) {
+//            ld = ps.lines[list[i]];
+//
+//            if (ld.validcount == Game.getInstance().renderer.validcount) {
+//                continue; 	// line has already been checked
+//            }
+//
+//            ld.validcount = Game.getInstance().renderer.validcount;
+//
+//            if (!func.doFunc(ld)) {  // PIT_ funcs
+//                return false;
+//            }
+//        }
+//        return true;	// everything was checked
         
-        //for (list = ps.blockmaplump[offset]; list != -1; offset++) {
-        for ( int i=0; i<list.length-1; i++) {
-            ld = ps.lines[list[i]];
-
-            if (ld.validcount == Game.getInstance().renderer.validcount) {
-                continue; 	// line has already been checked
+        
+//    for ( list = blockmaplump+offset ; *list != -1 ; list++) {
+        for ( int i=0; i<offsetList.length; i++) {
+//	ld = &lines[*list];
+            if ( offsetList[i]== -1 ) {
+                break;
             }
-
+            ld = ps.lines[offsetList[i]&0xFFFF];
+//
+//	if (ld->validcount == validcount)
+            if ( ld.validcount == Game.getInstance().renderer.validcount ) {
+     //	    continue; 	// line has already been checked
+               continue;
+            }
+//
+//	ld->validcount = validcount;
             ld.validcount = Game.getInstance().renderer.validcount;
-
+//		
+//	if ( !func(ld) )
+//	    return false;
+//        }
             if (!func.doFunc(ld)) {  // PIT_ funcs
                 return false;
             }
         }
+
         return true;	// everything was checked
     }
 
