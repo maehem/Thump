@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import static thump.base.FixedPoint.FRACBITS;
 
@@ -56,25 +57,33 @@ public class BlockMapLump extends Lump {
         yOrigin = bb.getShort()<<FRACBITS;
         xBlocks = bb.getShort();
         yBlocks = bb.getShort();
-        offsetList = new int[xBlocks * yBlocks];
+        numBlocks = (short)(xBlocks * yBlocks);
+        offsetList = new int[numBlocks];
         for (int i = 0; i < offsetList.length; i++) {
             // Old DOOM had index from lump start. But we don't need that now.
             // The first index value starts after the lump x/y vals and offset list.
             offsetList[i] = (bb.getShort() & 0x0000FFFF)-offsetList.length-4;
         }
         // Read offsetList
-        numBlocks = (short)(xBlocks * yBlocks);
         blockLists = new Short[numBlocks][];
+        int position = bb.position();        
         
         // Simulation uses the block links in the WAD.
         // Game zeros them out.
         for ( int i=0; i< numBlocks; i++) {
                 ArrayList<Short> blockList = new ArrayList<>();
+                bb.position(position+offsetList[i]*2);  // offset is measured in shorts
+                logger.log(Level.FINER, "    read block {0} at offset:{1}   ", new Object[]{i, bb.position()});
                 short block = 0;
                 do {
+                    //try{
                     block = bb.getShort();
+                    //logger.log(Level.CONFIG, "    {0}", Integer.toHexString(block&0xFFFF));
+                    //} catch (java.nio.BufferUnderflowException e) {
+                    //    int ii=0;
+                    //}
                     blockList.add(block);
-                } while (block != -1);
+                } while ( block != -1 );
 
                 Short t[] = new Short[blockList.size()];
                 blockLists[i]= blockList.toArray(t);
