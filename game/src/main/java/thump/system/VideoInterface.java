@@ -4,6 +4,7 @@
 package thump.system;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
@@ -196,11 +197,16 @@ public class VideoInterface implements KeyListener, ComponentListener {
     
     /**
      * Draws the draw buffer to the screen.
+     * @param blankScreen
      */
-    public void I_FinishUpdate (){
+    public void I_FinishUpdate ( boolean blankScreen ){
         logger.log(Level.FINEST, "I_FinishUpdate()");
         BufferedImage s = Game.getInstance().renderer.video.screenImage[0];
         Graphics g = viewCanvas.getStrategy().getDrawGraphics();
+        if ( blankScreen ) {
+            g.setColor(Color.GRAY);
+            g.fillRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+        }
         g.drawImage(s, 0, 0 , 
                 (int) (s.getWidth()*scaleX), (int) (s.getHeight()*scaleY), viewCanvas);
         viewCanvas.getStrategy().show();
