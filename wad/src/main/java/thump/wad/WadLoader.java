@@ -55,8 +55,8 @@ public class WadLoader {
 
     private WadLoader() {}
     
-    public static Wad getWad(File wadFile) {
-        Wad wad = new Wad();
+    public static Wad addWad(Wad wad, File wadFile) {
+        //Wad wad = new Wad();
         FileChannel fc = null;
         logger.log(Level.CONFIG, "Get WAD File: {0}", wadFile.getAbsolutePath());
         
@@ -81,7 +81,8 @@ public class WadLoader {
             fc.read(bb);
             bb.position(0);
             bb = bb.order(ByteOrder.LITTLE_ENDIAN);
-            wad.numlumps = bb.getInt();
+            int numLumps = bb.getInt();
+            wad.numlumps += numLumps;
             bb.clear();
             fc.read(bb);
             bb.position(0);
@@ -104,7 +105,7 @@ public class WadLoader {
             
             
             // Go to infotable offset and create list of lumps.
-            for (int i = 0; i < wad.numlumps; i++) {
+            for (int i = 0; i < numLumps; i++) {
                 bb.clear();
                 fc.read(bb);
                 bb.position(0);
@@ -125,6 +126,9 @@ public class WadLoader {
                 long mark = fc.position();
                 if ( name.startsWith("PLAYPAL") ) {
                     lump = new PlaypalLump(fc, name, filePos, lumpSize);
+                    if ( wad.paletteList != null ) {
+                        logger.log(Level.INFO, "{0} is being replaced by wad:{1}", new Object[]{name,wadFile.getName()} );
+                    }
                     wad.paletteList = ((PlaypalLump)lump).paletteList;
                     //lump.loadData(fc);
                 } else if ( name.startsWith("COLORMAP") ) {
@@ -237,6 +241,12 @@ public class WadLoader {
                 } else if ( (name.startsWith("MAP") || name.matches("E[1-9]M[1-9](.*)")) && lumpSize == 0 ) {
                     lump = new MapLump(fc, name, filePos, lumpSize);
                     currentMap = (MapLump) lump;
+                    Lump existingLump = wad.findByName(name);
+                    if ( existingLump != null ) {
+                        wad.mapLumps.remove(existingLump);
+                        wad.lumps.remove(existingLump);
+                        logger.log(Level.INFO, "Replace Map Level {0}", name);
+                    }
                     wad.mapLumps.add(currentMap);
                 } else if ( name.startsWith("THINGS") ) {
                     lump = new ThingsLump(fc, name, filePos, lumpSize);
@@ -284,6 +294,9 @@ public class WadLoader {
                     //logger.config(((RejectLump)lump).toString());
                     lump = null;
                 } else if ( name.startsWith("BLOCKMAP") ) {
+                    logger.log(Level.CONFIG, 
+                            "Load Blockmap: name:{0}  filePos:{1}  lumpSize:{2}", 
+                            new Object[]{name,filePos, lumpSize});
                     lump = new BlockMapLump(fc, name, filePos, lumpSize);
                     currentMap.setBlockMap((BlockMapLump) lump);
                     //logger.config(lump.toString());
@@ -358,7 +371,7 @@ public class WadLoader {
                         name.startsWith("AMMNUM") ||
                         name.startsWith("CWILV") ||
                         name.startsWith("BOSSBACK") ||
-                        name.startsWith("END")
+                        name.startsWith("ENDOOM")
                         
                   ) {
                     lump = new PictureLump(fc, name, filePos, lumpSize/*, wad.getPlayPalLump().paletteList*/);
@@ -381,7 +394,9 @@ public class WadLoader {
             logger.config("Finished Loading Lumps.\n\n\n\n\n");
             
             // Re-index the patch lump for correct patch order.
-            wad.patchesLump.sortPatches(wad.pNamesLump);
+            if ( wad.patchesLump != null ) {
+                wad.patchesLump.sortPatches(wad.pNamesLump);
+            }
         
             // Merge patches to create fullPatch for each texture.
             if (textureLump1 != null) {
@@ -424,7 +439,7 @@ public class WadLoader {
         return wad;
     }
 
-//    public Wad getWad() {
+//    public Wad addWad() {
 //        return wad;
 //    }
 }
