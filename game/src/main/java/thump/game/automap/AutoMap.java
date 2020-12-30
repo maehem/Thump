@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import thump.base.Defines;
 import static thump.base.Defines.SCREENHEIGHT;
 import static thump.base.Defines.SCREENWIDTH;
+import static thump.base.Defines.logger;
 import thump.base.FixedPoint;
 import static thump.base.FixedPoint.FRACBITS;
 import static thump.base.FixedPoint.FRACUNIT;
@@ -191,14 +192,23 @@ public class AutoMap {
     //
     public static final int R = ((8*PLAYERRADIUS)/7);
     
+    //        mline_t player_arrow[] = {
+    //            { { -R+R/8, 0 },  { R, 0 } },         // -----
+    //            { { R, 0 },       { R-R/2, R/4 } },   // ----->
+    //            { { R, 0 },       { R-R/2, -R/4 } },
+    //            { { -R+R/8, 0 },  { -R-R/8, R/4 } },  // >---->
+    //            { { -R+R/8, 0 },  { -R-R/8, -R/4 } },
+    //            { { -R+3*R/8, 0 }, { -R+R/8, R/4 } }, // >>--->
+    //            { { -R+3*R/8, 0 }, { -R+R/8, -R/4 } }
+    //        };
     private static final Mline player_arrow[] = new Mline[]{
-        new Mline(-R + R / 8,     0,  R,          0),     // -----
-        new Mline( R,             0,  R - R / 2,  R / 4), // ----.
-        new Mline( R,             0,  R - R / 2, -R / 4),
-        new Mline(-R + R / 8,     0, -R - R / 8,  R / 4), // >---.
-        new Mline(-R + R / 8,     0, -R - R / 8, -R / 4),
-        new Mline(-R + 3 * R / 8, 0, -R + R / 8,  R / 4), // >>--.
-        new Mline(-R + 3 * R / 8, 0, -R + R / 8, -R / 4)
+        new Mline(   -R + (R/8),    0,          R,       0),     // -----
+        new Mline(            R,    0,  R - (R/2),  (R/4) ), // ----->
+        new Mline(            R,    0,  R - (R/2), -(R/4) ),
+        new Mline(   -R + (R/8),    0, -R - (R/8),  (R/4) ), // >---->
+        new Mline(   -R + (R/8),    0, -R - (R/8), -(R/4) ),
+        new Mline( -R + (3*R/8),    0, -R + (R/8),  (R/4) ), // >>--->
+        new Mline( -R + (3*R/8),    0, -R + (R/8), -(R/4) )
     };
     //#undef R
     
@@ -206,22 +216,22 @@ public class AutoMap {
 
     //public static final int R = ((8*PLAYERRADIUS)/7)
     private static final Mline cheat_player_arrow[] = new Mline[]{
-        new Mline(-R + R / 8,      0,                R,               0    ), // -----
-        new Mline(R,               0,                R - R / 2,       R / 6), // ----.
-        new Mline(R,               0,                R - R / 2,      -R / 6),
-        new Mline(-R + R / 8,      0,               -R - R / 8,       R / 6), // >----.
-        new Mline(-R + R / 8,      0,               -R - R / 8,      -R / 6),
-        new Mline(-R + 3 * R / 8,  0,               -R + R / 8,       R / 6), // >>----.
-        new Mline(-R + 3 * R / 8,  0,               -R + R / 8,      -R / 6),
-        new Mline(-R / 2,          0,               -R / 2,          -R / 6), // >>-d--.
-        new Mline(-R / 2,         -R / 6,           -R / 2 + R / 6,  -R / 6),
-        new Mline(-R / 2 + R / 6, -R / 6,           -R / 2 + R / 6,   R / 4),
-        new Mline(-R / 6,          0,               -R / 6,          -R / 6), // >>-dd-.
-        new Mline(-R / 6,         -R / 6,            0,              -R / 6),
-        new Mline(0,              -R / 6,            0,               R / 4),
-        new Mline(R / 6,           R / 4,            R / 6,          -R / 7), // >>-ddt.
-        new Mline(R / 6,          -R / 7,            R / 6 + R / 32, -R / 7 - R / 32),
-        new Mline(R / 6 + R / 32, -R / 7 - R / 32,   R / 6 + R / 10, -R / 7)
+        new Mline(       -R + R/8,                0,                R,            0  ), //   -----
+        new Mline(              R,                0,        R - (R/2),          R/6  ), //   ----->
+        new Mline(              R,                0,        R - (R/2),         -R/6  ),
+        new Mline(     -R + (R/8),                0,       -R - (R/8),          R/6  ), //  >----->
+        new Mline(     -R + (R/8),                0,       -R - (R/8),         -R/6  ),
+        new Mline(   -R + (3*R/8),                0,       -R + (R/8),          R/6  ), // >>----->
+        new Mline(   -R + (3*R/8),                0,       -R + (R/8),         -R/6  ),
+        new Mline(           -R/2,                0,             -R/2,         -R/6  ), // >>-d--->
+        new Mline(           -R/2,             -R/6,   -(R/2) + (R/6),         -R/6  ),
+        new Mline( -(R/2) + (R/6),             -R/6,   -(R/2) + (R/6),          R/4  ),
+        new Mline(           -R/6,                0,           -(R/6),         -R/6  ), // >>-dd-->
+        new Mline(           -R/6,             -R/6,                0,         -R/6  ),
+        new Mline(              0,             -R/6,                0,          R/4  ),
+        new Mline(            R/6,              R/4,              R/6,         -R/7  ), // >>-ddt->
+        new Mline(            R/6,             -R/7,   (R/6) + (R/32),-(R/7) - (R/32)),
+        new Mline( (R/6) + (R/32),  -(R/7) - (R/32),   (R/6) + (R/10),          -R/7 )
     };
     public static final int NUMCHEATPLYRLINES = cheat_player_arrow.length;
 
@@ -245,7 +255,9 @@ public class AutoMap {
 
 
     int 	cheating = 1;
-    boolean 	grid = false;
+    //boolean 	grid = false;
+    
+    boolean 	grid = true;
 
     int 	leveljuststarted = 1; 	// kluge until AM_LevelInit() is called
 
@@ -1114,14 +1126,10 @@ public class AutoMap {
     //
     // Clip lines, draw visible part sof lines.
     //
-    void AM_drawMline(
-            Mline ml,
-            int color) {
+    void AM_drawMline( Mline ml, int color) {
         
         Fline fl = new Fline();
         
-        // TODO:   fl.a and fl.b not set.
-
         if (AM_clipMline(ml, fl)) {
             AM_drawFline(fl, color); // draws it on frame buffer using fb coords
         }
@@ -1230,16 +1238,16 @@ public class AutoMap {
             Fpoint p,
             //int*	x,
             //int*	y,
-            long	a ) {
+            int	a ) {
         int tmpx;
 
         tmpx =
-            FixedPoint.mul(p.x,finecosine(a>>ANGLETOFINESHIFT))
-            - FixedPoint.mul(p.y,finesine(a>>ANGLETOFINESHIFT));
+            FixedPoint.mul(     p.x,finecosine((a&0xFFFFFFFFL)>>ANGLETOFINESHIFT)   )
+            - FixedPoint.mul(   p.y,  finesine((a&0xFFFFFFFFL)>>ANGLETOFINESHIFT)   );
 
         p.y =
-            FixedPoint.mul(p.x,finesine(a>>ANGLETOFINESHIFT))
-            + FixedPoint.mul(p.y,finecosine(a>>ANGLETOFINESHIFT));
+            FixedPoint.mul(     p.x,  finesine((a&0xFFFFFFFFL)>>ANGLETOFINESHIFT)   )
+            + FixedPoint.mul(   p.y,finecosine((a&0xFFFFFFFFL)>>ANGLETOFINESHIFT)   );
 
         p.x = tmpx;
     }
@@ -1249,13 +1257,18 @@ public class AutoMap {
     ( Mline[]	lineguy,
       int		lineguylines,  //oh my
       int	scale,
-      long	angle,
+      int	angle,
       int	color,
       int	x,
       int	y )
     {
+        logger.log(Level.CONFIG, 
+                "AM_drawLineCharacter():  scale:{0},  angle:{1}  color:{2}  x:{3}  y:{4}", 
+                new Object[]{scale,Integer.toHexString(angle),color,x>>FRACBITS,y>>FRACBITS}
+        );
         Mline	l = new Mline(0, 0, 0, 0);
 
+        
         for (int i=0;i<lineguylines;i++) {
             l.a.x = lineguy[i].a.x;
             l.a.y = lineguy[i].a.y;
@@ -1298,14 +1311,17 @@ public class AutoMap {
         int		color;
 
         if (!game.netgame) {
-            if (cheating>0)
+            if (cheating>0) {
+                logger.log(Level.CONFIG, "    AM using cheat_player_arrow");
                 AM_drawLineCharacter
                     (cheat_player_arrow, NUMCHEATPLYRLINES, 0,
                      plr.mo.angle, WHITE, plr.mo.x, plr.mo.y);
-            else
+            } else {
+                logger.log(Level.CONFIG, "    AM using player_arrow");
                 AM_drawLineCharacter
                     (player_arrow, NUMPLYRLINES, 0, plr.mo.angle,
                      WHITE, plr.mo.x, plr.mo.y);
+            }
             return;
         }
 
@@ -1327,9 +1343,10 @@ public class AutoMap {
                 color = their_colors[their_color];
             }
 
-            AM_drawLineCharacter
-                (player_arrow, NUMPLYRLINES, 0, p.mo.angle,
-                 color, p.mo.x, p.mo.y);
+            AM_drawLineCharacter(
+                //player_arrow, NUMPLYRLINES, 0, p.mo.angle,
+                player_arrow, player_arrow.length, 0, p.mo.angle,
+                color, p.mo.x, p.mo.y);
         }
 
     }
