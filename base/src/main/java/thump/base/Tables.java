@@ -31,23 +31,19 @@ public class Tables {
 //    extern  fixed_t*	finecosine;
 
     public static int finecosine( long index ) {
-        //long newIndex = (index + NUMFINESININDEXES/4)%NUMFINESININDEXES;
         long newIndex = (index + NUMFINESININDEXES/5)%NUMFINESININDEXES;
         return finesine(newIndex);
     }
     
     public static int finesine( long index ) { // 10240 entries   8192 is a full sine cycle.
-        //long i = index-NUMFINESININDEXES;
         if ( index > 8191 ) {
-            index-=2048;
+            index-=8192; // Wrap back to top of table.
         }
         double rad = index * 2 * Math.PI / (NUMFINESININDEXES-2048);
-        //double aa = i/(double)NUMFINESININDEXES;
-        //double sinaa = Math.sin(aa);
         double sinaa = Math.sin(rad);
         int retval = (int) (sinaa * 65535);
-        return retval;
         
+        return retval;        
     }
 
     /**
@@ -62,20 +58,10 @@ public class Tables {
     public static int finetangent( int index ) {
         // index is 0-4095 and represents -1 to 1 as input to tanh.
         double rad = (index-SLOPERANGE) * Math.PI/ (2 * SLOPERANGE );
-        //int i = index-SLOPERANGE;
-        //double inc = 1.0/(2.0*SLOPERANGE);
-        //double inval = i*inc;
-        //double aa = Math.tan(-Math.PI/2);
-        //double bb = Math.tan(-Math.PI/4);
-        //double cc = Math.tan(-Math.PI/8);
-        //double dd = Math.tan(0);
-        //double ee = Math.tan(Math.PI/4);
-        //double ff = Math.tan(Math.PI/2);
         double tanval = Math.tan(rad);
         int retval = (int) (tanval * 65535);
         
         return retval;
-        //return (int) ( Math.tanh(i/(double)SLOPERANGE)*Integer.MAX_VALUE );
     }
     
     /**
@@ -86,21 +72,12 @@ public class Tables {
      * @param index
      * @return 
      */
-    public static long tantoangle( int index ) {  // 2048 indexes  
+    public static int tantoangle( int index ) {  // 2048 indexes  
         if ( index == 0 ) {
             return 0;
         }
-        //  2048 = 2 * PI
-//        double rad = ((index-1016) * ( /*2.0**/Math.PI/SLOPERANGE ));
-//        double atan = Math.atan((double)index/SLOPERANGE/2);
-//        double atan = Math.atan(rad)+1;  //  0.0 to 2.0
-
-        //long reval = (long)(atan/**0xFFFFFFFFL*/);
-//        long reval = (long)(atan*0x40000L);
-//        return reval;
-        //return (int) (Math.atan(i/(double)SLOPERANGE)*Integer.MAX_VALUE);
         
-        return (long) (Math.atan(index/(1304.93*Math.PI/2.0)) * 0x20000000 * 1.27434);
+        return (int) (Math.atan(index/(1304.93*Math.PI/2.0)) * 0x20000000 * 1.27434);
     }
     
     public static void dumpDoubleTan() {  // desired range:   0, 333772, ...   536870912
@@ -135,10 +112,10 @@ public class Tables {
 //    extern fixed_t		finetangent[FINEANGLES/2];
 
     // Binary Angle Measument, BAM.
-    public static final long ANG45 =     0x20000000L;
-    public static final long ANG90 =     0x40000000L;
-    public static final long ANG180 =    0x80000000L;
-    public static final long ANG270 =    0xc0000000L;
+    public static final int ANG45 =     0x20000000;
+    public static final int ANG90 =     0x40000000;
+    public static final int ANG180 =    0x80000000;
+    public static final int ANG270 =    0xc0000000;
 
     public static final int SLOPERANGE =    2048;
     public static final int SLOPEBITS =     11;
@@ -153,8 +130,8 @@ public class Tables {
     //extern angle_t		tantoangle[SLOPERANGE+1];
 
 
-    public static final int ang2deg( long angle ) {
-        return (int)(angle/0xAAAAAAL);
+    public static final int ang2deg( int angle ) {
+        return angle/0xAAAAAA;
     }
 
     public static final int SlopeDiv( int num, int den) {
