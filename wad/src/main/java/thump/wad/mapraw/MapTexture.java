@@ -165,17 +165,8 @@ public class MapTexture {
         return fullPatch;
     }
     
-    public Column getColumn(int colnum ) {
-        if ( colnum == 139 ) {
-            int i=0;  // debug breakpoint
-        }
-        try {
-            return getPatch().pixelData[colnum];         
-        } catch (Exception e) {
-            int size = getPatch().pixelData.length;
-            
-            return getPatch().pixelData[size-1];         
-        }
+    public Column getColumn(int colnum ) {        
+        return fullPatch.pixelData[colnum%fullPatch.pixelData.length];
     }
     
     public void merge(Wad wad) {
