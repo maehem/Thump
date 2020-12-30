@@ -7,6 +7,8 @@ package thump.game.play;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import static thump.base.Defines.logger;
 import static thump.game.Event.BT_CHANGE;
 import static thump.game.Event.BT_SPECIAL;
 import static thump.game.Event.BT_USE;
@@ -63,7 +65,8 @@ public class User {
     void P_Thrust ( 
         Player	player,
         long	_angle,
-        int	move ) {
+        int	move 
+    ) {
         long angle = _angle;
         angle >>= ANGLETOFINESHIFT;
 
@@ -95,8 +98,7 @@ public class User {
             player.bob = MAXBOB;
         }
 
-        if ((player.cheats & CF_NOMOMENTUM.getValue())>0 || !onground)
-        {
+        if ((player.cheats & CF_NOMOMENTUM.getValue())>0 || !onground) {
             player.viewz = player.mo.z + VIEWHEIGHT;
 
             if (player.viewz > player.mo.ceilingz-4*FRACUNIT) {
@@ -112,8 +114,7 @@ public class User {
 
 
         // move viewheight
-        if (player.playerstate == PST_LIVE)
-        {
+        if (player.playerstate == PST_LIVE) {
             player.viewheight += player.deltaviewheight;
 
             if (player.viewheight > VIEWHEIGHT)
@@ -149,21 +150,31 @@ public class User {
     //
     // P_MovePlayer
     //
-    void P_MovePlayer (Player player)
-    {
+    void P_MovePlayer (Player player) {
         TickCommand		cmd;
 
         cmd = player.cmd;
 
+        logger.log(Level.CONFIG, "    addjust player turn: {0}", cmd.angleturn);
         player.mo.angle += (cmd.angleturn<<16);
-
+        //player.mo.angle &= 0xFFFFFFFFL;
         // Do not let the player control movement
         //  if not onground.
         onground = (player.mo.z <= player.mo.floorz);
 
         if (cmd.forwardmove!=0 && onground) {
             P_Thrust (player, player.mo.angle, cmd.forwardmove*2048);
+            logger.log(Level.CONFIG, "    player move: {0}", cmd.forwardmove);
+            
         }
+        
+        // DEBUG CODE   -- delete
+        if (cmd.forwardmove!=0 && !onground) {
+            P_Thrust (player, player.mo.angle, cmd.forwardmove*2048);
+            logger.log(Level.CONFIG, "    player move: {0}", cmd.forwardmove);
+            
+        }
+         
 
         if (cmd.sidemove!=0 && onground) {
             P_Thrust (player, player.mo.angle-ANG90, cmd.sidemove*2048);
@@ -182,12 +193,11 @@ public class User {
     // Fall on your face when dying.
     // Decrease POV height to floor height.
     //
-    public static final long ANG5  = 	(ANG90/18);
+    public static final int ANG5  = 	(ANG90/18);
 
-    void P_DeathThink (Player player)
-    {
-        long		angle;
-        long		delta;
+    void P_DeathThink (Player player) {
+        int		angle;
+        int		delta;
 
         PSprite.P_MovePsprites (player);
 
@@ -204,8 +214,7 @@ public class User {
         onground = (player.mo.z <= player.mo.floorz);
         P_CalcHeight (player);
 
-        if (player.attacker != null && player.attacker != player.mo)
-        {
+        if (player.attacker != null && player.attacker != player.mo) {
             angle = Game.getInstance().renderer.R_PointToAngle2 (player.mo.x,
                                      player.mo.y,
                                      player.attacker.x,
@@ -242,8 +251,7 @@ public class User {
     //
     // P_PlayerThink
     //
-    void P_PlayerThink (Player player)
-    {
+    void P_PlayerThink (Player player) {
         TickCommand		cmd;
         WeaponType	newweapon;
 
@@ -256,8 +264,7 @@ public class User {
 
         // chain saw run forward
         cmd = player.cmd;
-        if ((player.mo.flags & MF_JUSTATTACKED.getValue())>0)
-        {
+        if ((player.mo.flags & MF_JUSTATTACKED.getValue())>0) {
             cmd.angleturn = 0;
             cmd.forwardmove = 0xc800/512;
             cmd.sidemove = 0;
@@ -265,8 +272,7 @@ public class User {
         }
 
 
-        if (player.playerstate == PST_DEAD)
-        {
+        if (player.playerstate == PST_DEAD) {
             P_DeathThink (player);
             return;
         }
@@ -293,8 +299,7 @@ public class User {
             cmd.buttons = 0;
         }			
 
-        if ((cmd.buttons & BT_CHANGE)>0)
-        {
+        if ((cmd.buttons & BT_CHANGE)>0) {
             // The actual changing of the weapon is done
             //  when the weapon psprite can do it
             //  (read: not in the middle of an attack).
@@ -321,8 +326,7 @@ public class User {
 
 
             if (player.weaponowned[newweapon.ordinal()]
-                && newweapon != player.readyweapon)
-            {
+                && newweapon != player.readyweapon) {
                 // Do not go to plasma or BFG in shareware,
                 //  even if cheated.
                 if ((newweapon != wp_plasma
@@ -335,15 +339,12 @@ public class User {
         }
 
         // check for use
-        if ((cmd.buttons & BT_USE)>0)
-        {
-            if (!player.usedown)
-            {
+        if ((cmd.buttons & BT_USE)>0) {
+            if (!player.usedown) {
                 Game.getInstance().map.P_UseLines (player);
                 player.usedown = true;
             }
-        }
-        else {
+        } else {
             player.usedown = false;
         }
 
@@ -393,8 +394,7 @@ public class User {
             } else {
                 player.fixedcolormap = 0;
             }
-        }
-        else if (player.powers[pw_infrared.ordinal()]>0) {
+        } else if (player.powers[pw_infrared.ordinal()]>0) {
             if (player.powers[pw_infrared.ordinal()] > 4*32
                 || (player.powers[pw_infrared.ordinal()]&8)>0 ) {
                 // almost full bright
@@ -403,11 +403,9 @@ public class User {
             else {
                 player.fixedcolormap = 0;
             }
-        }
-        else {
+        } else {
             player.fixedcolormap = 0;
         }
     }
-
 
 }
