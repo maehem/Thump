@@ -28,7 +28,7 @@ public class Thump {
      */
     public static void main(String[] args) {
         try {
-            logger.setLevel(Level.CONFIG);
+            logger.setLevel(Level.FINER);
             logger.addHandler(new Handler() {
                 @Override
                 public void publish(LogRecord record) {

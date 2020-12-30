@@ -121,7 +121,7 @@ public class Renderer {
     public  int			viewy;
     public  int			viewz;
 
-    public long                 viewangle;
+    public int                 viewangle;
 
     public int			viewcos;
     public int			viewsin;
@@ -137,18 +137,18 @@ public class Renderer {
     //
     // precalculated math tables
     //
-    long clipangle;
+    int clipangle;
 
     // The viewangletox[viewangle + FINEANGLES/4] lookup
     // maps the visible view angles to screen X coordinates,
     // flattening the arc to a flat projection plane.
     // There will be many angles mapped to the same X. 
-    long[] viewangletox = new long[FINEANGLES/2];
+    int[] viewangletox = new int[FINEANGLES/2];
 
     // The xtoviewangleangle[] table maps a screen pixel
     // to the lowest viewangle that maps back to x ranges
     // from clipangle to -clipangle.
-    long[]   xtoviewangle = new long[SCREENWIDTH+1];
+    int[]   xtoviewangle = new int[SCREENWIDTH+1];
     
     //void (*colfunc) (void);
     public ColumnFunction colfunc;
@@ -337,7 +337,7 @@ public class Renderer {
      * @param py
      * @return angle
      */
-    public long R_PointToAngle(int px, int py) {
+    public int R_PointToAngle(int px, int py) {
         int x = px;
         int y = py;
 
@@ -360,15 +360,16 @@ public class Renderer {
                     // octant 0
                     logger.log(Level.FINER,
                             "               octant 0:  tangtoangle():{0}", 
-                            Long.toHexString(tantoangle(SlopeDiv(y, x))&0xFFFFFFFFL));
-                    return tantoangle(SlopeDiv(y, x))&0xFFFFFFFFL;
+                            Integer.toHexString(tantoangle(SlopeDiv(y, x))/*&0xFFFFFFFFL*/));
+                    return tantoangle(SlopeDiv(y, x));//&0xFFFFFFFFL;
                 } else {
                     // octant 1
                     logger.log(Level.FINER, 
                             "               octant 1:   90-1-tantoangle():{0}", 
-                            Long.toHexString((ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
+                            Integer.toHexString( ANG90 - 1 - tantoangle( SlopeDiv(x, y) )) 
+                    );
                     //return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
-                    return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
+                    return (ANG90 - 1 - tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
                 }
             } else {   // y<0                
                 y = -y;  //flip it
@@ -382,17 +383,18 @@ public class Renderer {
                     );
                     logger.log(Level.FINER, 
                             "                      ~tantoangle(slopediv()) = {0}",
-                            Long.toHexString((~tantoangle(slpdiv)+1)&0xFFFFFFFFL)
+                            Integer.toHexString( -tantoangle(slpdiv) )
                     );
 
-                    return (~tantoangle(slpdiv)+1)&0xFFFFFFFFL;
+                    //return (~tantoangle(slpdiv)+1);//&0xFFFFFFFFL;
+                    return -tantoangle(slpdiv);//&0xFFFFFFFFL;
                 } else {
                     // octant 7
                     logger.log(Level.FINER,
                             "               octant 6(or7):  {0}", 
-                            Long.toHexString((ANG270 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL)
+                            Integer.toHexString( ANG270 + tantoangle(SlopeDiv(x, y)) )
                     );
-                    return (ANG270 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
+                    return ( ANG270 + tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
                 }
             }
         } else {  // x<0
@@ -402,13 +404,13 @@ public class Renderer {
                 if (x > y) {  // octant 3
                     logger.log(Level.FINER, 
                             "               octant 3: {0}",
-                            Long.toHexString((ANG180 - 1 + ~(tantoangle(SlopeDiv(y, x))))&0xFFFFFFFFL));
-                    return (ANG180 - 1 + ~(tantoangle(SlopeDiv(y, x))))&0xFFFFFFFFL;
+                            Integer.toHexString((ANG180 - 1 - tantoangle(SlopeDiv(y, x)))));
+                    return (ANG180 - 1 - tantoangle(SlopeDiv(y, x)));//&0xFFFFFFFFL;
                 } else {   // octant 2
                     logger.log( Level.CONFIG,
                             "               octant 2:  {0}",
-                            Long.toHexString((ANG90 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
-                    return (ANG90 + tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
+                            Integer.toHexString((ANG90 + tantoangle(SlopeDiv(x, y)))));
+                    return (ANG90 + tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
                 }
             } else {  // y<0
                 y = -y;
@@ -417,14 +419,14 @@ public class Renderer {
                     // octant 4
                     logger.log(Level.FINER, 
                             "               octant 4: {0}",
-                            Long.toHexString((ANG180 + tantoangle(SlopeDiv(y, x)))&0xFFFFFFFFL));
-                    return (ANG180 + tantoangle(SlopeDiv(y, x)))&0xFFFFFFFFL;
+                            Integer.toHexString(ANG180 + tantoangle(SlopeDiv(y, x))));
+                    return (ANG180 + tantoangle(SlopeDiv(y, x)));//&0xFFFFFFFFL;
                 } else {
                     // octant 5
                     logger.log(Level.FINER,
                             "               octant 5: {0}",
-                            Long.toHexString((ANG270 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL));
-                    return (ANG270 - 1 - tantoangle(SlopeDiv(x, y)))&0xFFFFFFFFL;
+                            Integer.toHexString(ANG270 - 1 - tantoangle(SlopeDiv(x, y))));
+                    return (ANG270 - 1 - tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
                 }
             }
         }
@@ -432,7 +434,7 @@ public class Renderer {
     }
 
 
-    public long R_PointToAngle2(int x1, int y1, int x2, int y2) {
+    public int R_PointToAngle2(int x1, int y1, int x2, int y2) {
         viewx = x1;
         viewy = y1;
 
@@ -441,7 +443,7 @@ public class Renderer {
 
 
     int R_PointToDist( int x,int y ) {
-        long	angle;
+        int	angle;
         int	dx;
         int	dy;
         int	temp;
@@ -457,7 +459,7 @@ public class Renderer {
             dy = temp;
         }
 
-        angle = (tantoangle( FixedPoint.div(dy,dx)>>DBITS )+ANG90) >> ANGLETOFINESHIFT;
+        angle = (int) (((tantoangle( FixedPoint.div(dy,dx)>>DBITS )+ANG90)&0xFFFFFFFFL) >> ANGLETOFINESHIFT);
 
         // use as cosine
         dist = FixedPoint.div (dx, finesine(angle) );	
@@ -497,10 +499,10 @@ public class Renderer {
     //  at the given angle.
     // rw_distance must be calculated first.
     //
-    int R_ScaleFromGlobalAngle (long visangle){
-        long scale;
-        long anglea;
-        long angleb;
+    int R_ScaleFromGlobalAngle (int visangle){
+        int scale;
+        int anglea;
+        int angleb;
         int sinea;
         int sineb;
         int num;
@@ -526,8 +528,8 @@ public class Renderer {
         angleb = ANG90 + (visangle-Segs.getInstance().rw_normalangle);
 
         // both sines are allways positive
-        sinea = finesine(anglea>>ANGLETOFINESHIFT);	
-        sineb = finesine(angleb>>ANGLETOFINESHIFT);
+        sinea = finesine((anglea&0xFFFFFFFFL)>>ANGLETOFINESHIFT);	
+        sineb = finesine((angleb&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
         num = FixedPoint.mul(projection,sineb)<<(detailshift?1:0);
         den = FixedPoint.mul(Segs.getInstance().rw_distance,sinea);
 
@@ -589,7 +591,7 @@ public class Renderer {
     void R_InitTextureMapping () {
         int			i;
         int			x;
-        long			t;
+        int			t;
         int		focallength;
 
         //Stats stats = Stats.getInstance();
@@ -630,7 +632,8 @@ public class Renderer {
             while (viewangletox[i]>x) {
                 i++;
             }
-            xtoviewangle[x] = ((((long)i)<<ANGLETOFINESHIFT)-ANG90)&0xFFFFFFFFL;
+            //xtoviewangle[x] = ((((long)i)<<ANGLETOFINESHIFT)-ANG90)&0xFFFFFFFFL;
+            xtoviewangle[x] = ((i<<ANGLETOFINESHIFT)-ANG90);//&0xFFFFFFFFL;
         }
 
         // Take out the fencepost cases from viewangletox.
@@ -774,7 +777,7 @@ public class Renderer {
         }
 
         for (i=0 ; i<viewwidth ; i++) {
-            cosadj = Math.abs(finecosine(xtoviewangle[i]>>ANGLETOFINESHIFT));
+            cosadj = Math.abs(finecosine((xtoviewangle[i]&0xFFFFFFFFL)>>ANGLETOFINESHIFT));
             plane.distscale[i] = FixedPoint.div(FRACUNIT,cosadj);
         }
 
@@ -817,10 +820,10 @@ public class Renderer {
         viewy = pv.y;
         
         //viewangle = player.mo.angle + viewangleoffset;
-        viewangle = (pv.angle + viewangleoffset)&0xFFFFFFFFL;
+        viewangle = (pv.angle + viewangleoffset);//&0xFFFFFFFFL;
         logger.log(Level.CONFIG, 
                 "    playerview: set view angle = pv.angle + viewangleoffset == {0} = {1} + {2}", 
-                new Object[]{Long.toHexString(viewangle), Long.toHexString(pv.angle), Long.toHexString(viewangleoffset)}
+                new Object[]{Integer.toHexString(viewangle), Integer.toHexString(pv.angle), Integer.toHexString(viewangleoffset)}
         );
         
         //extralight = player.extralight;
@@ -829,8 +832,8 @@ public class Renderer {
         //viewz = player.viewz;
         viewz = pv.viewz;
         
-        viewsin = finesine(viewangle>>ANGLETOFINESHIFT);
-        viewcos = finecosine(viewangle>>ANGLETOFINESHIFT);
+        viewsin =   finesine((viewangle&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
+        viewcos = finecosine((viewangle&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
 
         sscount = 0;
 

@@ -24,7 +24,7 @@ public class PlayerView extends RPlayerView{
     
 
     public PlayerView(
-            int x, int y, long angle, 
+            int x, int y, int angle, 
             int invisibility, 
             int lightlevel, 
             int extralight, 

@@ -66,15 +66,15 @@ public class Segs {
     public int      bottomtexture;
     public int      midtexture;
 
-    public long      rw_normalangle; //unsigned!
-    public long      rw_angle1;    // angle to line origin
+    public int      rw_normalangle; //unsigned!
+    public int      rw_angle1;    // angle to line origin
 
     //
     // regular wall
     //
     public int rw_x;
     public int rw_stopx;
-    public long rw_centerangle; // unsigned!
+    public int rw_centerangle; // unsigned!
     public int rw_offset;
     public int rw_distance;
     public int rw_scale;
@@ -223,7 +223,7 @@ public void R_RenderMaskedSegRange(
 // CALLED: CORE LOOPING ROUTINE.
 //
 void R_RenderSegLoop (Renderer renderer, Wad wad) {
-    long angle;
+    int angle;
     int index;
     int yl;
     int yh;
@@ -304,15 +304,16 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	if (segtextured) {
             logger.config("    textured column");
 	    // calculate texture offset
-	    angle = (rw_centerangle + renderer.xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
-            angle &= 0xFFFFFFFFL;
-            logger.log(Level.FINER, "    angle set to: 0x{0}  (int){1}", new Object[]{ Long.toHexString(angle), (int)angle});
+	    angle = (int) (((rw_centerangle + renderer.xtoviewangle[rw_x])&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
+            //angle &= 0xFFFFFFFFL;
+            angle&=0xFFF;
+            logger.log(Level.FINER, "    angle set to: 0x{0}  (int){1}", new Object[]{ Integer.toHexString(angle), (int)angle});
 
-            int finetan = finetangent((int) angle);
+            int finetan = finetangent(angle);
             int mul = FixedPoint.mul(finetan,rw_distance);
             logger.log(Level.FINER, "    finetan:{0}   mul:{1}   rw_offset:{2}", new Object[]{finetan, mul, rw_offset});
-	    //texturecolumn = rw_offset-mul;
-	    texturecolumn = (int) (Integer.toUnsignedLong(rw_offset)-Integer.toUnsignedLong(mul));
+	    texturecolumn = rw_offset-mul;
+	    //texturecolumn = (int) (Integer.toUnsignedLong(rw_offset)-Integer.toUnsignedLong(mul));
 	    texturecolumn >>= FRACBITS;
             logger.log(Level.FINER, "    texturecolumn set to: {0}", texturecolumn);
 
@@ -440,7 +441,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
     void R_StoreWallRange(int start, int stop, Renderer r, Wad wad) {
         int hyp;
         int sineval;
-        long distangle, offsetangle;
+        int distangle, offsetangle;
         int vtop;
         int lightnum;
 
@@ -466,7 +467,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             return;
         }
 
-        logger.log(Level.CONFIG, "    plane.lastopening: {0}", plane.lastopening);
+        logger.log(Level.FINER, "    plane.lastopening: {0}", plane.lastopening);
         
 //#ifdef RANGECHECK
 //    if (start >=viewwidth || start > stop)
@@ -479,19 +480,19 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         bsp.linedef.flags |= ML_MAPPED;
 
         // calculate rw_distance for scale calculation
-        rw_normalangle = (bsp.curline.angle + ANG90)&0xFFFFFFFFL;
+        rw_normalangle = (bsp.curline.angle + ANG90);//&0xFFFFFFFFL;
         offsetangle = Math.abs(rw_normalangle - rw_angle1);
-        logger.log(Level.CONFIG, "    offsetangle:{0}", Long.toHexString(offsetangle));
+        logger.log(Level.CONFIG, "    offsetangle:{0}", Integer.toHexString(offsetangle));
 
-        if (offsetangle > ANG90) {
+        if ((offsetangle&0xFFFFFFFFL) > (ANG90&0xFFFFFFFFL) ) {
             offsetangle = ANG90;
         }
-        logger.log(Level.CONFIG, "    set offset angle: {0}", Long.toHexString(offsetangle) );
-        distangle = (ANG90 - offsetangle)&0xFFFFFFFFL;
+        logger.log(Level.FINER, "    set offset angle: {0}", Integer.toHexString(offsetangle) );
+        distangle = (ANG90 - offsetangle);//&0xFFFFFFFFL;
         hyp = r.R_PointToDist(bsp.curline.v1.x, bsp.curline.v1.y);
         sineval = finesine(distangle >> ANGLETOFINESHIFT);
         rw_distance = FixedPoint.mul(hyp, sineval);
-        logger.log(Level.CONFIG, "    set rw_distance: {0}", rw_distance);
+        logger.log(Level.FINER, "    set rw_distance: {0}", rw_distance);
 
         bsp.drawsegs[bsp.ds_p].x1 = start;
         rw_x = start;
@@ -501,12 +502,12 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         rw_stopx = stop + 1;
 
         // calculate scale at both ends and step
-        logger.log(Level.CONFIG, 
+        logger.log(Level.FINER, 
                 "    set rw_scale:  r.viewangle:{0}   r.xtoviewangle[start]:{1}",
-                new Object[]{ Long.toHexString(r.viewangle), Long.toHexString(r.xtoviewangle[start]) }
+                new Object[]{ Integer.toHexString(r.viewangle), Integer.toHexString(r.xtoviewangle[start]) }
         );
         rw_scale = r.R_ScaleFromGlobalAngle(r.viewangle + r.xtoviewangle[start]);
-        logger.log(Level.CONFIG, "    rw_scale: {0}", rw_scale);
+        logger.log(Level.FINER, "    rw_scale: {0}", rw_scale);
         bsp.drawsegs[bsp.ds_p].scale1 = rw_scale;
         
         if (stop > start) {
@@ -650,7 +651,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 
                 if ((bsp.linedef.flags & ML_DONTPEGTOP)>0) {
                     // top of texture at top
-                    logger.log(Level.CONFIG, "    top texture at top");
+                    logger.log(Level.FINER, "    top texture at top");
                     rw_toptexturemid = worldtop;
                 } else {
                     int topTextureNum = bsp.sidedef.getTopTextureNum(wad);
@@ -662,13 +663,13 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                         vtop = bsp.backsector.ceilingheight;
                     }
                     // bottom of texture
-                    logger.log(Level.CONFIG, "    bottom of texture");
+                    logger.log(Level.FINER, "    bottom of texture");
                     rw_toptexturemid = vtop - viewz;
                 }
             }
             if (worldlow > worldbottom) {
                 // bottom texture
-                logger.log(Level.CONFIG, "    bottom texture");
+                logger.log(Level.FINER, "    bottom texture");
                 int bottomTextureNum;
                     bottomTextureNum = bsp.sidedef.getBottomTextureNum(wad);
                 try {
@@ -695,7 +696,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 maskedtexture = true;
                 maskedtexturecol = plane.lastopening - rw_x;
                 bsp.drawsegs[bsp.ds_p].maskedtexturecol = maskedtexturecol;
-                logger.log(Level.CONFIG,
+                logger.log(Level.FINER,
                         "masked midtexture:  plane.lastopening += rw_stopx - rw_x   {0} += {1}-{2} == {3}",
                         new Object[]{plane.lastopening + rw_stopx - rw_x, rw_stopx, rw_x});
                 plane.lastopening += rw_stopx - rw_x;
@@ -708,44 +709,44 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         if (segtextured) {
             // rw_normalangle: 1073741824
             // rw_angle1     : 2037829458
-            logger.log(Level.CONFIG, "    segtextured:  rw_normalangle:{0} - rw_angle1:{1} == offsetangle:{2}",
+            logger.log(Level.FINER, "    segtextured:  rw_normalangle:{0} - rw_angle1:{1} == offsetangle:{2}",
                     new Object[]{
-                        Long.toHexString(rw_normalangle), 
-                        Long.toHexString(rw_angle1), 
-                        Long.toHexString(rw_normalangle - rw_angle1)
+                        Integer.toHexString(rw_normalangle), 
+                        Integer.toHexString(rw_angle1), 
+                        Integer.toHexString(rw_normalangle - rw_angle1)
                     }
             );
-            offsetangle = (rw_normalangle - rw_angle1)&0xFFFFFFFFL;
+            offsetangle = (rw_normalangle - rw_angle1);//&0xFFFFFFFFL;
 
-            if ( offsetangle > ANG180 ) {
-                logger.log(Level.CONFIG, "        it's higher than 180 deg");
+            if ( (offsetangle&0xFFFFFFFFL) > (ANG180&0xFFFFFFFFL) ) {
+                logger.log(Level.FINER, "        it's higher than 180 deg");
                 //offsetangle = -offsetangle;
                 //offsetangle = (~offsetangle&0xFFFFFFFFL)+1;
-                offsetangle = ((~offsetangle)+1)&0xFFFFFFFFL;   // two's compliment
+                offsetangle = ((~offsetangle)+1);//&0xFFFFFFFFL;   // two's compliment
                 logger.log(Level.CONFIG, "        offsetangle now: {0}", offsetangle);
             }
 
-            if (offsetangle > ANG90) {
-                logger.log(Level.CONFIG, "        it's higher than 90 deg");
+            if ((offsetangle&0xFFFFFFFFL) > (ANG90&0xFFFFFFFFL)) {
+                logger.log(Level.FINER, "        it's higher than 90 deg");
                 offsetangle = ANG90;
-                logger.log(Level.CONFIG, "        offsetangle now: {0}", offsetangle);
+                logger.log(Level.FINER, "        offsetangle now: {0}", offsetangle);
             }
 
             sineval = finesine(offsetangle >> ANGLETOFINESHIFT);
             rw_offset = FixedPoint.mul(hyp, sineval);
-            logger.log(Level.CONFIG, "    rw_offset: {0}", rw_offset);
+            logger.log(Level.FINER, "    rw_offset: {0}", rw_offset);
 
-            if (rw_normalangle - rw_angle1 < ANG180) {
+            if ( ((rw_normalangle - rw_angle1)&0xFFFFFFFFL) < (ANG180&0xFFFFFFFFL) ) {
                 rw_offset = -rw_offset;
-            logger.log(Level.CONFIG, "    rw_offset: {0}", rw_offset);
+            logger.log(Level.FINER, "    rw_offset: {0}", rw_offset);
             }
 //            if ( rw_normalangle - rw_angle1 > 0) {
 //                rw_offset = -rw_offset;
 //            }
             
             rw_offset += bsp.sidedef.textureoffset + bsp.curline.offset;
-            logger.log(Level.CONFIG, "    rw_offset: {0}", rw_offset);
-            rw_centerangle = (ANG90 + r.viewangle - rw_normalangle)&0xFFFFFFFFL;
+            logger.log(Level.FINER, "    rw_offset: {0}", rw_offset);
+            rw_centerangle = (ANG90 + r.viewangle - rw_normalangle);//&0xFFFFFFFFL;
 //            if ( rw_centerangle < 0 ) {
 //                rw_centerangle =   ANG180 + ANG90 + r.viewangle - rw_normalangle;
 //            }
@@ -791,21 +792,21 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         worldbottom >>= 4;
 
         topstep = -FixedPoint.mul(rw_scalestep, worldtop);
-        logger.log(Level.CONFIG, "    topstep:{0}", topstep);
-        logger.log(Level.CONFIG,
+        logger.log(Level.FINER, "    topstep:{0}", topstep);
+        logger.log(Level.FINER,
                 "    r.centeryfrac: {0}   worldtop:{1}   rw_scale:{2}",
                 new Object[]{Integer.toHexString(r.centeryfrac), Integer.toHexString(worldtop), Integer.toHexString(rw_scale) }
         );
         topfrac = (r.centeryfrac >> 4) - FixedPoint.mul(worldtop, rw_scale);
-        logger.log(Level.CONFIG, "    topfrac:{0} == centeryfrac>>4:{1}  -  fixedpoint.mul():{2}", 
+        logger.log(Level.FINER, "    topfrac:{0} == centeryfrac>>4:{1}  -  fixedpoint.mul():{2}", 
                 new Object[]{
                     Integer.toHexString(topfrac),
                     Integer.toHexString(r.centeryfrac>>4),
                     Integer.toHexString(FixedPoint.mul(worldtop, rw_scale)),
                 });
-        logger.log(Level.CONFIG, "    bottomstep:{0}", bottomstep);
+        logger.log(Level.FINER, "    bottomstep:{0}", bottomstep);
         bottomstep = -FixedPoint.mul(rw_scalestep, worldbottom);
-        logger.log(Level.CONFIG, "    bottomfrac:{0}", bottomfrac);
+        logger.log(Level.FINER, "    bottomfrac:{0}", bottomfrac);
         bottomfrac = (r.centeryfrac >> 4) - FixedPoint.mul(worldbottom, rw_scale);
 
         if (null!=bsp.backsector) {
@@ -825,18 +826,18 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         // render it
         if (markceiling) {
-            logger.log(Level.CONFIG, "    ceiling check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
+            logger.log(Level.FINER, "    ceiling check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.ceilingplane = plane.R_CheckPlane(plane.ceilingplane, rw_x, rw_stopx - 1);
         }
 
         if (markfloor) {
-            logger.log(Level.CONFIG, "    floor check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
+            logger.log(Level.FINER, "    floor check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.floorplane = plane.R_CheckPlane(plane.floorplane, rw_x, rw_stopx - 1);
         }
 
         R_RenderSegLoop(r, wad);
         
-        logger.log(Level.CONFIG, "       rw_x = {0}\n   rw_stopx = {1}", new Object[]{rw_x, rw_stopx});
+        logger.log(Level.FINER, "       rw_x = {0}   rw_stopx = {1}", new Object[]{rw_x, rw_stopx});
 
         DrawSeg seg = bsp.drawsegs[bsp.ds_p];
         // save sprite clipping info
@@ -853,13 +854,13 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 seg.sprtopclip = Arrays.copyOfRange(plane.openings,plane.lastopening - start,plane.openings.length);
             }
             plane.lastopening += rw_stopx - start;
-            logger.log(Level.CONFIG, "plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
+            logger.log(Level.FINER, "    plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
         }
 
         if (((seg.silhouette & SIL_BOTTOM)>0 || maskedtexture)
                 && null==seg.sprbottomclip) {
             //memcpy(plane.lastopening, r.plane.floorclip[start], 2 * (rw_stopx - start));
-            logger.log(Level.CONFIG, "Arrays.copyOfRange( src:floorclip, startPos:{0}, dest:openings:, len:{1} )", 
+            logger.log(Level.FINER, "    Arrays.copyOfRange( src:floorclip, startPos:{0}, dest:openings:, len:{1} )", 
                     new Object[]{start, (rw_stopx - start)});
             System.arraycopy(
                     r.plane.floorclip,  start, 
@@ -868,8 +869,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             );
             
             if ( plane.lastopening - start > 0 ) {
-                logger.log(Level.CONFIG, 
-                        "seg.sprbottomclip = Arrays.copyOfRange( openings:{0}, lastopening-start:{1}, len:{2} )", 
+                logger.log(Level.FINER, 
+                        "    seg.sprbottomclip = Arrays.copyOfRange( openings:{0}, lastopening-start:{1}, len:{2} )", 
                         new Object[]{r.plane.openings, plane.lastopening - start, plane.openings.length});
                 seg.sprbottomclip = Arrays.copyOfRange(
                         plane.openings,plane.lastopening - start,plane.openings.length);
@@ -878,7 +879,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             }
             
             plane.lastopening += rw_stopx - start;
-            logger.log(Level.CONFIG, "plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
+            logger.log(Level.FINER, "     plane.lastopening += rw_stopx - start   {0} += {1} - {2}", new Object[]{ plane.lastopening, rw_stopx, start});
         }
 
         if (maskedtexture && 0==(seg.silhouette & SIL_TOP)) {

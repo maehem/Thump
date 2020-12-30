@@ -73,7 +73,7 @@ public class BlockMapLump extends Lump {
         for ( int i=0; i< numBlocks; i++) {
                 ArrayList<Short> blockList = new ArrayList<>();
                 bb.position(position+offsetList[i]*2);  // offset is measured in shorts
-                logger.log(Level.FINER, "    read block {0} at offset:{1}   ", new Object[]{i, bb.position()});
+                logger.log(Level.FINEST, "    read block {0} at offset:{1}   ", new Object[]{i, bb.position()});
                 short block = 0;
                 do {
                     //try{

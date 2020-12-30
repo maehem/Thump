@@ -528,63 +528,62 @@ public class Bsp {
     void R_AddLine(Seg line, Wad wad) {
         int  x1;
         int  x2;
-        long angle1;
-        long angle2;
-        long span;
-        long tspan;
+        int angle1;
+        int angle2;
+        int span;
+        int tspan;
 
         curline = line;
         Renderer r = renderer;
         // TODO OPTIMIZE: quickly reject orthogonal back sides.
-        angle1 = r.R_PointToAngle (line.v1.x, line.v1.y)&0xFFFFFFFFL;
-        angle2 = r.R_PointToAngle (line.v2.x, line.v2.y)&0xFFFFFFFFL;
+        angle1 = r.R_PointToAngle (line.v1.x, line.v1.y);//&0xFFFFFFFFL;
+        angle2 = r.R_PointToAngle (line.v2.x, line.v2.y);//&0xFFFFFFFFL;
 
         logger.log(Level.CONFIG, 
                 "Bsp.R_Addline(): {0}", line.toString());
         
         // Clip to view edges.
         // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
-        //span = (angle1 - angle2)&0xFFFFL;
-        span = (angle1 - angle2)&0xFFFFFFFFL;
-        //span = Math.abs(angle1-angle2)&0xFFFFFFFF;
+        //span = (angle1 - angle2)&0xFFFFFFFFL;
+        span = (angle1 - angle2);//&0xFFFFFFFFL;
         logger.log(Level.FINER, 
                 "     span=0x{0} = {1} = angle1-angle2 [0x{2}  {3}]-[0x{4}  {5}]", 
                 new Object[]{
-                    Long.toHexString(span),   ang2deg(span),
-                    Long.toHexString(angle1), ang2deg(angle1), 
-                    Long.toHexString(angle2), ang2deg(angle2)
+                    Integer.toHexString(span),   ang2deg(span),
+                    Integer.toHexString(angle1), ang2deg(angle1), 
+                    Integer.toHexString(angle2), ang2deg(angle2)
                 });
         
-        if (span >= ANG180) {  // Back side? i.e. backface culling?
+        if ( (span&0xFFFFFFFFL) >= (ANG180&0xFFFFFFFFL) ) {  // Back side? i.e. backface culling?
             logger.log(Level.FINER, 
                     "    span[{0}] > ANG180[{1}] ...  returning.",
-                    new Object[]{Long.toHexString(span), Long.toHexString(ANG180)}
+                    new Object[]{Integer.toHexString(span), Integer.toHexString(ANG180)}
             );
             return;
         }		
 
-        logger.log(Level.FINER, "        r.viewangle: {0}", Long.toHexString(r.viewangle) );
+        logger.log(Level.FINER, "        r.viewangle: {0}", Integer.toHexString(r.viewangle) );
         Segs.getInstance().rw_angle1 = angle1; // Global angle needed by segcalc.
-        logger.log(Level.FINER, "    rw_angle set to: {0}", Long.toHexString(angle1) );
+        logger.log(Level.FINER, "    rw_angle set to: {0}", Integer.toHexString(angle1) );
 
-        angle1 = (angle1-r.viewangle)&0xFFFFFFFFL;
-        logger.log(Level.FINE, "      angle1 set to: {0}", Long.toHexString(angle1));
-        angle2 = (angle2-r.viewangle)&0xFFFFFFFFL;
-        logger.log(Level.FINE, "      angle2 set to: {0}", Long.toHexString(angle2));
+        angle1 = (angle1-r.viewangle);//&0xFFFFFFFFL;
+        logger.log(Level.FINE, "      angle1 set to: {0}", Integer.toHexString(angle1));
+        angle2 = (angle2-r.viewangle);//&0xFFFFFFFFL;
+        logger.log(Level.FINE, "      angle2 set to: {0}", Integer.toHexString(angle2));
         
 //        logger.log(Level.CONFIG, 
 //                "    r.viewangle [{0}] subtracted from angle1 & angle2 now [0x{1}] [0x{2}]", 
-//                new Object[]{Long.toHexString(r.viewangle), Long.toHexString(angle1), Long.toHexString(angle2)});
+//                new Object[]{Integer.toHexString(r.viewangle), Integer.toHexString(angle1), Integer.toHexString(angle2)});
 
-        long clipangle = r.clipangle;        
+        int clipangle = r.clipangle;        
 
-        tspan = (angle1 + clipangle)&0xFFFFFFFFL;
+        tspan = (angle1 + clipangle);//&0xFFFFFFFFL;
         logger.log(Level.FINER, 
                 "      r.clipangle:0x{0}  span:0x{1}  tspan:0x{2}", 
                 new Object[]{ 
-                    Long.toHexString(clipangle), 
-                    Long.toHexString(span),
-                    Long.toHexString(tspan)
+                    Integer.toHexString(clipangle), 
+                    Integer.toHexString(span),
+                    Integer.toHexString(tspan)
                 });
 
         if (tspan > 2*clipangle) {
@@ -594,18 +593,18 @@ public class Bsp {
             if (tspan >= span) {
                 logger.log(Level.FINER, 
                         "     angle1: Off the left edge?  tspan=0x{0} >= span=0x{1}   returning...", 
-                        new Object[]{Long.toHexString(tspan), Long.toHexString(span)}
+                        new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
                 return;
             }
 
             angle1 = clipangle;
-            logger.log(Level.FINER, "    angle1 set to: {0}", Long.toHexString(angle1));
+            logger.log(Level.FINER, "    angle1 set to: {0}", Integer.toHexString(angle1));
             
         }
     
-        tspan = (clipangle - angle2)&0xFFFFFFFFL;  //tspan = (clipangle - angle2)&0xFFFFL;
-        logger.log(Level.FINER, "    tspan: {0}", Long.toHexString(tspan) );
+        tspan = (clipangle - angle2);//&0xFFFFFFFFL;  //tspan = (clipangle - angle2)&0xFFFFL;
+        logger.log(Level.FINER, "    tspan: {0}", Integer.toHexString(tspan) );
         if (tspan > 2*clipangle) {
             tspan -= 2*clipangle;
 
@@ -613,22 +612,24 @@ public class Bsp {
             if (tspan >= span) {
                 logger.log(Level.FINER, 
                         "     angle2: Off the left edge?  tspan={0} >= span={1}  returning...",
-                        new Object[]{Long.toHexString(tspan), Long.toHexString(span)}
+                        new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
                 return;
             }
             
             //angle2 = (-clipangle)&0xFFFFFFFFL;
-            angle2 = ((~clipangle)+1)&0xFFFFFFFFL;
-            logger.log(Level.FINER, "    angle2 set to: {0}", Long.toHexString(angle2));
+            //angle2 = ((~clipangle)+1)&0xFFFFFFFFL;
+            //angle2 = ((~clipangle)+1);//&0xFFFFFFFFL;
+            angle2 = -clipangle;
+            logger.log(Level.FINER, "    angle2 set to: {0}", Integer.toHexString(angle2));
         }
 
         // The seg is in the view range, but not necessarily visible.
-        angle1 = (((angle1+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFF;
-        angle2 = (((angle2+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFF;
+        angle1 = (((angle1+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
+        angle2 = (((angle2+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
         logger.log( Level.FINER,
                 "    shift down:  angle1:0x{0}   angle2:0x{1}", 
-                new Object[]{Long.toHexString(angle1), Long.toHexString(angle2) });
+                new Object[]{Integer.toHexString(angle1), Integer.toHexString(angle2) });
         x1 = (int)(r.viewangletox[(int)angle1]);
         x2 = (int)(r.viewangletox[(int)angle2]);
         logger.log(Level.FINER,
@@ -734,10 +735,10 @@ public class Bsp {
         int x2;
         int y2;
 
-        long angle1;
-        long angle2;
-        long span;
-        long tspan;
+        int angle1;
+        int angle2;
+        int span;
+        int tspan;
 
         int start;
 
@@ -779,30 +780,30 @@ public class Bsp {
         y2 = bsparray[checkcoord[boxpos][3]];
 
         // check clip list for an open space
-        long rp1 = r.R_PointToAngle(x1, y1);//&0xFFFFL;
-        long rp2 = r.R_PointToAngle(x2, y2);//&0xFFFFL;
-        long vAng = r.viewangle&0xFFFFFFFFL;
+        int rp1 = r.R_PointToAngle(x1, y1);//&0xFFFFL;
+        int rp2 = r.R_PointToAngle(x2, y2);//&0xFFFFL;
+        int vAng = r.viewangle;//&0xFFFFFFFFL;
         
-        logger.log(Level.FINER, "    viewangle:{0}", Long.toHexString(r.viewangle));
-        logger.log(Level.FINER, "    rp1: {0}   rp2:{1}", new Object[]{Long.toHexString(rp1), Long.toHexString(rp2)});
-        angle1 = (rp1 - r.viewangle)&0xFFFFFFFFL;
-        angle2 = (rp2 - r.viewangle)&0xFFFFFFFFL;
+        logger.log(Level.FINER, "    viewangle:{0}", Integer.toHexString(r.viewangle));
+        logger.log(Level.FINER, "    rp1: {0}   rp2:{1}", new Object[]{Integer.toHexString(rp1), Integer.toHexString(rp2)});
+        angle1 = (rp1 - r.viewangle);//&0xFFFFFFFFL;
+        angle2 = (rp2 - r.viewangle);//&0xFFFFFFFFL;
         
-        logger.log(Level.FINER, "    angle1 = {0} -  {1} = {2}", new Object[]{Long.toHexString(rp1), Long.toHexString(vAng), Long.toHexString(angle1) } );
-        logger.log(Level.FINER, "    angle2 = {0} -  {1} = {2}", new Object[]{Long.toHexString(rp2), Long.toHexString(vAng), Long.toHexString(angle2) } );
+        logger.log(Level.FINER, "    angle1 = {0} -  {1} = {2}", new Object[]{Integer.toHexString(rp1), Integer.toHexString(vAng), Integer.toHexString(angle1) } );
+        logger.log(Level.FINER, "    angle2 = {0} -  {1} = {2}", new Object[]{Integer.toHexString(rp2), Integer.toHexString(vAng), Integer.toHexString(angle2) } );
 
         //long saveAngle1 = angle1; // Debug
-        span = (angle1 - angle2)&0xFFFFFFFFL;
-        logger.log(Level.FINER, "    span = {0}", new Object[]{ Long.toHexString(span) } );
+        span = (angle1 - angle2);//&0xFFFFFFFFL;
+        logger.log(Level.FINER, "    span = {0}", new Object[]{ Integer.toHexString(span) } );
 
         // Sitting on a line?
-        if (span >= ANG180) {
+        if ( (span&0xFFFFFFFFL) >= (ANG180&0xFFFFFFFFL) ) {
             logger.log(Level.FINER, "             span > ANG180");
             return true;
         }
 
-        long clipangle = r.clipangle;
-        logger.log(Level.FINER, "R_CheckBBox: clipangle = {0} = {1}deg", new Object[]{ Long.toHexString(clipangle), ang2deg(clipangle) } );
+        int clipangle = r.clipangle;
+        logger.log(Level.FINER, "R_CheckBBox: clipangle = {0} = {1}deg", new Object[]{ Integer.toHexString(clipangle), ang2deg(clipangle) } );
         
         tspan = (angle1 + clipangle);
         if (tspan > 2*clipangle) {
@@ -812,7 +813,7 @@ public class Bsp {
             if (tspan >= span) {
                 logger.log(Level.CONFIG, 
                         "    ang1: Off the edge:  tspan >= span : {0} >= {1}    return false", 
-                        new Object[]{Long.toHexString(tspan), Long.toHexString(span)}
+                        new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
                 return false;
             }	
@@ -844,25 +845,27 @@ public class Bsp {
             if (tspan >= span) {
                 logger.log(Level.FINER, 
                         "    ang2: Off the edge:  tspan >= span : {0} >= {1}    return false", 
-                        new Object[]{Long.toHexString(tspan), Long.toHexString(span)}
+                        new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
                 return false;
             }
 
-            logger.log(Level.FINER, "    angle2 = -clipangle    angle2 = {0}", new Object[]{Long.toHexString(-clipangle)});
+            logger.log(Level.FINER, "    angle2 = -clipangle    angle2 = {0}", new Object[]{Integer.toHexString(-clipangle)});
             angle2 = -clipangle;
         }
 
         // Find the first clippost that touches the source post
         //  (adjacent pixels are touching).
-        angle1 = (((angle1+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFFL;
-        angle2 = (((angle2+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFFL;
+        //angle1 = (((angle1+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFFL;
+        //angle2 = (((angle2+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFFL;
+        angle1 = (int) ((((angle1+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFF);
+        angle2 = (int) ((((angle2+ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT)&0xFFF);
         try {
             sx1 = (int)(r.viewangletox[(int)angle1]);
         } catch ( ArrayIndexOutOfBoundsException ex ) {
             //sx1 = (int)(r.viewangletox[r.viewangletox.length-1]);
             logger.log(Level.WARNING, "R_CheckBBox: oops!  angle1 = [{0}], max angle is: {1}", 
-                    new Object[]{Long.toHexString(angle1), Long.toHexString(r.viewangletox.length)} );
+                    new Object[]{Integer.toHexString(angle1), Integer.toHexString(r.viewangletox.length)} );
             throw ex;
         }
         try {
@@ -870,7 +873,7 @@ public class Bsp {
         } catch ( ArrayIndexOutOfBoundsException ex ) {
             //sx2 = (int)(r.viewangletox[r.viewangletox.length-1]);
             logger.log(Level.WARNING, "R_CheckBBox: oops!  angle2 = [{0}], max angle is: {1}", 
-                    new Object[]{ Long.toHexString(angle2), Long.toHexString(r.viewangletox.length)} );
+                    new Object[]{ Integer.toHexString(angle2), Integer.toHexString(r.viewangletox.length)} );
             throw ex;
         }
 

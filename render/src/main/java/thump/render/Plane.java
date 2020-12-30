@@ -143,7 +143,7 @@ public class Plane {
         }
 
         length = FixedPoint.mul (distance,distscale[x1]);
-        angle = (int)((renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT);
+        angle = (int) (((renderer.viewangle + renderer.xtoviewangle[x1])&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
         draw.ds_xfrac = renderer.viewx + FixedPoint.mul(finecosine(angle), length);
         draw.ds_yfrac = -renderer.viewy - FixedPoint.mul(finesine(angle), length);
 
@@ -195,7 +195,7 @@ public class Plane {
         Arrays.fill(cachedheight, 0);
 
         // left to right mapping
-        angle = (int)((renderer.viewangle-ANG90)>>ANGLETOFINESHIFT);
+        angle = (int)(((renderer.viewangle-ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
 
         // scale will be unit scale at SCREENWIDTH/2 distance
         basexscale = FixedPoint.div (finecosine(angle),renderer.centerxfrac);
@@ -374,7 +374,7 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
-        logger.log(Level.FINER, 
+        logger.log(Level.FINEST, 
                 "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
                 new Object[]{x,_t1,_b1,_t2,_b2}
         );

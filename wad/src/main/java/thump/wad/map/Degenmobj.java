@@ -17,7 +17,7 @@ public class Degenmobj {
     public int y=0;
     public int z=0;
     
-    public long	angle;	// orientation
+    public int	angle;	// orientation
     public long	frame;	// might be ORed with FF_FULLBRIGHT
     public int  flags;
     //More drawing info: to determine current sprite.
@@ -33,7 +33,7 @@ public class Degenmobj {
     public String toString() {
         return MessageFormat.format(
                 "    Degenmobj:  x:{0}  y:{1}  z:{2}   angle:{3}  frame:{4}  flags:{5}  sprite:{6}\n        list:{7}",
-                new Object[]{x,y,z,Long.toHexString(angle),frame,Integer.toHexString(flags),sprite, nextList()}
+                new Object[]{x,y,z,Integer.toHexString(angle),frame,Integer.toHexString(flags),sprite, nextList()}
         );
                 
     }

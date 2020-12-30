@@ -13,7 +13,7 @@ public class RPlayerView {
     
     public int x; // mo.x
     public int y; // mo.y
-    public long angle; // mo.angle
+    public int angle; // mo.angle
     
     //public int powers[]; // powers[pw_invisibility.ordinal()]
     public int invisibility;    

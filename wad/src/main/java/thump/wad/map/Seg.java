@@ -21,7 +21,7 @@ public class Seg {
     private final MapLump map;
     public final int start;
     public final int end;
-    public final long angle;
+    public final int angle;
     public final int lineDefNum;
     public final int side; // How to use this?  // aka: side
     public final int offset;
@@ -38,11 +38,12 @@ public class Seg {
     public Side sidedef;
     public Line linedef;
 
-    public Seg(MapLump map, int start, int end, long angle, int lineDef, int side, int offset) {
+    public Seg(MapLump map, int start, int end, int angle, int lineDef, int side, int offset) {
         this.map = map;
         this.start = start;
         this.end = end;
-        this.angle = ((long)(angle&0xFFFFFFFL))<<FRACBITS;
+        //this.angle = ((long)(angle&0xFFFFFFFL))<<FRACBITS;
+        this.angle = (angle&0xFFFF)<<FRACBITS;
         this.lineDefNum = lineDef;
         this.side = side;
         this.offset = offset<<FRACBITS;
@@ -56,7 +57,7 @@ public class Seg {
     @Override
     public String toString() {
         return  "\n    seg=> start:" + start+ "  end:" + end +
-                "\n    angle:" + Long.toHexString(angle) + "    lineDef:" + lineDefNum +
+                "\n    angle:" + Integer.toHexString(angle) + "    lineDef:" + lineDefNum +
                 "    side:" + side + "   offset:" + offset
                 ;
     }

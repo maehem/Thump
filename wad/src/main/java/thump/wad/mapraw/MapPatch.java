@@ -1,8 +1,7 @@
 /*
  Texture MapPatch
  A single patchNum from a texture definition,
- basically a rectangular area within
- the texture rectangle.
+ basically a rectangular area within the texture rectangle.
 
     Offset Length Name     Content
     0x00   2      originx  A short int defining the horizontal offset of the patchNum relative to the upper-left of the texture

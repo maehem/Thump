@@ -213,14 +213,14 @@ public class RThings {
         Spriteframe	sprframe;
         int			lump;
 
-        long		rot;
+        int		rot;
         boolean		flip;
 
         int			index;
 
         Vissprite	vis;
 
-        long		ang;
+        int		ang;
         int		iscale;
         
         // transform the origin point
@@ -268,14 +268,14 @@ public class RThings {
 
         if (sprframe.rotate>0) {
             // choose a different rotation based on player view
-            ang = renderer.R_PointToAngle (thing.x, thing.y)&0xFFFFFFFFL;
-            rot = ((ang-thing.angle+(ANG45/2)*9)&0xFFFFFFFFL)>>29;
+            ang = renderer.R_PointToAngle (thing.x, thing.y);
+            rot = (int) ((((ang-thing.angle+(ANG45/2)*9))&0xFFFFFFFFL)>>29);
             logger.log(Level.CONFIG, 
                     "Rot:  ang:{0}  -  thing.angle:{1}  =  {2}\n" +
                     "      ANG45/2:{3}  ==>  * 9 : {4}   ((ang-thing.angle+(ANG45/2)*9)>>29): {5}", 
                     new Object[]{
-                        Long.toHexString(ang), Long.toHexString(thing.angle), Long.toHexString((ang-thing.angle)&0xFFFFFFFFL),
-                        Long.toHexString(ANG45/2), Long.toHexString( ang-thing.angle+(ANG45/2)*9 ),
+                        Integer.toHexString(ang), Integer.toHexString(thing.angle), Integer.toHexString((ang-thing.angle)),
+                        Integer.toHexString(ANG45/2), Integer.toHexString( ang-thing.angle+(ANG45/2)*9 ),
                         rot
                     }
             );

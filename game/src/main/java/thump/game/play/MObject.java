@@ -928,7 +928,7 @@ public class MObject {
             MapObject dest,
             MobJInfo.Type type) {
         MapObject	th;
-        long	an;
+        int	an;
         int		dist;
 
         th = P_SpawnMobj (source.x,
@@ -974,7 +974,7 @@ public class MObject {
             MapObject source,
             MobJInfo.Type type) {
         MapObject th;
-        long an;
+        int an;
 
         int x;
         int y;
