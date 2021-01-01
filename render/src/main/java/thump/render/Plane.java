@@ -143,14 +143,14 @@ public class Plane {
         }
 
         length = FixedPoint.mul (distance,distscale[x1]);
-        angle = (int) (((renderer.viewangle + renderer.xtoviewangle[x1])&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
+        angle = (renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT;
         draw.ds_xfrac = renderer.viewx + FixedPoint.mul(finecosine(angle), length);
         draw.ds_yfrac = -renderer.viewy - FixedPoint.mul(finesine(angle), length);
 
         if (renderer.fixedcolormap!=null) {
             draw.ds_colormap = renderer.fixedcolormap;
         } else {
-            int index = (int) ((long)(distance&0xFFFFFFFFL) >> LIGHTZSHIFT);
+            int index = distance>>LIGHTZSHIFT;
 
             if (index >= MAXLIGHTZ ) {
                 index = MAXLIGHTZ-1;
@@ -374,7 +374,7 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
-        logger.log(Level.FINEST, 
+        logger.log(Level.FINE, 
                 "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
                 new Object[]{x,_t1,_b1,_t2,_b2}
         );
@@ -453,12 +453,12 @@ public class Plane {
 //                    draw.dc_yh = pl.bottom[x];
                     draw.dc_yl = pl.top[x+1]; /*&0xFF; */
                     draw.dc_yh = pl.bottom[x+1];/* &0xFF; */
-
+                    logger.log(Level.CONFIG, "    pl.top/bottom[{0}]   draw.dc_yl={1}    draw.dc_yh={2}", new Object[]{x+1,draw.dc_yl, draw.dc_yh});
                     if (draw.dc_yl <= draw.dc_yh) {
                         // TODO:  See if xtoviewangle is similar to top[] and needs padding.
                         //angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
-                        angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
-                        draw.dc_x = x;
+                        angle = (renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT;
+                        draw.dc_x = x;   //   x+1 ????
                         //draw.dc_source = renderer.data.R_GetColumn(renderer.skytexture, angle);
                         // porbably more like draw.dc_source = renderer.skytexture.getColumn(angle);   ?
                         draw.dc_source = renderer.skytexture.getColumn(angle);
@@ -509,7 +509,7 @@ public class Plane {
 
 //            try {
             //for (x=pl.minx ; x<= stop ; x++) {
-            for (x=pl.minx+1 ; x < stop ; x++) {
+            for (x=pl.minx ; x < stop ; x++) {
 //                R_MakeSpans(x,
 //                        pl.top[x-1],
 //                        pl.bottom[x-1],
@@ -520,12 +520,14 @@ public class Plane {
         int i=0; // breakpoint
     }
                 R_MakeSpans(x,
-                        pl.top[x-1],
-                        pl.bottom[x-1],
+                        pl.top[x],
+                        pl.bottom[x],
+                        //pl.top[x-1],
+                        //pl.bottom[x-1],
                         //pl.top[x+1],
                         //pl.bottom[x+1]);
-                        pl.top[x],
-                        pl.bottom[x]);
+                        pl.top[x+1],
+                        pl.bottom[x+1]);
             }
 //            } catch ( ArrayIndexOutOfBoundsException e) {
 //                int i=0;  // Breakpoint.
