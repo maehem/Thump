@@ -229,8 +229,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
     int yh;
     int mid;
     int texturecolumn=0;
-    int top=0;
-    int bottom=0;
+    int top;
+    int bottom;
 
     logger.log(Level.CONFIG, "Render Seg Loop():   rw_x:{0}   rx_stopx:{1}    actual rendering happens here!", new Object[]{rw_x,rw_stopx});
     
@@ -238,7 +238,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
     
     for ( ; rw_x < rw_stopx ; rw_x++) {
 	// mark floor / ceiling areas
-        logger.log(Level.CONFIG, "    topfrac:{0}  bottomfrac:{1}", new Object[]{topfrac>>FRACBITS,bottomfrac>>FRACBITS});
+        logger.log(Level.FINER, "    topfrac:{0}  bottomfrac:{1}", new Object[]{topfrac>>FRACBITS,bottomfrac>>FRACBITS});
 	yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
         
         logger.log(Level.FINER, "    yl set to: {0}", yl);
@@ -302,7 +302,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	
 	// texturecolumn and lighting are independent of wall tiers
 	if (segtextured) {
-            logger.config("    textured column");
+            logger.finer("    textured column");
 	    // calculate texture offset
 	    angle = (int) (((rw_centerangle + renderer.xtoviewangle[rw_x])&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
             //angle &= 0xFFFFFFFFL;
@@ -313,6 +313,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
             int mul = FixedPoint.mul(finetan,rw_distance);
             logger.log(Level.FINER, "    finetan:{0}   mul:{1}   rw_offset:{2}", new Object[]{finetan, mul, rw_offset});
 	    texturecolumn = rw_offset-mul;
+            if ( texturecolumn < 0 ) texturecolumn = 0;  //  Can't be negative
+            
 	    //texturecolumn = (int) (Integer.toUnsignedLong(rw_offset)-Integer.toUnsignedLong(mul));
 	    texturecolumn >>= FRACBITS;
             logger.log(Level.FINER, "    texturecolumn set to: {0}", texturecolumn);
@@ -343,9 +345,13 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	    draw.dc_yl = yl;
 	    draw.dc_yh = yh;
 	    draw.dc_texturemid = rw_midtexturemid;
-	    //draw.dc_source = renderer.data.R_GetColumn(midtexture,texturecolumn);
+            //draw.dc_source = renderer.data.R_GetColumn(midtexture,texturecolumn);
+            MapTexture texture = wad.getTextures().get(midtexture);
+            if ( texturecolumn == -1 ) {
+                int ii=0;  // debug break point
+            }
             draw.dc_source = wad.getTextures().get(midtexture).getColumn(texturecolumn);
-            logger.log(Level.CONFIG, "    {0}: Draw a mid texture.", rw_x);
+            logger.log(Level.CONFIG, "    rw_x={0}: Draw a mid texture.  [{1}]", new Object[]{rw_x,texture.name});
 	    renderer.colfunc.doColFunc(draw);
 	    renderer.plane.ceilingclip[rw_x] = draw.viewheight;
 	    renderer.plane.floorclip[rw_x] = -1;
@@ -672,12 +678,12 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 logger.log(Level.FINER, "    bottom texture");
                 int bottomTextureNum;
                     bottomTextureNum = bsp.sidedef.getBottomTextureNum(wad);
-                try {
+                //try {
                     bottomtexture = r.data.texturetranslation[bottomTextureNum];
-                } catch( ArrayIndexOutOfBoundsException e ) {
-                    bottomtexture = -1;
+                //} catch( ArrayIndexOutOfBoundsException e ) {
+                //    bottomtexture = -1;
                     //throw e;
-                }
+                //}
                 
                 if ((bsp.linedef.flags & ML_DONTPEGBOTTOM)>0) {
                     // bottom of texture at bottom
@@ -826,12 +832,12 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         // render it
         if (markceiling) {
-            logger.log(Level.FINER, "    ceiling check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
+            logger.log(Level.FINE, "    ceiling check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.ceilingplane = plane.R_CheckPlane(plane.ceilingplane, rw_x, rw_stopx - 1);
         }
 
         if (markfloor) {
-            logger.log(Level.FINER, "    floor check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
+            logger.log(Level.FINE, "    floor check plane: {0} {1}", new Object[]{rw_x, rw_stopx - 1});
             plane.floorplane = plane.R_CheckPlane(plane.floorplane, rw_x, rw_stopx - 1);
         }
 
@@ -845,7 +851,8 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 && null==seg.sprtopclip) {
             //memcpy(plane.lastopening, r.plane.ceilingclip[start], 2 * (rw_stopx - start));
             try {
-            System.arraycopy(plane.ceilingclip, start, plane.openings,plane.lastopening, /*2 **/ (rw_stopx - start));
+            //System.arraycopy(plane.ceilingclip, start, plane.openings,plane.lastopening, /*2 **/ (rw_stopx - start));
+            System.arraycopy(plane.ceilingclip, start, plane.openings,plane.lastopening, 2 * (rw_stopx - start));
             } catch ( ArrayIndexOutOfBoundsException e ) {
                 throw e;
             }
@@ -860,16 +867,17 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         if (((seg.silhouette & SIL_BOTTOM)>0 || maskedtexture)
                 && null==seg.sprbottomclip) {
             //memcpy(plane.lastopening, r.plane.floorclip[start], 2 * (rw_stopx - start));
-            logger.log(Level.FINER, "    Arrays.copyOfRange( src:floorclip, startPos:{0}, dest:openings:, len:{1} )", 
+            logger.log(Level.FINE, "    Arrays.copyOfRange( src:floorclip, startPos:{0}, dest:openings:, len:{1} )", 
                     new Object[]{start, (rw_stopx - start)});
             System.arraycopy(
                     r.plane.floorclip,  start, 
                     plane.openings,     plane.lastopening, 
                     /* 2 * */ (rw_stopx - start)
+           //         2 *  (rw_stopx - start)
             );
             
             if ( plane.lastopening - start > 0 ) {
-                logger.log(Level.FINER, 
+                logger.log(Level.FINE, 
                         "    seg.sprbottomclip = Arrays.copyOfRange( openings:{0}, lastopening-start:{1}, len:{2} )", 
                         new Object[]{r.plane.openings, plane.lastopening - start, plane.openings.length});
                 seg.sprbottomclip = Arrays.copyOfRange(

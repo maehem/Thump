@@ -165,7 +165,7 @@ public class MapTexture {
         return fullPatch;
     }
     
-    public Column getColumn(int colnum ) {        
+    public Column getColumn(int colnum ) {
         return fullPatch.pixelData[colnum%fullPatch.pixelData.length];
     }
     

@@ -144,19 +144,20 @@ public class Draw {
         int		fracstep;
 
         if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT ) {
-            logger.log(Level.CONFIG, "R_DrawColumn: {0} to {1} at {2}", new Object[]{dc_yl, dc_yh, dc_x});
+            logger.log(Level.WARNING, "    R_DrawColumn: {0} to {1} at {2}", new Object[]{dc_yl, dc_yh, dc_x});
         }
-        logger.log(Level.CONFIG, "R_DrawColumn");
         
         // Zero length, column does not exceed a pixel.
         int count = dc_yh - dc_yl; 
         if (count <= 0) {
+            logger.log(Level.FINE, "    Short post. Nothing to draw.");
             return;
         } 
         int y = ylookup[dc_yl];
         int x = columnofs[dc_x];  
 
         int [] vals = dc_source.getRawVals();
+        logger.log(Level.CONFIG, "    R_DrawColumn in buffer at:  x:{0}  yStart:{1} count:{2}", new Object[]{x,y/SCREENWIDTH, count});
         fracstep = dc_iscale; 
         frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
         
@@ -611,9 +612,10 @@ public class Draw {
 //    //	dscount++; 
 //    #endif 
 
-
-        xfrac = ds_xfrac; 
-        yfrac = ds_yfrac; 
+        xfrac = ds_xfrac;
+        yfrac = ds_yfrac;
+        
+        logger.log(Level.CONFIG, "Draw.R_DrawSpan( xfrac:{0},  yfrac:{1})", new Object[]{xfrac, yfrac});
 
         Screen dest = renderer.video.screens[0];
         //dest = ylookup[ds_y] + columnofs[ds_x1];
@@ -622,6 +624,8 @@ public class Draw {
         }
         int x = columnofs[ds_x1];
         int y = ylookup[ds_y];
+        
+        logger.log(Level.CONFIG, "start draw at y:{0}", y/SCREENWIDTH);
 
         // We do not check for zero spans here?
         int count = ds_x2 - ds_x1; 

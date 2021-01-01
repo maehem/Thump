@@ -73,7 +73,7 @@ public class Bsp {
         int nextIdx=0;
         //cliprange_t * start;
         int startIdx;
-
+        
         Segs segs = Segs.getInstance();
         
         // Find the first range that touches the range
@@ -81,7 +81,7 @@ public class Bsp {
         //start = solidsegs;
         startIdx = 0;
         
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
         
         //while (start -> last < first - 1) {
         //    start++;
@@ -90,7 +90,7 @@ public class Bsp {
             startIdx++;
         }
         //logger.log(Level.CONFIG, "    1");
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
         //if (first < start -> first) {
         if ( first < solidsegs[startIdx].first ) {    
@@ -105,8 +105,8 @@ public class Bsp {
                         
                 //newend++;
                 newend++;
-                logger.log(Level.FINER, "Insert new clipost.");
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+                logger.log(Level.FINE, "Insert new clipost.");
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
                 //while (next != start) {
                 //    *next = *(next-1);
@@ -118,7 +118,7 @@ public class Bsp {
                     solidsegs[nextIdx].first = solidsegs[nextIdx-1].first;
                     solidsegs[nextIdx].last = solidsegs[nextIdx-1].last;
                     nextIdx--;
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 }
                 
                 //dumpSolidSegs(); // debug
@@ -126,7 +126,7 @@ public class Bsp {
                 solidsegs[nextIdx].first = first;//next->first = first;
                 solidsegs[nextIdx].last = last;//next->last = last;
                 
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 
                 return;
             }
@@ -137,24 +137,25 @@ public class Bsp {
 
             // Now adjust the clip size.
         }
-        //logger.log(Level.CONFIG, "    4");
+        logger.log(Level.FINE, "    4");
 
         // Bottom contained in start?
         //if (last <= start -> last) {
         //    return;
         //}
         if (last <= solidsegs[startIdx].last) {
+            logger.log(Level.FINE, "    last < solidsegs[startIdx].last");
             return;
         }
 
         //next = start;
         nextIdx = startIdx;
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
         boolean crunch=false;
         //logger.log(Level.CONFIG, "    5");
         
-                logger.log(Level.FINER, "Insert new clipost.");
+                logger.log(Level.FINE, "Insert new clipost.");
         //while (last >= (next+1)->first-1) {
         while (last >= solidsegs[nextIdx+1].first - 1) {
             // There is a fragment between two posts.
@@ -162,7 +163,7 @@ public class Bsp {
             segs.R_StoreWallRange (solidsegs[nextIdx].last + 1, solidsegs[nextIdx+1].first - 1, renderer, wad );
             //next++;
             nextIdx++;
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
 
             //if (last <= next->last) {
             if (last <= solidsegs[nextIdx].last) {
@@ -171,7 +172,7 @@ public class Bsp {
                 logger.log(Level.FINER, "Bottom contained in next.  Adjust clip size.");
                 //start->last = next->last;	
                 solidsegs[startIdx].last = solidsegs[nextIdx].last;	
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
                 //goto crunch;
                 crunch=true;
         //logger.log(Level.CONFIG, "    crunch");
@@ -206,7 +207,7 @@ public class Bsp {
         //    // Remove a post.
         //     * ++start =  * next;
         //}
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
         while (nextIdx++ != newend) {
             // Remove a post.
             logger.log(Level.FINER, "Remove a post.");
@@ -214,14 +215,14 @@ public class Bsp {
             // * ++start =  * next;
             solidsegs[startIdx].first = solidsegs[nextIdx].first;
             solidsegs[startIdx].last = solidsegs[nextIdx].last;
-            dumpSolidSegs(nextIdx, startIdx);  // For Debug
+            //dumpSolidSegs(nextIdx, startIdx);  // For Debug
         }
         //dumpSolidSegs(); // debug
 
         //logger.log(Level.CONFIG, "    7");
         //newend = start + 1;
         newend = startIdx + 1;
-        dumpSolidSegs(nextIdx, startIdx);  // For Debug
+        //dumpSolidSegs(nextIdx, startIdx);  // For Debug
     }
 
 
@@ -544,9 +545,8 @@ public class Bsp {
         
         // Clip to view edges.
         // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
-        //span = (angle1 - angle2)&0xFFFFFFFFL;
-        span = (angle1 - angle2);//&0xFFFFFFFFL;
-        logger.log(Level.FINER, 
+        span = (angle1 - angle2);
+        logger.log(Level.FINE, 
                 "     span=0x{0} = {1} = angle1-angle2 [0x{2}  {3}]-[0x{4}  {5}]", 
                 new Object[]{
                     Integer.toHexString(span),   ang2deg(span),
@@ -555,16 +555,16 @@ public class Bsp {
                 });
         
         if ( (span&0xFFFFFFFFL) >= (ANG180&0xFFFFFFFFL) ) {  // Back side? i.e. backface culling?
-            logger.log(Level.FINER, 
+            logger.log(Level.FINE, 
                     "    span[{0}] > ANG180[{1}] ...  returning.",
                     new Object[]{Integer.toHexString(span), Integer.toHexString(ANG180)}
             );
             return;
         }		
 
-        logger.log(Level.FINER, "        r.viewangle: {0}", Integer.toHexString(r.viewangle) );
+        logger.log(Level.FINE, "        r.viewangle: {0}", Integer.toHexString(r.viewangle) );
         Segs.getInstance().rw_angle1 = angle1; // Global angle needed by segcalc.
-        logger.log(Level.FINER, "    rw_angle set to: {0}", Integer.toHexString(angle1) );
+        logger.log(Level.FINE, "    rw_angle set to: {0}", Integer.toHexString(angle1) );
 
         angle1 = (angle1-r.viewangle);//&0xFFFFFFFFL;
         logger.log(Level.FINE, "      angle1 set to: {0}", Integer.toHexString(angle1));
@@ -578,7 +578,7 @@ public class Bsp {
         int clipangle = r.clipangle;        
 
         tspan = (angle1 + clipangle);//&0xFFFFFFFFL;
-        logger.log(Level.FINER, 
+        logger.log(Level.FINE, 
                 "      r.clipangle:0x{0}  span:0x{1}  tspan:0x{2}", 
                 new Object[]{ 
                     Integer.toHexString(clipangle), 
@@ -586,12 +586,14 @@ public class Bsp {
                     Integer.toHexString(tspan)
                 });
 
-        if (tspan > 2*clipangle) {
+        //if ((tspan&0xFFFFFFFFL) > (2*clipangle&0xFFFFFFFFL) ) {
+        if ( Integer.compareUnsigned(tspan,2*clipangle) > 0 ) {
             tspan -= 2*clipangle;
 
             // Totally off the left edge?
-            if (tspan >= span) {
-                logger.log(Level.FINER, 
+            //if (tspan >= span) {
+            if ( Integer.compareUnsigned(tspan,span) >= 0 ) {
+                logger.log(Level.FINE, 
                         "     angle1: Off the left edge?  tspan=0x{0} >= span=0x{1}   returning...", 
                         new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
@@ -599,18 +601,20 @@ public class Bsp {
             }
 
             angle1 = clipangle;
-            logger.log(Level.FINER, "    angle1 set to: {0}", Integer.toHexString(angle1));
+            logger.log(Level.FINE, "    angle1 set to: {0}", Integer.toHexString(angle1));
             
         }
     
         tspan = (clipangle - angle2);//&0xFFFFFFFFL;  //tspan = (clipangle - angle2)&0xFFFFL;
-        logger.log(Level.FINER, "    tspan: {0}", Integer.toHexString(tspan) );
-        if (tspan > 2*clipangle) {
+        logger.log(Level.FINE, "    tspan: {0}", Integer.toHexString(tspan) );
+        //if ( (tspan&0xFFFFFFFFL) > (2*clipangle&0xFFFFFFFFL) ) {
+        if ( Integer.compareUnsigned(tspan,2*clipangle) > 0 ) {
             tspan -= 2*clipangle;
 
             // Totally off the left edge?
-            if (tspan >= span) {
-                logger.log(Level.FINER, 
+            //if ( (tspan&0xFFFFFFFFL) >= (span&0xFFFFFFFFL) ) {
+            if ( Integer.compareUnsigned(tspan,span) >= 0 ) {
+                logger.log(Level.FINE, 
                         "     angle2: Off the left edge?  tspan={0} >= span={1}  returning...",
                         new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
@@ -621,24 +625,24 @@ public class Bsp {
             //angle2 = ((~clipangle)+1)&0xFFFFFFFFL;
             //angle2 = ((~clipangle)+1);//&0xFFFFFFFFL;
             angle2 = -clipangle;
-            logger.log(Level.FINER, "    angle2 set to: {0}", Integer.toHexString(angle2));
+            logger.log(Level.FINE, "    angle2 set to: {0}", Integer.toHexString(angle2));
         }
 
         // The seg is in the view range, but not necessarily visible.
         angle1 = (((angle1+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
         angle2 = (((angle2+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
-        logger.log( Level.FINER,
+        logger.log( Level.FINE,
                 "    shift down:  angle1:0x{0}   angle2:0x{1}", 
-                new Object[]{Integer.toHexString(angle1), Integer.toHexString(angle2) });
-        x1 = (int)(r.viewangletox[(int)angle1]);
-        x2 = (int)(r.viewangletox[(int)angle2]);
-        logger.log(Level.FINER,
+                new Object[]{angle1, angle2 });
+        x1 = (int)(r.viewangletox[angle1]);
+        x2 = (int)(r.viewangletox[angle2]);
+        logger.log(Level.FINE,
                 "    x1: {0}    x2: {1}", 
                 new Object[]{Integer.toHexString(x1), Integer.toHexString(x2)});
 
         // Does not cross a pixel?
         if (x1 == x2) {
-            logger.log(Level.FINER, "   x1 == x2 ,  {0} == {1}   returning...", new Object[]{ x1, x2 });
+            logger.log(Level.FINE, "   x1 == x2 ,  {0} == {1}   returning...", new Object[]{ x1, x2 });
             return;
         }				
 
@@ -646,7 +650,8 @@ public class Bsp {
 
         // Single sided line?
         if (backsector == null) {
-            logger.log(Level.FINER, "    single sided line.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
+            logger.log(Level.FINE, "    single sided line.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
+            
             R_ClipSolidWallSegment (x1, x2-1, wad);
             return;
         }
@@ -654,18 +659,18 @@ public class Bsp {
         // Closed door.
         if (backsector.ceilingheight <= frontsector.floorheight
             || backsector.floorheight >= frontsector.ceilingheight) {
-            logger.log(Level.FINER, "    closed door.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
+            logger.log(Level.FINE, "    closed door.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
             R_ClipSolidWallSegment (x1, x2-1, wad);
             return;
         }
 
-        logger.log(Level.FINER, "    FrontSector: {0}", frontsector.toString());
-        logger.log(Level.FINER, "     Backsector: {0}", backsector.toString());
+        logger.log(Level.FINE, "    FrontSector: {0}", frontsector.toString());
+        logger.log(Level.FINE, "     Backsector: {0}", backsector.toString());
         
         // Window.
         if (backsector.ceilingheight != frontsector.ceilingheight
             || backsector.floorheight != frontsector.floorheight) {
-            logger.log(Level.FINER, 
+            logger.log(Level.FINE, 
                     "    clip pass wall segment:  :window:  x1:{0}   x2:{1} ==> x2-1:{2}", 
                     new Object[]{
                         Integer.toHexString(x1),
@@ -691,7 +696,7 @@ public class Bsp {
 
 
 //      clippass:
-        logger.log(Level.FINER, 
+        logger.log(Level.FINE, 
                     "    clippass:  x1:{0}   x2:{1} ==> x2-1:{2}", 
                     new Object[]{
                         Integer.toHexString(x1),
