@@ -32,6 +32,7 @@ import static thump.game.network.Net.BACKUPTICS;
 import thump.game.play.Wipe;
 import static thump.game.sound.sfx.Sounds.MusicEnum.*;
 import thump.game.play.PlayerView;
+import thump.wad.Wad;
 import thump.wad.WadLoader;
 import thump.wad.lump.PictureLump;
 import thump.wad.map.Node;
@@ -306,10 +307,13 @@ public final class DoomMain {
 
 // Not yet ready for external WAD add-ons.
 //TODO        W_InitMultipleFiles(wadfiles);
-        
+        //xxx
 
-        game.wad = WadLoader.getWad(new File(wadList.get(0)));
-
+        game.wad = new Wad();
+        //    game.wad = WadLoader.addWad(new File(wadList.get(0)));
+        for ( String wadFile: wadList ) {
+            WadLoader.addWad(game.wad, new File(wadFile));
+        }
         
 /*        
         // Not ready for any of this
@@ -549,7 +553,8 @@ public final class DoomMain {
         if (game.nodrawers) {
             return;                    // for comparative timing / profiling
         }
-        //game.video.screens[0].clear();
+        //game.renderer.video.screens[0].clear();
+        //Arrays.fill(game.renderer.video.screens[0].area, 1);
 
         redrawsbar = false;
 
@@ -613,7 +618,12 @@ public final class DoomMain {
         // draw buffered stuff to screen
         //logger.config("Render Update - No Blit");
         game.videoInterface.I_UpdateNoBlit();
+        
+        // Debug:   blank render area so we can see what's not getting rendered.
+        //Arrays.fill(game.renderer.video.screens[0].area, 3);
+        
         //VideoInterface.getInstance().I_FinishUpdate();
+        //game.videoInterface.I_FinishUpdate(true);
 
         // draw the view directly
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.gametic>0) {
@@ -681,7 +691,8 @@ public final class DoomMain {
 
         // normal update
         if (!wipe) {
-            game.videoInterface.I_FinishUpdate ();              // page flip or blit buffer
+            //game.videoInterface.I_FinishUpdate (true);              // page flip or blit buffer
+            game.videoInterface.I_FinishUpdate (false);              // page flip or blit buffer
             return;
         }
 
@@ -700,7 +711,7 @@ public final class DoomMain {
             done = Wipe.getInstance().wipe_ScreenWipe(Wipe.Wipes.wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, (int) tics);
             game.videoInterface.I_UpdateNoBlit();
             menu.M_Drawer();   // menu is drawn even on top of wipes
-            game.videoInterface.I_FinishUpdate();   // page flip or blit buffer
+            //game.videoInterface.I_FinishUpdate(true);   // page flip or blit buffer
         } while (!done);
         
         // Wipe blows away any redraw for the status bar.
@@ -1152,6 +1163,7 @@ public final class DoomMain {
                 player.extralight, 
                 player.viewz, player.fixedcolormap,
                 player.psprites);
+                game.playerView = pv;        
         } else {
             pv.x = player.mo.x;
             pv.y = player.mo.y;
@@ -1168,7 +1180,6 @@ public final class DoomMain {
             pv.psprites = player.psprites;
         }
         
-        game.playerView = pv;        
         game.renderer.R_SetupFrame (pv);
         
 
@@ -1187,7 +1198,7 @@ public final class DoomMain {
         }
         // The head node is the last node output.
         //bsp.R_RenderBSPNode (numnodes-1);
-        game.renderer.bsp.R_RenderBSPNode (
+        game.renderer.bsp.R_RenderBSPNode ( "",
                 //game.playerSetup.nodes.length-1,
                 game.playerSetup.nodes.size()-1,
                 (ArrayList<Node>)(ArrayList<?>)(game.playerSetup.nodes),
@@ -1202,8 +1213,8 @@ public final class DoomMain {
                 game.things.rThings.pspriteiscale
         );
         game.net.NetUpdate (); // Check for new console commands.
-        game.things.R_DrawMasked();        
-        game.net.NetUpdate (); // Check for new console commands.			
+//        game.things.R_DrawMasked();        
+//        game.net.NetUpdate (); // Check for new console commands.			
     }
     
 }
