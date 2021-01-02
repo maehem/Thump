@@ -9,9 +9,9 @@ This branch will also focus on porting the AWT/Swing usage over to Java 13+, Ope
 
 The author has created this project for no other reason other than to study and transform the original Doom C-source to Java as well as stay versed on the use of JavaFX in a novel way.  This software is not intended to be used, sold or even ever finished.  The author reserves the right to abandon or "park" this code for indefinite amounts of time to go work on other interests.  You may do what you want with this code within the limits of the software license.  Learn, study, enjoy!
 
-## "If I said it was 'Still not Alpha', but look, walls!" edition.  Build 20.003
+## "'Still not Alpha', but look, walls!" edition.  Build 20.003
 
-![Menu](readme_images/menu/png?raw=true "Menu")   ![In Game](readme_images/ingame.jpg?raw=true "In Game")
+![Menu](./readme_images/menu/png?raw=true "Menu")   ![In Game](./readme_images/ingame.jpg?raw=true "In Game")
 
 This release will compile and run under Java 14.
 Menus work and a new game can be started.
