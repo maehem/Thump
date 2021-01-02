@@ -126,6 +126,8 @@ public class Plane {
 //            I_Error ("R_MapPlane: %i, %i at %i",x1,x2,y);
 //        }
 //    #endif
+    
+        logger.log(Level.CONFIG, "    Plane.R_MapPlane( y:{0}, x1:{1}, x2:{2})");
         Draw draw = renderer.draw;
         
         if (planeheight != cachedheight[y]) {
@@ -143,7 +145,7 @@ public class Plane {
         }
 
         length = FixedPoint.mul (distance,distscale[x1]);
-        angle = (renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT;
+        angle = ((renderer.viewangle + renderer.xtoviewangle[x1])>>ANGLETOFINESHIFT)&0xFFF;
         draw.ds_xfrac = renderer.viewx + FixedPoint.mul(finecosine(angle), length);
         draw.ds_yfrac = -renderer.viewy - FixedPoint.mul(finesine(angle), length);
 
@@ -166,6 +168,10 @@ public class Plane {
         draw.ds_x1 = x1;
         draw.ds_x2 = x2;
 
+        logger.log(Level.CONFIG, 
+                "    draw: ds_y:{0}   ds_x1:{1}   ds_x2:{2}   ds_xfrac:{3}    ds_yfrac:{4}",
+                new Object[]{ draw.ds_y, draw.ds_x1, draw.ds_x2, draw.ds_xfrac, draw.ds_yfrac }
+        );
         // high or low detail
         draw.spanfunc();	
     }
@@ -195,7 +201,8 @@ public class Plane {
         Arrays.fill(cachedheight, 0);
 
         // left to right mapping
-        angle = (int)(((renderer.viewangle-ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
+        //angle = (int)(((renderer.viewangle-ANG90)&0xFFFFFFFFL)>>ANGLETOFINESHIFT);
+        angle = ((renderer.viewangle-ANG90)>>ANGLETOFINESHIFT)&0xFFF;
 
         // scale will be unit scale at SCREENWIDTH/2 distance
         basexscale = FixedPoint.div (finecosine(angle),renderer.centerxfrac);
@@ -374,7 +381,7 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
-        logger.log(Level.FINE, 
+        logger.log(Level.CONFIG, 
                 "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
                 new Object[]{x,_t1,_b1,_t2,_b2}
         );
@@ -395,6 +402,7 @@ public class Plane {
             spanstart[b2] = x;
             b2--;
         }
+        //logger.log(Level.CONFIG, "    spanstart[]:  {0}", Arrays.toString(spanstart));
     }
 
 
@@ -457,7 +465,7 @@ public class Plane {
                     if (draw.dc_yl <= draw.dc_yh) {
                         // TODO:  See if xtoviewangle is similar to top[] and needs padding.
                         //angle = (int)((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT);
-                        angle = (renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT;
+                        angle = ((renderer.viewangle + renderer.xtoviewangle[x])>>ANGLETOSKYSHIFT)&0x3FF;
                         draw.dc_x = x;   //   x+1 ????
                         //draw.dc_source = renderer.data.R_GetColumn(renderer.skytexture, angle);
                         // porbably more like draw.dc_source = renderer.skytexture.getColumn(angle);   ?
