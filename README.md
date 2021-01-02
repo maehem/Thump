@@ -11,7 +11,7 @@ The author has created this project for no other reason other than to study and 
 
 ## "'Still not Alpha', but look, walls!" edition.  Build 20.003
 
-![Menu](./readme_images/menu/png?raw=true "Menu")   ![In Game](./readme_images/ingame.jpg?raw=true "In Game")
+![Menu](./readme_images/menu.png?raw=true "Menu")   ![In Game](./readme_images/ingame.png?raw=true "In Game")
 
 This release will compile and run under Java 14.
 Menus work and a new game can be started.
