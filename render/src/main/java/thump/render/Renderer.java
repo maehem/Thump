@@ -305,7 +305,8 @@ public class Renderer {
         dy = (y - ly);
 
         // Try to quickly decide by looking at sign bits.
-        if ( ((ldy ^ ldx ^ dx ^ dy)&0x80000000) > 0 ) {
+        //if ( ((ldy ^ ldx ^ dx ^ dy)&0x80000000) > 0 ) {
+        if ( ((ldy ^ ldx ^ dx ^ dy)&0x80000000) != 0 ) {
             logger.log(Level.CONFIG,
                     "XOR:\n    ldy:{0}\n    ldx:{1}\n     dx:{2}\n     dy:{3}",
                     new Object[]{
@@ -358,13 +359,13 @@ public class Renderer {
                 // y>= 0
                 if (x > y) {
                     // octant 0
-                    logger.log(Level.FINE,
+                    logger.log(Level.FINER,
                             "               octant 0:  tangtoangle():{0}", 
                             Integer.toHexString(tantoangle(SlopeDiv(y, x))/*&0xFFFFFFFFL*/));
                     return tantoangle(SlopeDiv(y, x));//&0xFFFFFFFFL;
                 } else {
                     // octant 1
-                    logger.log(Level.FINE, 
+                    logger.log(Level.FINER, 
                             "               octant 1:   90-1-tantoangle():{0}", 
                             Integer.toHexString( ANG90 - 1 - tantoangle( SlopeDiv(x, y) )) 
                     );
@@ -377,11 +378,11 @@ public class Renderer {
                 if (x > y) {
                     // octant 8   or is this 6 (typo in original C?)
                     int slpdiv = SlopeDiv(y, x);
-                    logger.log(Level.FINE, 
+                    logger.log(Level.FINER, 
                             "               octant 7(or6):  SlopDiv(x:{0},y:{1}) = {2}",
                         new Object[]{x,y,slpdiv}
                     );
-                    logger.log(Level.FINE, 
+                    logger.log(Level.FINER, 
                             "                      ~tantoangle(slopediv()) = {0}",
                             Integer.toHexString( -tantoangle(slpdiv) )
                     );
@@ -390,7 +391,7 @@ public class Renderer {
                     return -tantoangle(slpdiv);//&0xFFFFFFFFL;
                 } else {
                     // octant 7
-                    logger.log(Level.FINE,
+                    logger.log(Level.FINER,
                             "               octant 6(or7):  {0}", 
                             Integer.toHexString( ANG270 + tantoangle(SlopeDiv(x, y)) )
                     );
@@ -402,12 +403,12 @@ public class Renderer {
 
             if (y >= 0) {  // y>= 0                
                 if (x > y) {  // octant 3
-                    logger.log(Level.FINE, 
+                    logger.log(Level.FINER, 
                             "               octant 3: {0}",
                             Integer.toHexString((ANG180 - 1 - tantoangle(SlopeDiv(y, x)))));
                     return (ANG180 - 1 - tantoangle(SlopeDiv(y, x)));//&0xFFFFFFFFL;
                 } else {   // octant 2
-                    logger.log( Level.CONFIG,
+                    logger.log( Level.FINER,
                             "               octant 2:  {0}",
                             Integer.toHexString((ANG90 + tantoangle(SlopeDiv(x, y)))));
                     return (ANG90 + tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
@@ -417,13 +418,13 @@ public class Renderer {
 
                 if (x > y) {
                     // octant 4
-                    logger.log(Level.FINE, 
+                    logger.log(Level.FINER, 
                             "               octant 4: {0}",
                             Integer.toHexString(ANG180 + tantoangle(SlopeDiv(y, x))));
                     return (ANG180 + tantoangle(SlopeDiv(y, x)));//&0xFFFFFFFFL;
                 } else {
                     // octant 5
-                    logger.log(Level.FINE,
+                    logger.log(Level.FINER,
                             "               octant 5: {0}",
                             Integer.toHexString(ANG270 - 1 - tantoangle(SlopeDiv(x, y))));
                     return (ANG270 - 1 - tantoangle(SlopeDiv(x, y)));//&0xFFFFFFFFL;
