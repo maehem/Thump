@@ -67,7 +67,12 @@ import thump.wad.sound.music.MidiEventWrapper;
 @SuppressWarnings("serial")
 public class WadViewer extends javax.swing.JFrame implements TreeSelectionListener {
 
-    private final String wadFile = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Doom" + File.separator + "doom2.wad";
+    private final String mainWadFile = 
+            System.getProperty("user.home") + File.separator + "Documents" + File.separator + 
+            "Doom" + File.separator + "doom2.wad";
+    private final String addOnWadFile = 
+            System.getProperty("user.home") + File.separator + "Documents" + File.separator + 
+            "Doom" + File.separator + "thumproom.wad";
     private final Wad wad;
     private final ImagePanel imagePreviewPanel;
     private Sequencer sequencer = null;
@@ -78,8 +83,9 @@ public class WadViewer extends javax.swing.JFrame implements TreeSelectionListen
     public WadViewer() {
         initComponents();
         //setLoggerLevel();
-
-        wad = WadLoader.getWad(new File(wadFile));
+        wad = new Wad();
+        WadLoader.addWad(wad, new File(mainWadFile));
+        WadLoader.addWad(wad, new File(addOnWadFile));
 
         // Build Tree Model
         DefaultMutableTreeNode top
