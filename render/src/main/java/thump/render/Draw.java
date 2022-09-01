@@ -157,7 +157,7 @@ public class Draw {
         int x = columnofs[dc_x];  
 
         int [] vals = dc_source.getRawVals();
-        logger.log(Level.CONFIG, "    R_DrawColumn in buffer at:  x:{0}  yStart:{1} count:{2}", new Object[]{x,y/SCREENWIDTH, count});
+        logger.log(Level.FINEST, "    R_DrawColumn in buffer at:  x:{0}  yStart:{1} count:{2}", new Object[]{x,y/SCREENWIDTH, count});
         fracstep = dc_iscale; 
         frac = dc_texturemid + (dc_yl-renderer.centery)*fracstep; 
         
@@ -615,7 +615,7 @@ public class Draw {
         xfrac = ds_xfrac;
         yfrac = ds_yfrac;
         
-        logger.log(Level.CONFIG, "Draw.R_DrawSpan( xfrac:{0},  yfrac:{1})", new Object[]{xfrac, yfrac});
+        logger.log(Level.FINER, "Draw.R_DrawSpan( xfrac:{0},  yfrac:{1})", new Object[]{xfrac, yfrac});
 
         Screen dest = renderer.video.screens[0];
         //dest = ylookup[ds_y] + columnofs[ds_x1];
@@ -625,7 +625,7 @@ public class Draw {
         int x = columnofs[ds_x1];
         int y = ylookup[ds_y];
         
-        logger.log(Level.CONFIG, "start draw at y:{0}", y/SCREENWIDTH);
+        logger.log(Level.FINEST, "start draw at y:{0}", y/SCREENWIDTH);
 
         // We do not check for zero spans here?
         int count = ds_x2 - ds_x1; 

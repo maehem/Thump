@@ -127,7 +127,7 @@ public class Plane {
 //        }
 //    #endif
     
-        logger.log(Level.CONFIG, "    Plane.R_MapPlane( y:{0}, x1:{1}, x2:{2})");
+        logger.log(Level.FINER, "    Plane.R_MapPlane( y:{0}, x1:{1}, x2:{2})", new Object[]{y,x1,x2});
         Draw draw = renderer.draw;
         
         if (planeheight != cachedheight[y]) {
@@ -168,7 +168,7 @@ public class Plane {
         draw.ds_x1 = x1;
         draw.ds_x2 = x2;
 
-        logger.log(Level.CONFIG, 
+        logger.log(Level.FINEST, 
                 "    draw: ds_y:{0}   ds_x1:{1}   ds_x2:{2}   ds_xfrac:{3}    ds_yfrac:{4}",
                 new Object[]{ draw.ds_y, draw.ds_x1, draw.ds_x2, draw.ds_xfrac, draw.ds_yfrac }
         );
@@ -291,7 +291,7 @@ public class Plane {
         int unionh;
         int x;
 
-        logger.log(Level.CONFIG, "R_CheckPlane(start:{0},stop:{1})", new Object[]{start, stop});
+        logger.log(Level.FINE, "R_CheckPlane(start:{0},stop:{1})", new Object[]{start, stop});
         
         if (start < pl.minx) {
             intrl = pl.minx;
@@ -381,7 +381,7 @@ public class Plane {
         int t2 = _t2;
         int b2 = _b2;
         
-        logger.log(Level.CONFIG, 
+        logger.log(Level.FINEST, 
                 "R_MakeSpans(x:{0}, t1:{1}, b1:{2}, t2:{3}, b2:{4}",
                 new Object[]{x,_t1,_b1,_t2,_b2}
         );

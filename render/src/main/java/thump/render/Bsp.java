@@ -68,7 +68,7 @@ public class Bsp {
 
 
     void R_ClipSolidWallSegment(int first, int last, Wad wad) {
-        logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
+        logger.log(Level.FINE, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
         //cliprange_t * next;
         int nextIdx=0;
         //cliprange_t * start;
@@ -244,7 +244,6 @@ public class Bsp {
 ////    cliprange_t*	next;
 ////    cliprange_t*	start;
 //
-//        logger.log(Level.CONFIG, "Bsp.R_ClipSolidWallSegment( first:{0}, last:{1})", new Object[]{first, last});
 //        int	next=0;  // next index
 //        //int nextIndex = 0;
 //        int	start = 0; // current start index
@@ -502,6 +501,12 @@ public class Bsp {
         }
 
         // There is a fragment after *next.
+        logger.log(Level.CONFIG, 
+                "There is a fragment after *next.\n" +
+                        "     -> call R_StoreWallRange( {0}, {1} )",
+                new Object[]{solidsegs[start].last+1, last}
+                
+        );
         Segs.getInstance().R_StoreWallRange (
                 solidsegs[start].last + 1, last, 
                 renderer, wad);
@@ -540,13 +545,13 @@ public class Bsp {
         angle1 = r.R_PointToAngle (line.v1.x, line.v1.y);//&0xFFFFFFFFL;
         angle2 = r.R_PointToAngle (line.v2.x, line.v2.y);//&0xFFFFFFFFL;
 
-        logger.log(Level.CONFIG, 
+        logger.log(Level.FINER, 
                 "Bsp.R_Addline(): {0}", line.toString());
         
         // Clip to view edges.
         // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
         span = (angle1 - angle2);
-        logger.log(Level.FINE, 
+        logger.log(Level.FINEST, 
                 "     span=0x{0} = {1} = angle1-angle2 [0x{2}  {3}]-[0x{4}  {5}]", 
                 new Object[]{
                     Integer.toHexString(span),   ang2deg(span),
@@ -555,21 +560,21 @@ public class Bsp {
                 });
         
         if ( (span&0xFFFFFFFFL) >= (ANG180&0xFFFFFFFFL) ) {  // Back side? i.e. backface culling?
-            logger.log(Level.FINE, 
+            logger.log(Level.FINEST, 
                     "    span[{0}] > ANG180[{1}] ...  returning.",
                     new Object[]{Integer.toHexString(span), Integer.toHexString(ANG180)}
             );
             return;
         }		
 
-        logger.log(Level.FINE, "        r.viewangle: {0}", Integer.toHexString(r.viewangle) );
+        logger.log(Level.FINEST, "        r.viewangle: {0}", Integer.toHexString(r.viewangle) );
         Segs.getInstance().rw_angle1 = angle1; // Global angle needed by segcalc.
-        logger.log(Level.FINE, "    rw_angle set to: {0}", Integer.toHexString(angle1) );
+        logger.log(Level.FINEST, "    rw_angle set to: {0}", Integer.toHexString(angle1) );
 
         angle1 = (angle1-r.viewangle);//&0xFFFFFFFFL;
-        logger.log(Level.FINE, "      angle1 set to: {0}", Integer.toHexString(angle1));
+        logger.log(Level.FINEST, "      angle1 set to: {0}", Integer.toHexString(angle1));
         angle2 = (angle2-r.viewangle);//&0xFFFFFFFFL;
-        logger.log(Level.FINE, "      angle2 set to: {0}", Integer.toHexString(angle2));
+        logger.log(Level.FINEST, "      angle2 set to: {0}", Integer.toHexString(angle2));
         
 //        logger.log(Level.CONFIG, 
 //                "    r.viewangle [{0}] subtracted from angle1 & angle2 now [0x{1}] [0x{2}]", 
@@ -578,7 +583,7 @@ public class Bsp {
         int clipangle = r.clipangle;        
 
         tspan = (angle1 + clipangle);//&0xFFFFFFFFL;
-        logger.log(Level.FINE, 
+        logger.log(Level.FINEST, 
                 "      r.clipangle:0x{0}  span:0x{1}  tspan:0x{2}", 
                 new Object[]{ 
                     Integer.toHexString(clipangle), 
@@ -593,7 +598,7 @@ public class Bsp {
             // Totally off the left edge?
             //if (tspan >= span) {
             if ( Integer.compareUnsigned(tspan,span) >= 0 ) {
-                logger.log(Level.FINE, 
+                logger.log(Level.FINEST, 
                         "     angle1: Off the left edge?  tspan=0x{0} >= span=0x{1}   returning...", 
                         new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
@@ -601,12 +606,12 @@ public class Bsp {
             }
 
             angle1 = clipangle;
-            logger.log(Level.FINE, "    angle1 set to: {0}", Integer.toHexString(angle1));
+            logger.log(Level.FINEST, "    angle1 set to: {0}", Integer.toHexString(angle1));
             
         }
     
         tspan = (clipangle - angle2);//&0xFFFFFFFFL;  //tspan = (clipangle - angle2)&0xFFFFL;
-        logger.log(Level.FINE, "    tspan: {0}", Integer.toHexString(tspan) );
+        logger.log(Level.FINEST, "    tspan: {0}", Integer.toHexString(tspan) );
         //if ( (tspan&0xFFFFFFFFL) > (2*clipangle&0xFFFFFFFFL) ) {
         if ( Integer.compareUnsigned(tspan,2*clipangle) > 0 ) {
             tspan -= 2*clipangle;
@@ -614,7 +619,7 @@ public class Bsp {
             // Totally off the left edge?
             //if ( (tspan&0xFFFFFFFFL) >= (span&0xFFFFFFFFL) ) {
             if ( Integer.compareUnsigned(tspan,span) >= 0 ) {
-                logger.log(Level.FINE, 
+                logger.log(Level.FINEST, 
                         "     angle2: Off the left edge?  tspan={0} >= span={1}  returning...",
                         new Object[]{Integer.toHexString(tspan), Integer.toHexString(span)}
                 );
@@ -625,24 +630,24 @@ public class Bsp {
             //angle2 = ((~clipangle)+1)&0xFFFFFFFFL;
             //angle2 = ((~clipangle)+1);//&0xFFFFFFFFL;
             angle2 = -clipangle;
-            logger.log(Level.FINE, "    angle2 set to: {0}", Integer.toHexString(angle2));
+            logger.log(Level.FINEST, "    angle2 set to: {0}", Integer.toHexString(angle2));
         }
 
         // The seg is in the view range, but not necessarily visible.
         angle1 = (((angle1+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
         angle2 = (((angle2+ANG90)/*&0xFFFFFFFFL*/)>>ANGLETOFINESHIFT)&0xFFF;
-        logger.log( Level.FINE,
+        logger.log( Level.FINEST,
                 "    shift down:  angle1:0x{0}   angle2:0x{1}", 
                 new Object[]{angle1, angle2 });
         x1 = (int)(r.viewangletox[angle1]);
         x2 = (int)(r.viewangletox[angle2]);
-        logger.log(Level.FINE,
+        logger.log(Level.FINEST,
                 "    x1: {0}    x2: {1}", 
                 new Object[]{Integer.toHexString(x1), Integer.toHexString(x2)});
 
         // Does not cross a pixel?
         if (x1 == x2) {
-            logger.log(Level.FINE, "   x1 == x2 ,  {0} == {1}   returning...", new Object[]{ x1, x2 });
+            logger.log(Level.FINEST, "   x1 == x2 ,  {0} == {1}   returning...", new Object[]{ x1, x2 });
             return;
         }				
 
@@ -650,7 +655,7 @@ public class Bsp {
 
         // Single sided line?
         if (backsector == null) {
-            logger.log(Level.FINE, "    single sided line.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
+            logger.log(Level.FINEST, "    single sided line.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
             
             R_ClipSolidWallSegment (x1, x2-1, wad);
             return;
@@ -659,18 +664,18 @@ public class Bsp {
         // Closed door.
         if (backsector.ceilingheight <= frontsector.floorheight
             || backsector.floorheight >= frontsector.ceilingheight) {
-            logger.log(Level.FINE, "    closed door.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
+            logger.log(Level.FINEST, "    closed door.  x1:{0}   x2-1:{1}", new Object[]{x1, x2-1});
             R_ClipSolidWallSegment (x1, x2-1, wad);
             return;
         }
 
-        logger.log(Level.FINE, "    FrontSector: {0}", frontsector.toString());
-        logger.log(Level.FINE, "     Backsector: {0}", backsector.toString());
+        logger.log(Level.FINEST, "    FrontSector: {0}", frontsector.toString());
+        logger.log(Level.FINEST, "     Backsector: {0}", backsector.toString());
         
         // Window.
         if (backsector.ceilingheight != frontsector.ceilingheight
             || backsector.floorheight != frontsector.floorheight) {
-            logger.log(Level.FINE, 
+            logger.log(Level.FINEST, 
                     "    clip pass wall segment:  :window:  x1:{0}   x2:{1} ==> x2-1:{2}", 
                     new Object[]{
                         Integer.toHexString(x1),
@@ -696,7 +701,7 @@ public class Bsp {
 
 
 //      clippass:
-        logger.log(Level.FINE, 
+        logger.log(Level.FINEST, 
                     "    clippass:  x1:{0}   x2:{1} ==> x2-1:{2}", 
                     new Object[]{
                         Integer.toHexString(x1),
@@ -725,7 +730,7 @@ public class Bsp {
     };
 
     /**
-     * Checks BSP node/subtree bounding box.
+     * Checks BSP node/sub-tree bounding box.
      * 
      * @param bspcoord bounding box coordinates
      * @return true if some part of the bbox might be visible.

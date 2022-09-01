@@ -1651,12 +1651,11 @@ void M_SetupNextMenu(Menu menudef)
     itemOn = currentMenu.lastOn;
 }
 
-
-//
-// M_Ticker
-//
-public void M_Ticker ()
-{
+/**
+ * Menu Ticker -- M_Ticker
+ */
+public void M_Ticker () {
+    logger.finer("Game.M_Ticker()");
     skullAnimCounter--;
     if (skullAnimCounter <= 0) {
 	whichSkull ^= 1;

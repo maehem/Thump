@@ -155,7 +155,8 @@ public class User {
 
         cmd = player.cmd;
 
-        logger.log(Level.CONFIG, "    addjust player turn: {0}", cmd.angleturn);
+        logger.log(Level.FINE, "P_MovePlayer()");
+        logger.log(Level.FINER, "    adjust player turn: {0}", cmd.angleturn<<16);
         player.mo.angle += (cmd.angleturn<<16);
         //player.mo.angle &= 0xFFFFFFFFL;
         // Do not let the player control movement
@@ -164,16 +165,16 @@ public class User {
 
         if (cmd.forwardmove!=0 && onground) {
             P_Thrust (player, player.mo.angle, cmd.forwardmove*2048);
-            logger.log(Level.CONFIG, "    player move: {0}", cmd.forwardmove);
+            logger.log(Level.FINE, "    player move: {0}", cmd.forwardmove);
             
         }
         
-        // DEBUG CODE   -- delete
-        if (cmd.forwardmove!=0 && !onground) {
-            P_Thrust (player, player.mo.angle, cmd.forwardmove*2048);
-            logger.log(Level.CONFIG, "    player move: {0}", cmd.forwardmove);
-            
-        }
+//        // DEBUG CODE   -- delete
+//        if (cmd.forwardmove!=0 && !onground) {
+//            P_Thrust (player, player.mo.angle, cmd.forwardmove*2048);
+//            logger.log(Level.CONFIG, "    player move: {0}", cmd.forwardmove);
+//            
+//        }
          
 
         if (cmd.sidemove!=0 && onground) {

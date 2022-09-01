@@ -258,7 +258,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	    top = cClip+1;
 	    bottom = yl-1;
 
-            logger.log(Level.FINER, 
+            logger.log(Level.FINE, 
                     "    mark ceiling:  top:{0}  bottom:{1}  rw_x:{2}",
                     new Object[]{top, bottom, rw_x}
             );
@@ -286,7 +286,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	if (markfloor) {
 	    top = yh+1;
 	    bottom = fClip-1;
-            logger.log(Level.FINER, 
+            logger.log(Level.FINE, 
                     "    mark floor:  top:{0}  bottom:{1}  rw_x:{2}",
                     new Object[]{top, bottom, rw_x}
             );
@@ -341,7 +341,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	// draw the wall tiers
 	if (midtexture>0) {
 	    // single sided line
-            logger.config("wall tiers: midtexture: single sided line.");
+            logger.finer("wall tiers: midtexture: single sided line.");
 	    draw.dc_yl = yl;
 	    draw.dc_yh = yh;
 	    draw.dc_texturemid = rw_midtexturemid;
@@ -351,16 +351,16 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 int ii=0;  // debug break point
             }
             draw.dc_source = wad.getTextures().get(midtexture).getColumn(texturecolumn);
-            logger.log(Level.CONFIG, "    rw_x={0}: Draw a mid texture.  [{1}]", new Object[]{rw_x,texture.name});
+            logger.log(Level.FINER, "    rw_x={0}: Draw a mid texture.  [{1}]", new Object[]{rw_x,texture.name});
 	    renderer.colfunc.doColFunc(draw);
 	    renderer.plane.ceilingclip[rw_x] = draw.viewheight;
 	    renderer.plane.floorclip[rw_x] = -1;
 	} else {
 	    // two sided line
-            logger.config("wall tiers: midtexture: two sided line.");
+            logger.finer("wall tiers: midtexture: two sided line.");
 	    if (toptexture>0) {
 		// top wall
-                logger.config("    top wall.");
+                logger.finer("    top wall.");
 		mid = pixhigh>>HEIGHTBITS;
 		pixhigh += pixhighstep;
 
@@ -375,17 +375,17 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 		    draw.dc_texturemid = rw_toptexturemid;
 		    //draw.dc_source = renderer.data.R_GetColumn(toptexture,texturecolumn);
                     draw.dc_source = wad.getTextures().get(toptexture).getColumn(texturecolumn);
-                    logger.log(Level.CONFIG, "    {0}: Draw a top texture.  yl:{1}  yh:{2}  texturemid:{3}", new Object[]{rw_x,yl,mid,rw_toptexturemid});
+                    logger.log(Level.FINER, "    {0}: Draw a top texture.  yl:{1}  yh:{2}  texturemid:{3}", new Object[]{rw_x,yl,mid,rw_toptexturemid});
 		    renderer.colfunc.doColFunc(draw);
-                    logger.log(Level.CONFIG, "    ... done.");
+                    logger.log(Level.FINER, "    ... done.");
 		    renderer.plane.ceilingclip[rw_x] = mid;
-                    logger.log(Level.CONFIG, "    ceilingclip = mid.");
+                    logger.log(Level.FINER, "    ceilingclip = mid.");
 		} else {
                     renderer.plane.ceilingclip[rw_x] = yl-1;
                 }
 	    } else {
 		// no top wall
-                logger.config("    no top wall.");
+                logger.finer("    no top wall.");
 		if (markceiling) {
                     renderer.plane.ceilingclip[rw_x] = yl-1;
                 }
@@ -393,7 +393,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 			
 	    if (bottomtexture>0) {
 		// bottom wall
-                logger.config("    bottom wall.");
+                logger.finer("    bottom wall.");
 		mid = (pixlow+HEIGHTUNIT-1)>>HEIGHTBITS;
 		pixlow += pixlowstep;
 
@@ -408,7 +408,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 		    draw.dc_texturemid = rw_bottomtexturemid;
 		    //draw.dc_source = renderer.data.R_GetColumn(bottomtexture, texturecolumn);
                     draw.dc_source = wad.getTextures().get(bottomtexture).getColumn(texturecolumn);
-                    logger.log(Level.CONFIG, "    {0}: Draw a bottom texture., rw_x");
+                    logger.log(Level.FINER, "    {0}: Draw a bottom texture., rw_x");
 		    renderer.colfunc.doColFunc(draw);
 		    renderer.plane.floorclip[rw_x] = mid;
 		} else {
@@ -416,7 +416,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 }
 	    } else {
 		// no bottom wall
-                logger.config("    no bottom wall.");
+                logger.finer("    no bottom wall.");
 		if (markfloor) {
                     renderer.plane.floorclip[rw_x] = yh+1;
                 }
@@ -425,14 +425,14 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 	    if (maskedtexture) {
 		// save texturecol
 		//  for backdrawing of masked mid texture
-                logger.config("save texturecol for backdrawing of masked mid texture");
+                logger.finer("save texturecol for backdrawing of masked mid texture");
 		renderer.plane.openings[maskedtexturecol+rw_x] = texturecolumn;
 	    }
 	}
 		
 	rw_scale += rw_scalestep;
 	topfrac += topstep;
-        logger.log(Level.FINER, "    topfrac+= {0} == {1}", new Object[]{Integer.toHexString(topstep), Integer.toHexString(topfrac)});
+        logger.log(Level.FINEST, "    topfrac+= {0} == {1}", new Object[]{Integer.toHexString(topstep), Integer.toHexString(topfrac)});
 	bottomfrac += bottomstep;
     }
 }
@@ -451,7 +451,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         int vtop;
         int lightnum;
 
-        logger.log(Level.CONFIG, "Segs.R_StoreWallRange( {0}, {1} )", new Object[]{start, stop});
+        logger.log(Level.FINE, "Segs.R_StoreWallRange( {0}, {1} )", new Object[]{start, stop});
         if ( stop < 0 ) {
             int ii=0;  // debugger breakpoint
             logger.config("    stop < 0 !!!     BAD!");
@@ -488,7 +488,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         // calculate rw_distance for scale calculation
         rw_normalangle = (bsp.curline.angle + ANG90);//&0xFFFFFFFFL;
         offsetangle = Math.abs(rw_normalangle - rw_angle1);
-        logger.log(Level.CONFIG, "    offsetangle:{0}", Integer.toHexString(offsetangle));
+        logger.log(Level.FINER, "    offsetangle:{0}", Integer.toHexString(offsetangle));
 
         if ((offsetangle&0xFFFFFFFFL) > (ANG90&0xFFFFFFFFL) ) {
             offsetangle = ANG90;
@@ -504,7 +504,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
         rw_x = start;
         bsp.drawsegs[bsp.ds_p].x2 = stop;
         bsp.drawsegs[bsp.ds_p].curline = bsp.curline;
-        logger.log(Level.CONFIG, "    set rw_stopx:{0}", (stop+1) );
+        logger.log(Level.FINER, "    set rw_stopx:{0}", (stop+1) );
         rw_stopx = stop + 1;
 
         // calculate scale at both ends and step
@@ -541,7 +541,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         // calculate texture boundaries
         //  and decide if floor / ceiling marks are needed
-        logger.log(Level.CONFIG, "    calculate texture boundaries");
+        logger.log(Level.FINER, "    calculate texture boundaries");
         worldtop = bsp.frontsector.ceilingheight - viewz;
         worldbottom = bsp.frontsector.floorheight - viewz;
 
@@ -553,9 +553,9 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
 
         if (null==bsp.backsector) {
             // single sided line
-            logger.log(Level.CONFIG, "    single sided line");
+            logger.log(Level.FINER, "    single sided line");
             midtexture = r.data.texturetranslation[wad.getTextureNum(bsp.sidedef.midtexture)];
-            logger.log(Level.CONFIG, "    midtexture set to: {0}  {1}", new Object[]{midtexture, bsp.sidedef.midtexture});
+            logger.log(Level.FINER, "    midtexture set to: {0}  {1}", new Object[]{midtexture, bsp.sidedef.midtexture});
             // a single sided line is terminal, so it must mark ends
             markfloor = true;
             markceiling = true;
@@ -677,7 +677,10 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 // bottom texture
                 logger.log(Level.FINER, "    bottom texture");
                 int bottomTextureNum;
-                    bottomTextureNum = bsp.sidedef.getBottomTextureNum(wad);
+                bottomTextureNum = bsp.sidedef.getBottomTextureNum(wad);
+                if ( bottomTextureNum == -1 ) {
+                    logger.config("debug here: negative index for bottomTextureNum!");
+                }
                 //try {
                     bottomtexture = r.data.texturetranslation[bottomTextureNum];
                 //} catch( ArrayIndexOutOfBoundsException e ) {
@@ -729,7 +732,7 @@ void R_RenderSegLoop (Renderer renderer, Wad wad) {
                 //offsetangle = -offsetangle;
                 //offsetangle = (~offsetangle&0xFFFFFFFFL)+1;
                 offsetangle = ((~offsetangle)+1);//&0xFFFFFFFFL;   // two's compliment
-                logger.log(Level.CONFIG, "        offsetangle now: {0}", offsetangle);
+                logger.log(Level.FINER, "        offsetangle now: {0}", offsetangle);
             }
 
             if ((offsetangle&0xFFFFFFFFL) > (ANG90&0xFFFFFFFFL)) {

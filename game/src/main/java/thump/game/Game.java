@@ -721,17 +721,17 @@ public class Game {
     } 
 
 
-    //
-    // G_Ticker
-    // Make ticcmd_ts for the players.
-    //
+    /**
+     * Game Ticker -- G_Ticker
+     */
     public void G_Ticker () { 
         int		i;
         int		buf; 
         TickCommand	cmd;
 
         //Player[] players = Stats.getInstance().players;
-        
+        logger.finer("Game.G_Ticker()");
+
         // do player reborns if needed
         for (i=0 ; i<MAXPLAYERS ; i++) {
             if (playeringame[i] && players[i].playerstate == PST_REBORN) {

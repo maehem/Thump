@@ -10,6 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
+                <!--exec.args>-classpath %classpath thump.Thump</exec.args-->
                 <exec.args>-classpath %classpath thump.Thump -file /Users/mark/Documents/Doom/thumproom2.wad</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>

@@ -178,7 +178,7 @@ public class RThings {
         //MapObject thing = sec.thinglist;
         Degenmobj thing = sec.thinglist;
         if ( thing != null ) {
-            logger.log(Level.CONFIG, "    project sprites:\n{0}", thing.toString());
+            logger.log(Level.FINE, "    project sprites:\n{0}", thing.toString());
         }
         
         // Handle all things in sector.

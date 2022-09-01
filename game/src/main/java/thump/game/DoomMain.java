@@ -84,18 +84,16 @@ public final class DoomMain {
     Event   events[] = new Event[MAXEVENTS];
     int     eventhead;
     int     eventtail;
-
+    
+    PlayerView pv=null;
+    
         
     public DoomMain( List<String> args) throws FileNotFoundException {
         logger.log(Level.CONFIG, "{0}", title);
         
-        //dumpTanToAngle();  // Debug
-        //dumpDoubleTan();
-        
         game.args = args;
         //ThumpLogger.init();  // Sets up or logging handlers and level.
         game.setDoomMain(this);
-        
         
         int p;
         
@@ -524,11 +522,6 @@ public final class DoomMain {
         }
     }
                 
-    //
-    // D_Display
-    //  draw current display, possibly wiping it from the previous
-    //
-
     // wipegamestate can be set to -1 to force a wipe on the next draw
     public GameState wipegamestate     = GS_DEMOSCREEN;
 
@@ -539,6 +532,9 @@ public final class DoomMain {
     public int     borderdrawcount;
     private    GameState oldgamestate = GameState.GS_NONE;
         
+    /**
+     * Doom Display -- D_Display
+     */
     void D_Display () {
         long			nowtime;
         long			tics;
@@ -548,7 +544,7 @@ public final class DoomMain {
         boolean			wipe;
         boolean			redrawsbar;
 
-        //logger.config("D_Display()");
+        logger.finer("D_Display()");
         
         if (game.nodrawers) {
             return;                    // for comparative timing / profiling
@@ -567,7 +563,7 @@ public final class DoomMain {
 
         // save the current screen if about to wipe
         if (game.gamestate != wipegamestate) {
-            logger.config("Set Wipe Gamestate");
+            logger.finest("Set Wipe Gamestate");
             wipe = true;
             Wipe.getInstance().wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
         } else {
@@ -575,14 +571,14 @@ public final class DoomMain {
         }
 
         if (game.gamestate == GS_LEVEL && game.gametic>0) {
-            //logger.config("HeadUp Erase");
+            logger.finest("HeadUp Erase");
             game.headUp.HU_Erase();
         }
 
         // do buffered drawing
         switch (game.gamestate) {
           case GS_LEVEL:
-            //logger.config("GS_LEVEL");
+            logger.finest("GS_LEVEL");
             if (game.gametic==0) {
                 break;
             }
@@ -616,7 +612,6 @@ public final class DoomMain {
         }
 
         // draw buffered stuff to screen
-        //logger.config("Render Update - No Blit");
         game.videoInterface.I_UpdateNoBlit();
         
         // Debug:   blank render area so we can see what's not getting rendered.
@@ -627,7 +622,6 @@ public final class DoomMain {
 
         // draw the view directly
         if (game.gamestate == GS_LEVEL && !game.autoMap.automapactive && game.gametic>0) {
-            logger.config("************  Render Player View  *************");
             R_RenderPlayerView (game.players[game.displayplayer]);
             
             if (game.gamestate == GS_LEVEL && game.gametic>0) {
@@ -684,7 +678,6 @@ public final class DoomMain {
                     y,0,"M_PAUSE", game.wad);
         }
 
-
         // menus go directly to the screen
         menu.M_Drawer ();          // menu is drawn even on top of everything
         game.net.NetUpdate ();         // send out any new accumulation
@@ -695,7 +688,6 @@ public final class DoomMain {
             game.videoInterface.I_FinishUpdate (false);              // page flip or blit buffer
             return;
         }
-
 
         // wipe update
         Wipe.getInstance().wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
@@ -722,7 +714,9 @@ public final class DoomMain {
     }
 
 
-
+    /**
+     * Doom Loop
+     */
     private void doomLoop() {
         long lastTime = System.currentTimeMillis();
         while (true) {
@@ -743,9 +737,7 @@ public final class DoomMain {
                     logger.config("D_DoAdvanceDemo");
                     D_DoAdvanceDemo();
                 }
-                //logger.config("M_Ticker");
                 menu.M_Ticker();
-                //logger.config("game.G_Ticker");
                 game.G_Ticker();
                 game.gametic++;
                 game.net.maketic++;
@@ -756,8 +748,7 @@ public final class DoomMain {
 
             game.sound.S_UpdateSounds(game.players[game.consoleplayer].mo);// move positional sounds
 
-            // Update display, next frame, with current state.
-            D_Display();
+            D_Display(); // Update display, next frame, with current state.
 //            #
 //            ifndef SNDSERV // Sound mixing for the buffer is snychronous.
             game.sound.UpdateSound();
@@ -767,16 +758,16 @@ public final class DoomMain {
             game.sound.soundInterface.I_SubmitSound();
 //            #endif
             
-            
             // Sleep in a way to keep the doom loop at 30 fps
             try { Thread.sleep(27); } catch (Exception e) {}
-
         }
     }
 
-//
-// Find a Response File
-//
+    /**
+     * Find Response File
+     * 
+     * @throws FileNotFoundException 
+     */
     private void findResponseFile() throws FileNotFoundException {
         int MAXARGVS = 100;
 
@@ -858,24 +849,22 @@ public final class DoomMain {
         }
     }
     
-    //
-    // D_PageTicker
-    // Handles timing for warped projection
-    //
+    /**
+     * Doom Page Ticker -- D_PageTicker
+     * 
+     * Handles timing for warped projection
+     */
     void D_PageTicker () {
         if (--pagetic < 0)
             D_AdvanceDemo ();
     }
 
-
-
-    //
-    // D_PageDrawer
-    //
+    /**
+     * Doom Page Drawer -- D_PageDrawer
+     */
     void D_PageDrawer () {
         game.renderer.video.drawPatch(0,0, 0, ((PictureLump)game.wad.findByName(pagename)).pic);
     }
-
 
     //
     // D_AdvanceDemo
@@ -1150,11 +1139,13 @@ public final class DoomMain {
         logger.severe("Game mode indeterminate");
     }
 
-    PlayerView pv=null;
-    //
-    // R_RenderView
-    //
+    /**
+     * Render Player View -- R_RenderPlayerView
+     * @param player 
+     */
     public void R_RenderPlayerView (Player player) {
+       logger.config("************  Render Player View  *************");
+
         if ( pv==null ) {
             pv = new PlayerView(
                 player.mo.x, player.mo.y, player.mo.angle,
@@ -1168,7 +1159,7 @@ public final class DoomMain {
             pv.x = player.mo.x;
             pv.y = player.mo.y;
 //            if ( pv.angle != player.mo.angle ) {
-//                logger.log(Level.CONFIG, "Player angle has chenged:  old:{0}  new:{1}",
+//                logger.log(Level.CONFIG, "Player angle has changed:  old:{0}  new:{1}",
 //                        new Object[]{Long.toHexString(player.mo.angle), Long.toHexString(pv.angle)});
 //            }
             pv.angle = player.mo.angle;
