@@ -11,7 +11,7 @@ The author has created this project for no other reason other than to study and 
 
 ## "'Still not Alpha', but look, walls!" edition.  Build 20.003
 
-![Menu](./readme_images/menu.png?raw=true "Menu")   ![In Game](./readme_images/ingame.png?raw=true "In Game")
+![Menu](./readme_images/menu.png?raw=true)   ![In Game](./readme_images/ingame.png?raw=true)
 
 This release will compile and run under Java 14.
 Menus work and a new game can be started.
@@ -24,5 +24,3 @@ The next focus will be to get a regular level to render properly.
 ## Doom WAD files not included.
 Even though this game barely runs, it still needs the DOOM1.WAD (etc) files in order to get very far.  I don't include them here since I don't know what the copyright is regarding them.  So you'll need to use your Googles and find the original WAD files to play with.   The game looks in your <user>/Documents/Doom/ directory for those files, so put them there.
 Use a tool like "Eureka" to create a simple 4-wall test room to start with.
-  
-  
